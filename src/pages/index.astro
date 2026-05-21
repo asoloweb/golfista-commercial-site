@@ -1,0 +1,403 @@
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+	title="GreenLine - Performance Golf App"
+	description="Porta il tuo gioco al livello successivo con analisi swing, sfide live e percorso guidato."
+>
+	<div class="bg-orb bg-orb-left"></div>
+	<div class="bg-orb bg-orb-right"></div>
+
+	<header class="topbar reveal">
+		<a class="brand" href="#">GreenLine</a>
+		<nav>
+			<a href="#features">Funzioni</a>
+			<a href="#workflow">Workflow</a>
+			<a href="#pricing">Prezzi</a>
+		</nav>
+		<a class="button button-ghost" href="#">Richiedi demo</a>
+	</header>
+
+	<main>
+		<section class="hero">
+			<p class="pill reveal">Nuova stagione 2026: AI Caddie Coach</p>
+			<h1 class="reveal">Il sistema operativo per chi vuole giocare a golf meglio, ogni settimana.</h1>
+			<p class="lead reveal">
+				GreenLine unisce tracking round, analisi swing e coaching predittivo in una sola app.
+				Più disciplina. Meno appunti sparsi.
+			</p>
+			<div class="cta reveal">
+				<a class="button button-primary" href="#">Inizia gratis</a>
+				<a class="button button-soft" href="#">Guarda anteprima</a>
+			</div>
+		</section>
+
+		<section class="mockup reveal">
+			<div class="mockup-glow"></div>
+			<div class="mockup-frame">
+				<div class="mockup-top">
+					<span class="dot"></span>
+					<span class="dot"></span>
+					<span class="dot"></span>
+				</div>
+				<div class="stats-grid">
+					<article>
+						<p class="label">Handicap trend</p>
+						<p class="value">-2.4</p>
+						<p class="meta">Ultimi 90 giorni</p>
+					</article>
+					<article>
+						<p class="label">Fairway colpiti</p>
+						<p class="value">71%</p>
+						<p class="meta">+12% rispetto al mese scorso</p>
+					</article>
+					<article>
+						<p class="label">Streak allenamento</p>
+						<p class="value">18</p>
+						<p class="meta">sessioni consecutive</p>
+					</article>
+					<article>
+						<p class="label">Shot dispersion</p>
+						<p class="value">Tighter</p>
+						<p class="meta">driver + ferro medio</p>
+					</article>
+				</div>
+			</div>
+		</section>
+
+		<section id="features" class="features">
+			<article class="card reveal">
+				<h3>Round Intelligence</h3>
+				<p>Trasforma scorecard e GPS in insight pratici per decidere su cosa lavorare subito.</p>
+			</article>
+			<article class="card reveal">
+				<h3>AI Caddie in tempo reale</h3>
+				<p>Consigli su bastone e linea in base a vento, distanza e storico personale.</p>
+			</article>
+			<article class="card reveal">
+				<h3>Training protocol</h3>
+				<p>Routine dinamiche da 15 a 45 minuti con obiettivi chiari e progressione settimanale.</p>
+			</article>
+		</section>
+
+		<section id="workflow" class="workflow reveal">
+			<h2>Dal driving range al torneo, senza attrito.</h2>
+			<p>
+				Pianifica, esegui e misura ogni micro miglioramento con una timeline unica. Tutto sincronizzato
+				fra coach, atleta e circolo.
+			</p>
+		</section>
+
+		<section id="pricing" class="pricing reveal">
+			<p class="pricing-badge">Piani trasparenti</p>
+			<h2>Prezzo semplice. Crescita continua.</h2>
+			<a class="button button-primary" href="#">Attiva GreenLine Pro</a>
+		</section>
+	</main>
+
+	<script>
+		const observer = new IntersectionObserver(
+			(entries) => {
+				for (const entry of entries) {
+					if (entry.isIntersecting) {
+						entry.target.classList.add('is-visible');
+					}
+				}
+			},
+			{ threshold: 0.2 },
+		);
+
+		document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+	</script>
+</Layout>
+
+<style>
+	:root {
+		--bg: #07140e;
+		--bg-soft: #0d2018;
+		--card: rgba(18, 42, 31, 0.65);
+		--line: rgba(170, 228, 196, 0.2);
+		--text: #f0fdf4;
+		--muted: #c7e9d4;
+		--accent: #74f2a5;
+		--accent-strong: #22c55e;
+	}
+
+	* {
+		box-sizing: border-box;
+	}
+
+	body {
+		font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+		color: var(--text);
+		background:
+			radial-gradient(circle at 20% 10%, rgba(43, 140, 87, 0.3), transparent 45%),
+			radial-gradient(circle at 80% 0%, rgba(7, 90, 51, 0.45), transparent 35%),
+			var(--bg);
+	}
+
+	main {
+		max-width: 1160px;
+		margin: 0 auto;
+		padding: 1rem 1.25rem 6rem;
+	}
+
+	.bg-orb {
+		position: fixed;
+		width: 420px;
+		height: 420px;
+		border-radius: 50%;
+		filter: blur(60px);
+		z-index: -1;
+	}
+
+	.bg-orb-left {
+		background: rgba(44, 190, 108, 0.25);
+		top: -130px;
+		left: -140px;
+	}
+
+	.bg-orb-right {
+		background: rgba(17, 107, 70, 0.35);
+		right: -80px;
+		top: 160px;
+	}
+
+	.topbar {
+		max-width: 1160px;
+		margin: 0 auto;
+		padding: 1.1rem 1.25rem;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+
+	.brand {
+		font-family: 'Space Grotesk', 'Avenir Next', sans-serif;
+		font-size: 1.1rem;
+		font-weight: 700;
+		letter-spacing: 0.03em;
+		text-decoration: none;
+		color: var(--text);
+	}
+
+	nav {
+		display: flex;
+		gap: 1.25rem;
+	}
+
+	nav a {
+		color: var(--muted);
+		font-size: 0.95rem;
+		text-decoration: none;
+	}
+
+	.hero {
+		padding: 3.75rem 0 2rem;
+		text-align: center;
+	}
+
+	.pill {
+		display: inline-flex;
+		padding: 0.45rem 0.9rem;
+		border: 1px solid var(--line);
+		border-radius: 999px;
+		font-size: 0.85rem;
+		background: rgba(37, 87, 63, 0.35);
+	}
+
+	h1 {
+		font-family: 'Space Grotesk', 'Sora', sans-serif;
+		font-size: clamp(2.4rem, 6.5vw, 5rem);
+		line-height: 1.06;
+		margin: 1.1rem auto;
+		max-width: 980px;
+	}
+
+	.lead {
+		max-width: 720px;
+		margin: 0 auto;
+		color: var(--muted);
+		font-size: 1.05rem;
+		line-height: 1.6;
+	}
+
+	.cta {
+		margin-top: 1.8rem;
+		display: flex;
+		gap: 0.8rem;
+		justify-content: center;
+		flex-wrap: wrap;
+	}
+
+	.button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.7rem 1.2rem;
+		border-radius: 0.8rem;
+		font-weight: 600;
+		text-decoration: none;
+		transition: transform 180ms ease, box-shadow 200ms ease, background 200ms ease;
+	}
+
+	.button:hover {
+		transform: translateY(-2px);
+	}
+
+	.button-primary {
+		background: linear-gradient(120deg, var(--accent), var(--accent-strong));
+		color: #072211;
+		box-shadow: 0 12px 30px rgba(68, 197, 125, 0.3);
+	}
+
+	.button-soft,
+	.button-ghost {
+		background: rgba(24, 60, 44, 0.65);
+		color: var(--text);
+		border: 1px solid var(--line);
+	}
+
+	.mockup {
+		margin-top: 1.6rem;
+		position: relative;
+	}
+
+	.mockup-glow {
+		position: absolute;
+		inset: 18% 12%;
+		filter: blur(50px);
+		background: rgba(75, 186, 117, 0.24);
+	}
+
+	.mockup-frame {
+		position: relative;
+		border: 1px solid var(--line);
+		background: linear-gradient(180deg, rgba(10, 29, 20, 0.95), rgba(9, 20, 15, 0.95));
+		border-radius: 1.4rem;
+		overflow: hidden;
+		padding-bottom: 1rem;
+	}
+
+	.mockup-top {
+		display: flex;
+		gap: 0.4rem;
+		padding: 0.85rem;
+		border-bottom: 1px solid var(--line);
+	}
+
+	.dot {
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		background: rgba(161, 230, 194, 0.5);
+	}
+
+	.stats-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.9rem;
+		padding: 1rem;
+	}
+
+	.stats-grid article,
+	.card {
+		background: var(--card);
+		border: 1px solid var(--line);
+		border-radius: 1rem;
+		padding: 1rem;
+	}
+
+	.label {
+		margin: 0;
+		font-size: 0.83rem;
+		color: var(--muted);
+	}
+
+	.value {
+		margin: 0.5rem 0 0.2rem;
+		font-family: 'Space Grotesk', 'Sora', sans-serif;
+		font-size: 2rem;
+		font-weight: 700;
+	}
+
+	.meta {
+		margin: 0;
+		color: var(--muted);
+		font-size: 0.88rem;
+	}
+
+	.features {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 0.9rem;
+		margin-top: 2rem;
+	}
+
+	.card h3,
+	.workflow h2,
+	.pricing h2 {
+		font-family: 'Space Grotesk', 'Sora', sans-serif;
+	}
+
+	.card p,
+	.workflow p {
+		color: var(--muted);
+		line-height: 1.55;
+	}
+
+	.workflow,
+	.pricing {
+		margin-top: 2rem;
+		border: 1px solid var(--line);
+		border-radius: 1rem;
+		padding: 2rem;
+		background: rgba(15, 35, 25, 0.6);
+	}
+
+	.pricing {
+		text-align: center;
+	}
+
+	.pricing-badge {
+		display: inline-block;
+		margin: 0;
+		padding: 0.35rem 0.8rem;
+		font-size: 0.8rem;
+		border: 1px solid var(--line);
+		border-radius: 999px;
+		color: var(--muted);
+	}
+
+	.reveal {
+		opacity: 0;
+		transform: translateY(26px) scale(0.99);
+		transition: opacity 700ms ease, transform 700ms ease;
+	}
+
+	.reveal.is-visible {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+
+	@media (max-width: 900px) {
+		nav {
+			display: none;
+		}
+
+		.features,
+		.stats-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.workflow,
+		.pricing {
+			padding: 1.25rem;
+		}
+	}
+</style>
+
+<style is:global>
+	@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap');
+</style>
