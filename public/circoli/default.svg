@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Copertina circolo">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1f2b1f" />
+      <stop offset="100%" stop-color="#2b3d2c" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#g)" />
+  <circle cx="180" cy="480" r="220" fill="#00ec10" fill-opacity="0.12" />
+  <circle cx="1020" cy="120" r="180" fill="#00ec10" fill-opacity="0.16" />
+  <g fill="none" stroke="#00ec10" stroke-opacity="0.6" stroke-width="14">
+    <circle cx="600" cy="315" r="86" />
+    <path d="M600 200v230" />
+    <path d="M485 315h230" />
+  </g>
+  <text x="600" y="542" text-anchor="middle" fill="#d7ffd9" font-size="40" font-family="Georgia, 'Times New Roman', serif">
+    Copertina Circolo
+  </text>
+</svg>

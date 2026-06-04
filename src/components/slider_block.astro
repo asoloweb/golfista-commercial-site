@@ -1,0 +1,166 @@
+---
+import { directusAssetUrl } from '../lib/directus';
+
+interface SlideItem {
+	titolo?: string;
+	sottotitolo?: string;
+	label?: string;
+	href?: string;
+	immagine?: string;
+}
+
+interface Props {
+	slides?: SlideItem[];
+	titolo?: string;
+	sottotitolo?: string;
+	label?: string;
+	href?: string;
+}
+
+const {
+	slides = [],
+	titolo = '',
+	sottotitolo = '',
+	label = '',
+	href = '',
+} = Astro.props;
+
+const resolvedSlides =
+	slides.length > 0
+		? slides
+		: [
+				{
+					titolo,
+					sottotitolo,
+					label,
+					href,
+				},
+		  ];
+
+const hasMultipleSlides = resolvedSlides.length > 1;
+
+const sliderId = `slider-${Math.random().toString(36).slice(2)}`;
+
+function resolveImageSrc(value: string | undefined) {
+	if (!value) return '';
+	return directusAssetUrl(value, { format: 'webp', quality: 78, width: 1280, height: 720, fit: 'cover' });
+}
+---
+
+<div
+	class="slider_block swiper"
+	id={sliderId}
+	data-swiper-enabled={hasMultipleSlides ? 'true' : 'false'}
+>
+	<div class="swiper-wrapper">
+		{resolvedSlides.map((slide) => (
+			<div
+				class="swiper-slide single_slide"
+				style={slide.immagine ? `background-image: url('${resolveImageSrc(slide.immagine)}')` : ''}
+			>
+				{slide.titolo && <h1 data-aos="fade-up" data-aos-duration="1500" set:html={slide.titolo} />}
+				{slide.sottotitolo && <h2 data-aos="fade-up" data-aos-duration="1800" set:html={slide.sottotitolo} />}
+				{slide.label && slide.href && (
+					<button data-aos="fade-up" data-aos-duration="2000" class="slider_button MainButton" type="button" data-href={slide.href}>
+						{slide.label}
+					</button>
+				)}
+				{slide.immagine && (
+					<span class="slide_image_sr" aria-hidden="true"></span>
+				)}
+			</div>
+		))}
+	</div>
+	{hasMultipleSlides && <div class="swiper-pagination"></div>}
+	{hasMultipleSlides && <div class="swiper-button-prev"></div>}
+	{hasMultipleSlides && <div class="swiper-button-next"></div>}
+</div>
+
+
+<style>
+		.title_block {
+			margin: 32px 0 16px;
+			border-left: 6px solid var(--secondary);
+			padding-left: 14px;
+		}
+
+		.title_block h1 {
+		margin: 0;
+		color: var(--primary);
+		}
+
+		.slider_block {
+			display: grid;
+			gap: 16px;
+			height: calc(100vh - 320px);
+			max-width: 1600px;
+			margin: auto;
+			margin-bottom:40px;
+		}
+
+		.slider_block .single_slide {
+		min-height: 220px;
+		padding: 60px;
+		border-radius: 16px;
+		background-size: cover;
+		background-position: center;
+		color: var(--bianco);
+		position: relative;
+		overflow: hidden;
+		}
+
+		.slider_button {
+		background-color: transparent;
+		color: var(--secondary);
+		border: navajowhite;
+		font-size: 22px;
+		font-weight: bold;
+		font-family: var(--font-heading);
+		}
+
+		.single_slide h1 {
+			font-size:100px;
+			line-height: 100px;
+			margin:0;
+			max-width: 65%;
+			text-shadow: 5px 3px 20px #000;
+		}
+
+		.single_slide h2 {
+			max-width: calc(var(--max-width)/2);
+			text-shadow: 5px 3px 20px #000;
+			font-size: 35px;
+			line-height: 40px;
+		}
+
+		.slider_block .single_slide > * {
+		position: relative;
+		z-index: 1;
+		}
+
+	.single_slide {
+		padding: 60px;
+		background-size: cover !important;
+		background-position: center;
+		min-height: 240px;
+		display: flex;
+		flex-direction: column;
+		align-items: start;
+		justify-content: center;
+		gap: 8px;
+	}
+	.slide_image_sr {
+		display: none;
+	}
+	:global(.swiper-button-prev),
+	:global(.swiper-button-next) {
+		color: #111;
+	}
+
+	@media (max-width: 640px) {
+		.single_slide h1 {
+			font-size:45px;
+			line-height:50px;
+		}
+	}
+</style>

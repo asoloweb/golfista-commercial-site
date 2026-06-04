@@ -1,0 +1,268 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { circoloIdFromSlug, fetchCircoloById } from '../../lib/supabase';
+
+const routeSlug = String(Astro.params.slug || '').trim();
+const circoloId = circoloIdFromSlug(routeSlug);
+const circolo = circoloId ? await fetchCircoloById(circoloId) : null;
+
+if (!circolo) {
+	Astro.response.status = 404;
+}
+
+const title = circolo?.nomecircolo || 'Circolo non trovato';
+const description = circolo?.desc_ai || [circolo?.indirizzo, circolo?.paese, circolo?.provincia].filter(Boolean).join(', ');
+const mapHref =
+	circolo?.lat && circolo?.lon
+		? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${circolo.lat},${circolo.lon}`)}`
+		: '';
+const coverImage = circolo?.local_cover_url || circolo?.cover_image_url || circolo?.cover_url || circolo?.logo_url || '';
+const logoImage = circolo?.local_logo_url || circolo?.logo_url || '/loghi/fallback.jpg';
+
+const details = circolo
+	? [
+			['Indirizzo', circolo.indirizzo],
+			['Località', [circolo.paese, circolo.provincia].filter(Boolean).join(' · ')],
+			['Telefono', circolo.telefono],
+			['Email', circolo.mail],
+			['Segretario', circolo.segretario],
+			['Coordinate', circolo.lat && circolo.lon ? `${circolo.lat}, ${circolo.lon}` : ''],
+		].filter(([, value]) => Boolean(value))
+	: [];
+---
+
+<BaseLayout
+	title={title}
+	seoTitle={title}
+	seoDescription={description || `Scheda del circolo ${title} su Golfista.`}
+	canonicalPath={routeSlug ? `/circoli/${routeSlug}` : '/circoli'}
+	noindex={!circolo}
+>
+	{circolo ? (
+		<>
+			<section class="club_detail_hero">
+				{coverImage && (
+					<img
+						src={coverImage}
+						alt={title}
+						class="club_cover"
+						fetchpriority="high"
+						data-fallback-one={`/circoli/${circolo.idcircolo}.1.jpg`}
+						data-fallback-two={`/circoli/${circolo.idcircolo}.2.jpg`}
+						onerror="if(!this.dataset.triedOne){this.dataset.triedOne='1';this.src=this.dataset.fallbackOne;}else if(!this.dataset.triedTwo){this.dataset.triedTwo='1';this.src=this.dataset.fallbackTwo;}else{this.style.display='none';}"
+					/>
+				)}
+				<div class="club_detail_overlay">
+					<a href="/circoli" class="back_link">← Tutti i circoli</a>
+					<div class="club_identity">
+						<img
+							src={logoImage}
+							alt={`Logo ${title}`}
+							class="club_logo"
+							onerror="this.onerror=null;this.src='/loghi/fallback.jpg';"
+						/>
+						<div>
+							<p class="eyebrow">Circolo golf</p>
+							<h1>{title}</h1>
+							{(circolo.paese || circolo.provincia) && (
+								<p>{[circolo.paese, circolo.provincia].filter(Boolean).join(' · ')}</p>
+							)}
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="club_detail_body">
+				<div class="club_detail_grid">
+					<article class="club_description">
+						<h2>Informazioni</h2>
+						{circolo.desc_ai ? (
+							<div class="rich_text">
+								{circolo.desc_ai.split('\n').filter(Boolean).map((paragraph) => <p>{paragraph}</p>)}
+							</div>
+						) : (
+							<p>Non è ancora disponibile una descrizione per questo circolo.</p>
+						)}
+					</article>
+
+					<aside class="club_sidebar">
+						<h2>Dettagli</h2>
+						<dl>
+							{details.map(([label, value]) => (
+								<div>
+									<dt>{label}</dt>
+									<dd>{value}</dd>
+								</div>
+							))}
+						</dl>
+
+						<div class="club_actions">
+							{circolo.website && (
+								<a href={circolo.website} target="_blank" rel="noopener noreferrer" class="MainButton">
+									Sito web
+								</a>
+							)}
+							{circolo.mail && <a href={`mailto:${circolo.mail}`} class="secondary_button">Invia email</a>}
+							{circolo.telefono && <a href={`tel:${circolo.telefono.replace(/\s+/g, '')}`} class="secondary_button">Chiama</a>}
+							{mapHref && <a href={mapHref} target="_blank" rel="noopener noreferrer" class="secondary_button">Apri mappa</a>}
+						</div>
+					</aside>
+				</div>
+			</section>
+		</>
+	) : (
+		<section class="club_not_found">
+			<h1>Circolo non trovato</h1>
+			<p>Il circolo richiesto non esiste o non è disponibile.</p>
+			<a href="/circoli" class="MainButton">Torna ai circoli</a>
+		</section>
+	)}
+</BaseLayout>
+
+<style>
+	.club_detail_hero {
+		position: relative;
+		min-height: 430px;
+		background: #101810;
+		color: #fff;
+		overflow: hidden;
+	}
+
+	.club_cover {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		opacity: 0.55;
+	}
+
+	.club_detail_overlay {
+		position: relative;
+		z-index: 1;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-end;
+		max-width: var(--max-width);
+		min-height: 430px;
+		margin: 0 auto;
+		padding: 42px 20px;
+	}
+
+	.back_link {
+		align-self: flex-start;
+		margin-bottom: auto;
+		color: inherit;
+		font-weight: 700;
+		text-decoration: none;
+	}
+
+	.club_identity {
+		display: flex;
+		align-items: center;
+		gap: 24px;
+	}
+
+	.club_logo {
+		width: 110px;
+		height: 110px;
+		object-fit: contain;
+		border-radius: 24px;
+		background: #fff;
+		padding: 14px;
+	}
+
+	.eyebrow {
+		margin: 0 0 8px;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--primary);
+	}
+
+	.club_identity h1 {
+		margin: 0;
+		font-size: clamp(38px, 6vw, 82px);
+		line-height: 0.95;
+	}
+
+	.club_detail_body,
+	.club_not_found {
+		padding: 56px 20px 80px;
+	}
+
+	.club_detail_grid {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 360px;
+		gap: 28px;
+		max-width: var(--max-width);
+		margin: 0 auto;
+	}
+
+	.club_description,
+	.club_sidebar,
+	.club_not_found {
+		border-radius: 26px;
+		background: #fff;
+		padding: 30px;
+		box-shadow: 0 12px 34px rgba(0, 0, 0, 0.08);
+	}
+
+	.rich_text p {
+		font-size: 18px;
+		line-height: 1.7;
+	}
+
+	dl {
+		margin: 0;
+	}
+
+	dl div {
+		padding: 14px 0;
+		border-bottom: 1px solid #e8e8e8;
+	}
+
+	dt {
+		font-weight: 800;
+		color: var(--primary);
+	}
+
+	dd {
+		margin: 5px 0 0;
+		line-height: 1.45;
+	}
+
+	.club_actions {
+		display: grid;
+		gap: 10px;
+		margin-top: 24px;
+	}
+
+	.secondary_button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 46px;
+		border: 1px solid var(--primary);
+		border-radius: 999px;
+		color: inherit;
+		font-weight: 700;
+		text-decoration: none;
+	}
+
+	.club_not_found {
+		max-width: 760px;
+		margin: 60px auto;
+	}
+
+	@media (max-width: 860px) {
+		.club_detail_grid {
+			grid-template-columns: 1fr;
+		}
+
+		.club_identity {
+			align-items: flex-start;
+			flex-direction: column;
+		}
+	}
+</style>

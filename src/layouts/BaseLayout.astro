@@ -1,0 +1,239 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { directusAssetUrl, directusSingleton } from '../lib/directus';
+import '../styles/global.css';
+
+export interface Props {
+	title: string;
+	seoTitle?: string;
+	seoDescription?: string;
+	canonicalPath?: string;
+	noindex?: boolean;
+}
+
+const { title, seoTitle, seoDescription, canonicalPath, noindex = false } = Astro.props;
+const shouldLoadThirdPartyScripts = !import.meta.env.DEV;
+const siteUrl = (import.meta.env.PUBLIC_SITE_URL || 'https://www.golfista.app').replace(/\/+$/, '');
+const organizationSameAs = (import.meta.env.PUBLIC_ORGANIZATION_SAME_AS || '')
+	.split(',')
+	.map((entry) => entry.trim())
+	.filter(Boolean);
+const umamiScriptSrc = import.meta.env.PUBLIC_UMAMI_SCRIPT_SRC || '';
+const umamiWebsiteId = import.meta.env.PUBLIC_UMAMI_WEBSITE_ID || '';
+const googleAdsId = import.meta.env.PUBLIC_GOOGLE_ADS_ID || '';
+const iubendaWidgetSrc = import.meta.env.PUBLIC_IUBENDA_WIDGET_SRC || '';
+
+type Options = {
+	logo_light?: string;
+	site_name?: string;
+	contact_email?: string;
+	contact_phone?: string;
+	contact_address?: string;
+};
+
+function resolveImageSrc(value: string) {
+	return directusAssetUrl(value);
+}
+
+let logoLightSrc = import.meta.env.PUBLIC_LOGO_LIGHT || '/favicon.svg';
+let siteName = 'Golfista';
+let organizationEmail = '';
+let organizationPhone = '';
+let organizationStreetAddress = '';
+
+try {
+	const options = await directusSingleton<Options>('options', {
+		fields: 'logo_light,site_name,contact_email,contact_phone,contact_address',
+	});
+	if (options?.logo_light) {
+		logoLightSrc = resolveImageSrc(options.logo_light);
+	}
+	if (options?.site_name) {
+		siteName = options.site_name;
+	}
+	organizationEmail = options?.contact_email || '';
+	organizationPhone = options?.contact_phone || '';
+	organizationStreetAddress = options?.contact_address || '';
+} catch (error) {
+	console.error('Error fetching options for favicon:', error);
+}
+
+const resolvedTitle = seoTitle || title;
+const resolvedDescription =
+	typeof seoDescription === 'string' && seoDescription.trim().length > 0
+		? seoDescription.trim()
+		: `${resolvedTitle} | ${siteName}`;
+
+const absoluteLogoUrl = (() => {
+	try {
+		return new URL(logoLightSrc, siteUrl).toString();
+	} catch {
+		return logoLightSrc;
+	}
+})();
+
+function getFaviconMimeType(src: string) {
+	const cleanedSrc = src.split('?')[0].split('#')[0].toLowerCase();
+	if (cleanedSrc.endsWith('.svg')) return 'image/svg+xml';
+	if (cleanedSrc.endsWith('.png')) return 'image/png';
+	if (cleanedSrc.endsWith('.webp')) return 'image/webp';
+	if (cleanedSrc.endsWith('.jpg') || cleanedSrc.endsWith('.jpeg')) return 'image/jpeg';
+	if (cleanedSrc.endsWith('.ico')) return 'image/x-icon';
+	return undefined;
+}
+
+const faviconMimeType = getFaviconMimeType(logoLightSrc);
+const canonicalUrl = (() => {
+	const path = canonicalPath || Astro.url?.pathname || '/';
+	try {
+		return new URL(path, siteUrl).toString();
+	} catch {
+		return siteUrl;
+	}
+})();
+
+const organizationId = `${siteUrl}/#organization`;
+const legalServiceId = `${siteUrl}/#legalservice`;
+const organizationJsonLd = JSON.stringify(
+	{
+		'@context': 'https://schema.org',
+		'@graph': [
+			{
+				'@type': 'Organization',
+				'@id': organizationId,
+				name: siteName,
+				url: siteUrl,
+				logo: absoluteLogoUrl,
+				...(organizationEmail ? { email: organizationEmail } : {}),
+				...(organizationPhone ? { telephone: organizationPhone } : {}),
+				sameAs: organizationSameAs,
+			},
+			{
+				'@type': 'WebSite',
+				'@id': legalServiceId,
+				name: siteName,
+				url: siteUrl,
+				image: absoluteLogoUrl,
+				...(organizationPhone ? { telephone: organizationPhone } : {}),
+				...(organizationEmail ? { email: organizationEmail } : {}),
+				...(organizationStreetAddress
+					? { address: { '@type': 'PostalAddress', streetAddress: organizationStreetAddress } }
+					: {}),
+			},
+		],
+	},
+	null,
+	2
+);
+---
+
+<html lang="it">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type={faviconMimeType} href={logoLightSrc} />
+		<link rel="shortcut icon" type={faviconMimeType} href={logoLightSrc} />
+		<link rel="apple-touch-icon" href={logoLightSrc} />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="theme-color" content="#000000" />
+		<meta name="generator" content={Astro.generator} />
+		<link rel="canonical" href={canonicalUrl} />
+		<link rel="alternate" hreflang="it-IT" href={canonicalUrl} />
+		<link rel="alternate" hreflang="x-default" href={canonicalUrl} />
+		<title>{resolvedTitle}</title>
+		<meta name="description" content={resolvedDescription} />
+		{noindex && <meta name="robots" content="noindex, nofollow" />}
+		<script type="application/ld+json" set:html={organizationJsonLd}></script>
+		<link rel="stylesheet" href="/vendor/aos.css" />
+		<link rel="stylesheet" href="/vendor/swiper-bundle.min.css" />
+		{shouldLoadThirdPartyScripts && iubendaWidgetSrc && (
+			<>
+				<script
+					type="text/javascript"
+					src={iubendaWidgetSrc}
+				></script>
+			</>
+		)}
+		{shouldLoadThirdPartyScripts && umamiScriptSrc && umamiWebsiteId && (
+			<>
+				<script is:inline define:vars={{ umamiScriptSrc, umamiWebsiteId }}>
+					const host = window.location.hostname;
+					const isLocalhost =
+						host === 'localhost' || host === '127.0.0.1' || host === '::1' || host.endsWith('.local');
+
+					if (!isLocalhost) {
+						const umamiScript = document.createElement('script');
+						umamiScript.defer = true;
+						umamiScript.src = umamiScriptSrc;
+						umamiScript.setAttribute('data-website-id', umamiWebsiteId);
+						document.head.appendChild(umamiScript);
+					}
+				</script>
+			</>
+		)}
+		{shouldLoadThirdPartyScripts && googleAdsId && (
+		<script is:inline define:vars={{ googleAdsId }}>
+			const host = window.location.hostname;
+			const isLocalhost =
+				host === 'localhost' || host === '127.0.0.1' || host === '::1' || host.endsWith('.local');
+
+			const attributionParams = new URLSearchParams(window.location.search || '');
+			for (const key of ['gclid', 'gbraid', 'wbraid']) {
+				const value = attributionParams.get(key);
+				if (value) {
+					sessionStorage.setItem(`attribution_${key}`, value);
+				}
+			}
+
+			if (!isLocalhost) {
+				const gtagScript = document.createElement('script');
+				gtagScript.async = true;
+				gtagScript.src = `https://www.googletagmanager.com/gtag/js?id=${googleAdsId}`;
+				document.head.appendChild(gtagScript);
+
+				window.dataLayer = window.dataLayer || [];
+				window.gtag = function () {
+					window.dataLayer.push(arguments);
+				};
+				window.gtag('js', new Date());
+				window.gtag('config', googleAdsId);
+			}
+		</script>
+		)}
+
+	</head>
+	<body>
+		<Header />
+		<main>
+			<slot />
+		</main>
+		<Footer />
+		<script defer src="/vendor/aos.js"></script>
+		<script defer src="/scripts/aos-init.js"></script>
+		<script defer src="/scripts/swiper-init.js"></script>
+		<script>
+			document.addEventListener('click', (event) => {
+				const target = event.target;
+				if (!(target instanceof Element)) return;
+
+				const telLink = target.closest('a[href^="tel:"]');
+				if (telLink instanceof HTMLAnchorElement && typeof window.gtag === 'function') {
+					window.gtag('event', 'click_to_call', {
+						contact_type: 'phone',
+						link_target: telLink.getAttribute('href') || '',
+					});
+					return;
+				}
+
+				const mailtoLink = target.closest('a[href^="mailto:"]');
+				if (mailtoLink instanceof HTMLAnchorElement && typeof window.gtag === 'function') {
+					window.gtag('event', 'click_to_email', {
+						contact_type: 'email',
+						link_target: mailtoLink.getAttribute('href') || '',
+					});
+				}
+			});
+		</script>
+		<slot name="scripts" />
+	</body>
+</html>

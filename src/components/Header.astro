@@ -1,0 +1,242 @@
+---
+
+import { directusAssetUrl, directusItems, directusSingleton } from '../lib/directus';
+
+interface MenuItem {
+	id?: number | string;
+	sort?: number | null;
+	label?: string;
+	custom_href?: string;
+	pages?: { pages_id?: PageItem | number | string }[] | PageItem[];
+}
+
+interface Menu {
+	id: number;
+	slug?: string;
+	titolo?: string;
+	menu_items?: MenuItem[] | (number | string)[];
+}
+
+interface PageItem {
+	id?: number;
+	slug?: string;
+	title?: string;
+}
+
+interface Options {
+	logo_dark?: string;
+	logo_light?: string;
+	site_name?: string;
+	contact_address?: string;
+	contact_phone?: string;
+	contact_email?: string;
+	maps_url?: string;
+	instagram_url?: string;
+	facebook_url?: string;
+}
+
+let logoDarkSrc =
+	import.meta.env.PUBLIC_LOGO_DARK || import.meta.env.PUBLIC_LOGO_LIGHT || '/favicon.svg';
+let options: Options | null = null;
+const currentPath = Astro.url?.pathname ?? '/';
+
+let menuItems: MenuItem[] = [];
+
+try {
+	options = await directusSingleton<Options>('options', {
+		fields: 'logo_dark,site_name,contact_address,contact_phone,contact_email,maps_url,instagram_url,facebook_url',
+	});
+	if (options?.logo_dark) {
+		logoDarkSrc = resolveImageSrc(options.logo_dark);
+	}
+
+	const menus = await directusItems<Menu>('Menus', {
+		'filter[slug][_eq]': 'main',
+		fields:
+			'menu_items.menu_items_id.id,menu_items.menu_items_id.sort,menu_items.menu_items_id.label,menu_items.menu_items_id.custom_href,menu_items.menu_items_id.pages.pages_id.id,menu_items.menu_items_id.pages.pages_id.slug,menu_items.menu_items_id.pages.pages_id.title',
+	});
+	const menu = menus[0];
+	const rawItems = Array.isArray(menu?.menu_items) ? menu.menu_items : [];
+	const itemObjects = rawItems
+		.map((item) => {
+			if (!item || typeof item !== 'object') return null;
+			if ('menu_items_id' in item && item.menu_items_id && typeof item.menu_items_id === 'object') {
+				return item.menu_items_id as MenuItem;
+			}
+			return item as MenuItem;
+		})
+		.filter((item): item is MenuItem => Boolean(item));
+
+	menuItems = itemObjects.sort((a, b) => (a.sort ?? 9999) - (b.sort ?? 9999));
+} catch (error) {
+	console.error('Error fetching menu from Directus:', error);
+}
+
+function resolveImageSrc(value: string) {
+	return directusAssetUrl(value);
+}
+
+function getItemPage(item: MenuItem): PageItem | null {
+	const rawPages = item.pages;
+	if (!rawPages || !Array.isArray(rawPages)) return null;
+	const normalizedPages = rawPages
+		.map((page) => {
+			if (!page) return null;
+			if (typeof page === 'object' && 'pages_id' in page) {
+				return page.pages_id && typeof page.pages_id === 'object'
+					? (page.pages_id as PageItem)
+					: null;
+			}
+			if (typeof page === 'object' && 'slug' in page) {
+				return page as PageItem;
+			}
+			return null;
+		})
+		.filter((page): page is PageItem => Boolean(page));
+
+	return normalizedPages[0] ?? null;
+}
+
+function getItemHref(item: MenuItem) {
+	if (item.custom_href) return normalizeHref(item.custom_href);
+	const page = getItemPage(item);
+	if (!page?.slug || page.slug === 'home') return '/';
+	return `/${page.slug}`;
+}
+
+function normalizeHref(href: string) {
+	const raw = String(href || '').trim();
+	if (!raw) return '/';
+	if (raw.startsWith('#')) return raw;
+	if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
+	if (raw.startsWith('mailto:') || raw.startsWith('tel:')) return raw;
+	return raw.startsWith('/') ? raw : `/${raw}`;
+}
+
+function normalizePath(path: string) {
+	if (!path) return '/';
+	let cleanPath = path.split('?')[0].split('#')[0];
+	if (cleanPath.length > 1 && cleanPath.endsWith('/')) {
+		cleanPath = cleanPath.slice(0, -1);
+	}
+	return cleanPath;
+}
+
+function isCurrentMenuItem(href: string) {
+	if (!href) return false;
+	const base = Astro.url?.origin || 'http://localhost';
+	try {
+		const url = new URL(href, base);
+		return normalizePath(url.pathname) === normalizePath(currentPath);
+	} catch {
+		return false;
+	}
+}
+
+function getItemTitle(item: MenuItem, index: number) {
+	return (
+		item.label ||
+		getItemPage(item)?.title ||
+		`Link ${index + 1}`
+	);
+}
+
+function getMenuItemIdClass(item: MenuItem, index: number) {
+	const raw = item.id != null ? String(item.id) : `index-${index + 1}`;
+	const safe = raw.toLowerCase().replace(/[^a-z0-9_-]+/g, '-');
+	return `menu_item_id_${safe}`;
+}
+
+const siteName = options?.site_name || 'Golfista';
+const topbarLinks = [
+	options?.contact_address
+		? { href: options.maps_url || undefined, label: options.contact_address, external: Boolean(options.maps_url) }
+		: null,
+	options?.contact_phone
+		? { href: `tel:${options.contact_phone.replace(/\s+/g, '')}`, label: options.contact_phone }
+		: null,
+	options?.contact_email ? { href: `mailto:${options.contact_email}`, label: options.contact_email } : null,
+].filter(Boolean) as { href?: string; label: string; external?: boolean }[];
+const socialLinks = [
+	options?.instagram_url ? { href: options.instagram_url, label: 'Instagram', type: 'instagram' } : null,
+	options?.facebook_url ? { href: options.facebook_url, label: 'Facebook', type: 'facebook' } : null,
+].filter(Boolean) as { href: string; label: string; type: 'instagram' | 'facebook' }[];
+---
+{topbarLinks.length > 0 && (
+	<div class="TopBar">
+		{topbarLinks.map((link) => (
+			<a href={link.href || '#'} target={link.external ? '_blank' : undefined}>
+				{link.label}
+			</a>
+		))}
+		{socialLinks.length > 0 && (
+			<div class="TopBarSocialLinks" aria-label="Social">
+				{socialLinks.map((social) => (
+					<a href={social.href} target="_blank" rel="noopener noreferrer" aria-label={social.label}>
+						{social.type === 'instagram' ? (
+							<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.8 2h8.4A5.8 5.8 0 0122 7.8v8.4a5.8 5.8 0 01-5.8 5.8H7.8A5.8 5.8 0 012 16.2V7.8A5.8 5.8 0 017.8 2zm8.2 3H8a3 3 0 00-3 3v8a3 3 0 003 3h8a3 3 0 003-3V8a3 3 0 00-3-3zm-4 3a4 4 0 110 8 4 4 0 010-8zm0 2.4a1.6 1.6 0 100 3.2 1.6 1.6 0 000-3.2zM17.3 6.4a1.1 1.1 0 110 2.2 1.1 1.1 0 010-2.2z"></path></svg>
+						) : (
+							<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V4h-3c-3 0-5 2-5 5v3H6v4h3v6h4v-6h3l1-4h-4V9c0-.6.4-1 1-1z"></path></svg>
+						)}
+					</a>
+				))}
+			</div>
+		)}
+	</div>
+)}
+<header class="site-header">
+	<nav aria-label="Menu principale">
+		<div>
+			<a href="/" aria-label={`Vai alla home page di ${siteName}`}>
+				<img class="MenuLogo" src={logoDarkSrc} alt={siteName} />
+			</a>
+		</div>
+		<div class="MenuItemsContainer">
+		{menuItems.map((item, index) => {
+			const href = getItemHref(item);
+			const title = getItemTitle(item, index);
+			const isCurrent = isCurrentMenuItem(href);
+			const idClass = getMenuItemIdClass(item, index);
+			const className = isCurrent
+				? `menu_item current_menu_item ${idClass}`
+				: `menu_item ${idClass}`;
+			return (
+				<a href={href} class={className}>
+					{title}
+				</a>
+			);
+		})}
+		</div>
+		<button class="hamburger_button mburger" type="button" aria-label="Menu" aria-expanded="false">
+			<b></b>
+			<b></b>
+			<b></b>
+		</button>
+	</nav>
+</header>
+
+<script is:inline>
+(() => {
+	const button = document.querySelector('.hamburger_button');
+	const menu = document.querySelector('.MenuItemsContainer');
+	const header = document.querySelector('.site-header');
+	if (!button || !menu) return;
+	button.addEventListener('click', () => {
+		const isOpen = menu.classList.toggle('is-open');
+		button.classList.toggle('is-active', isOpen);
+		button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+	});
+
+	if (!header) return;
+
+	const setSticky = () => {
+		const shouldStick = window.scrollY > 10;
+		header.classList.toggle('is-sticky', shouldStick);
+		document.body.style.paddingTop = shouldStick ? `${header.offsetHeight}px` : '';
+	};
+
+	setSticky();
+	window.addEventListener('scroll', setSticky, { passive: true });
+	window.addEventListener('resize', setSticky);
+})();
+</script>

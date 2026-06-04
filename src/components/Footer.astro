@@ -1,0 +1,195 @@
+---
+import { directusAssetUrl, directusItems, directusSingleton } from '../lib/directus';
+
+interface MenuItem {
+	id?: number | string;
+	label?: string;
+	custom_href?: string;
+	pages?: { pages_id?: PageItem | number | string }[] | PageItem[];
+}
+
+interface Menu {
+	id: number;
+	slug?: string;
+	titolo?: string;
+	menu_items?: MenuItem[] | (number | string)[];
+}
+
+interface PageItem {
+	id?: number;
+	slug?: string;
+	title?: string;
+}
+
+interface Options {
+	logo_light?: string;
+	footer_text?: string;
+	site_name?: string;
+	cookie_policy_url?: string;
+	instagram_url?: string;
+	facebook_url?: string;
+}
+
+let logoLightSrc = import.meta.env.PUBLIC_LOGO_LIGHT || '/favicon.svg';
+let footerText = '';
+let siteName = 'Golfista';
+let cookiePolicyUrl = '';
+let instagramUrl = '';
+let facebookUrl = '';
+const footerMenus = [
+	{ slug: 'menu-footer-1', items: [] as MenuItem[] },
+	{ slug: 'menu-footer-2', items: [] as MenuItem[] },
+	{ slug: 'menu-footer-3', items: [] as MenuItem[] },
+];
+
+try {
+	const options = await directusSingleton<Options>('options', {
+		fields: 'logo_light,footer_text,site_name,cookie_policy_url,instagram_url,facebook_url',
+	});
+	if (options?.logo_light) {
+		logoLightSrc = resolveImageSrc(options.logo_light);
+	}
+	if (options?.footer_text) {
+		footerText = options.footer_text;
+	}
+	if (options?.site_name) {
+		siteName = options.site_name;
+	}
+	if (options?.cookie_policy_url) {
+		cookiePolicyUrl = options.cookie_policy_url;
+	}
+	if (options?.instagram_url) {
+		instagramUrl = options.instagram_url;
+	}
+	if (options?.facebook_url) {
+		facebookUrl = options.facebook_url;
+	}
+
+	const menuFields =
+		'menu_items.menu_items_id.id,menu_items.menu_items_id.label,menu_items.menu_items_id.custom_href,menu_items.menu_items_id.pages.pages_id.id,menu_items.menu_items_id.pages.pages_id.slug,menu_items.menu_items_id.pages.pages_id.title';
+
+	for (const footerMenu of footerMenus) {
+		const menus = await directusItems<Menu>('Menus', {
+			'filter[slug][_eq]': footerMenu.slug,
+			fields: menuFields,
+		});
+		const menu = menus[0];
+		const rawItems = Array.isArray(menu?.menu_items) ? menu.menu_items : [];
+		const itemObjects = rawItems
+			.map((item) => {
+				if (!item || typeof item !== 'object') return null;
+				if ('menu_items_id' in item && item.menu_items_id && typeof item.menu_items_id === 'object') {
+					return item.menu_items_id as MenuItem;
+				}
+				return item as MenuItem;
+			})
+			.filter((item): item is MenuItem => Boolean(item));
+
+		footerMenu.items = itemObjects;
+	}
+} catch (error) {
+	console.error('Error fetching footer menu from Directus:', error);
+}
+
+function resolveImageSrc(value: string) {
+	return directusAssetUrl(value);
+}
+
+function getItemPage(item: MenuItem): PageItem | null {
+	const rawPages = item.pages;
+	if (!rawPages || !Array.isArray(rawPages)) return null;
+	const normalizedPages = rawPages
+		.map((page) => {
+			if (!page) return null;
+			if (typeof page === 'object' && 'pages_id' in page) {
+				return page.pages_id && typeof page.pages_id === 'object'
+					? (page.pages_id as PageItem)
+					: null;
+			}
+			if (typeof page === 'object' && 'slug' in page) {
+				return page as PageItem;
+			}
+			return null;
+		})
+		.filter((page): page is PageItem => Boolean(page));
+
+	return normalizedPages[0] ?? null;
+}
+
+function getItemHref(item: MenuItem) {
+	if (item.custom_href) return normalizeHref(item.custom_href);
+	const page = getItemPage(item);
+	if (!page?.slug || page.slug === 'home') return '/';
+	return `/${page.slug}`;
+}
+
+function normalizeHref(href: string) {
+	const raw = String(href || '').trim();
+	if (!raw) return '/';
+	if (raw.startsWith('#')) return raw;
+	if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
+	if (raw.startsWith('mailto:') || raw.startsWith('tel:')) return raw;
+	return raw.startsWith('/') ? raw : `/${raw}`;
+}
+
+function getItemTitle(item: MenuItem, index: number) {
+	return item.label || getItemPage(item)?.title || `Link ${index + 1}`;
+}
+
+function getMenuItemIdClass(item: MenuItem, index: number, menuIndex: number) {
+	const raw = item.id != null ? String(item.id) : `menu-${menuIndex + 1}-index-${index + 1}`;
+	const safe = raw.toLowerCase().replace(/[^a-z0-9_-]+/g, '-');
+	return `menu_item_id_${safe}`;
+}
+
+const socialLinks = [
+	instagramUrl ? { href: instagramUrl, label: 'Instagram', type: 'instagram' } : null,
+	facebookUrl ? { href: facebookUrl, label: 'Facebook', type: 'facebook' } : null,
+].filter(Boolean) as { href: string; label: string; type: 'instagram' | 'facebook' }[];
+
+---
+
+<footer class="site-footer">
+	<nav aria-label="Menu footer">
+		<div>
+			<a href="/" aria-label={`Vai alla home page di ${siteName}`}>
+				<img class="MenuLogo" src={logoLightSrc} alt={siteName} />
+			</a>
+		</div>
+		<div class="FooterItemsContainer">
+			{footerMenus.map((footerMenu, menuIndex) => (
+				<div class="FooterMenuColumn">
+					{footerMenu.items.map((item, index) => {
+						const href = getItemHref(item);
+						const title = getItemTitle(item, index);
+						const idClass = getMenuItemIdClass(item, index, menuIndex);
+						return (
+							<a href={href} class={`menu_item ${idClass}`}>
+								{title}
+							</a>
+						);
+					})}
+				</div>
+			))}
+		</div>
+	</nav>
+	{socialLinks.length > 0 && (
+		<div class="FooterSocialLinks" aria-label="Social">
+			{socialLinks.map((social) => (
+				<a href={social.href} target="_blank" rel="noopener noreferrer" aria-label={social.label}>
+					{social.type === 'instagram' ? (
+						<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"></circle></svg>
+					) : (
+						<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V4h-3c-3 0-5 2-5 5v3H6v4h3v4h4v-4h3l1-4h-4V9c0-.6.4-1 1-1z"></path></svg>
+					)}
+				</a>
+			))}
+		</div>
+	)}
+	<div class="footer_data" set:html={footerText} />
+	{cookiePolicyUrl && (
+		<div class="footer_cookie_policy">
+			<a href={cookiePolicyUrl}>Cookie Policy</a>
+		</div>
+	)}
+</footer>

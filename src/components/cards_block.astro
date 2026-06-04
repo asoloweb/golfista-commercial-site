@@ -1,0 +1,207 @@
+---
+import { directusAssetUrl } from '../lib/directus';
+
+interface PageRef {
+	id?: number;
+	slug?: string;
+}
+
+interface SingleCard {
+	id?: number;
+	titolo_card?: string;
+	descrizione?: string;
+	immagine?: string;
+	icon_url?: string;
+	href?: string;
+	link?: PageRef | number | null;
+}
+
+interface CardRelation {
+	single_card_id?: SingleCard | number | null;
+}
+
+interface Props {
+	titolo?: string;
+	card?: CardRelation[] | SingleCard[];
+	compactMedia?: boolean;
+}
+
+const { titolo = '', card = [], compactMedia = false } = Astro.props;
+
+function resolveImageSrc(value: string | undefined, compact = false) {
+	if (!value) return '';
+	if (compact) {
+		return directusAssetUrl(value, { format: 'webp', quality: 80 });
+	}
+	return directusAssetUrl(value, { format: 'webp', quality: 76, width: 640, height: 420, fit: 'cover' });
+}
+
+function normalizeCards(input: CardRelation[] | SingleCard[]) {
+	if (!Array.isArray(input)) return [];
+	return input
+		.map((entry) => {
+			if (!entry || typeof entry !== 'object') return null;
+			if ('single_card_id' in entry) {
+				return entry.single_card_id && typeof entry.single_card_id === 'object'
+					? (entry.single_card_id as SingleCard)
+					: null;
+			}
+			if ('titolo_card' in entry || 'descrizione' in entry || 'immagine' in entry || 'icon_url' in entry || 'href' in entry) {
+				return entry as SingleCard;
+			}
+			return null;
+		})
+		.filter((entry): entry is SingleCard => Boolean(entry));
+}
+
+function getCardHref(card: SingleCard) {
+	if (card.href) return card.href;
+	if (card.link && typeof card.link === 'object' && card.link.slug) {
+		return card.link.slug === 'home' ? '/' : `/${card.link.slug}`;
+	}
+	return '';
+}
+
+const cards = normalizeCards(card);
+---
+
+{cards.length > 0 && (
+	<section class={`cards_block ${compactMedia ? 'cards_block_compact_media' : ''}`} data-aos="fade-up" data-aos-duration="1500">
+		<div class="cards_block_inner">
+			{titolo && <h2 class="cards_block_title" set:html={titolo} />}
+
+			<div class="cards_grid">
+				{cards.map((single) => {
+					const href = getCardHref(single);
+					const Tag = href ? 'a' : 'div';
+					const isIcon = Boolean(single.icon_url);
+					const imageSrc = single.icon_url || resolveImageSrc(single.immagine, compactMedia);
+
+					return (
+						<Tag class="cards_card" href={href || undefined}>
+							{imageSrc && (
+								<div class={`cards_card_media ${isIcon ? 'cards_card_icon' : ''}`}>
+									<img src={imageSrc} alt={single.titolo_card || ''} loading="lazy" />
+								</div>
+							)}
+							{single.titolo_card && <h3 class="cards_card_title" set:html={single.titolo_card} />}
+							{single.descrizione && <p class="cards_card_description" set:html={single.descrizione} />}
+						</Tag>
+					);
+				})}
+			</div>
+		</div>
+	</section>
+)}
+
+<style>
+	.cards_block {
+		margin-bottom:40px;
+	}
+
+	.cards_block_inner {
+		max-width: var(--max-width);
+		margin: 0 auto;
+		padding:30px;
+		border-radius:20px;
+		background-color:#fff;
+	}
+
+	.cards_block_title {
+		margin: 40px 0;
+		color: #000;
+		font-size:60px;
+		line-height: 60px;
+	}
+
+	.cards_block_title :global(span) {
+		color: var(--primary);
+	}
+
+	.cards_block_inner :global(span) {
+		color: var(--primary);
+	}
+
+	.cards_grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 24px;
+		margin-bottom:40px;
+	}
+
+	.cards_card {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		padding: 18px;
+		background: var(--bianco);
+		border-radius: 18px;
+		color: var(--nero);
+		transition: transform 200ms ease, box-shadow 200ms ease;
+		min-height: 100%;
+		box-shadow: 4px 11px 20px #00000029;
+		text-align: center;
+		align-items: center;
+		min-height: 240px;
+		justify-content: center;
+	}
+
+	a.cards_card:hover {
+		transform: translateY(-4px);
+		box-shadow: 0 16px 30px rgba(0, 0, 0, 0.15);
+	}
+
+	.cards_card_title {
+		margin: 4px 0 0;
+		font-size: 22px;
+		line-height: 24px;
+	}
+
+	.cards_card_description {
+		margin: 4px 0 0;
+		font-size: 16px;
+		line-height: 22px;
+	}
+
+	.cards_card_media img {
+		width: 84px;
+		height: 84px;
+		object-fit: contain;
+	}
+
+	.cards_card_icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 96px;
+		height: 96px;
+		margin-bottom: 8px;
+		border-radius: 24px;
+		background: rgba(0, 236, 16, 0.12);
+	}
+
+	.cards_card_icon img {
+		display: block;
+		width: 58px;
+		height: 58px;
+	}
+
+	.cards_block_compact_media .cards_card_media img {
+		height: 120px;
+		width: auto;
+		max-width: 100%;
+		object-fit: contain;
+	}
+
+	@media (max-width: 1024px) {
+		.cards_grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	@media (max-width: 640px) {
+		.cards_grid {
+			grid-template-columns: 1fr 1fr;
+		}
+	}
+</style>

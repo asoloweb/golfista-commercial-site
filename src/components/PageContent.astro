@@ -1,0 +1,411 @@
+---
+import HeroBlock from '../components/hero_block.astro';
+import TitleBlock from '../components/title_block.astro';
+import SliderBlock from '../components/slider_block.astro';
+import CardsBlock from '../components/cards_block.astro';
+import AccordionBlock from '../components/accordion_block.astro';
+import GoogleReviewsBlock from '../components/google_reviews_block.astro';
+import { directusAssetUrl } from '../lib/directus';
+
+type HeroBlockItem = {
+	id: number;
+	titolo?: string;
+	sottotitolo?: string;
+	paragrafo?: string;
+	label?: string;
+	href?: string;
+	immagine?: string;
+	inverti?: boolean;
+	background_color?: string;
+};
+
+type SlideItem = {
+	id?: number;
+	titolo?: string;
+	sottotitolo?: string;
+	label?: string;
+	href?: string;
+	immagine?: string;
+};
+
+type SliderItem = {
+	id?: number;
+	slides?: { item?: SlideItem }[] | SlideItem[];
+};
+
+type SliderBlockItem = {
+	id?: number;
+	slider?: SliderItem | number | null;
+};
+
+type TitleBlockItem = {
+	id: number;
+	title?: string;
+};
+
+type PageRef = {
+	id?: number;
+	slug?: string;
+};
+
+type SingleCardItem = {
+	id?: number;
+	titolo_card?: string;
+	descrizione?: string;
+	immagine?: string;
+	icon_url?: string;
+	href?: string;
+	link?: PageRef | number | null;
+};
+
+type CardRelation = {
+	single_card_id?: SingleCardItem | number | null;
+};
+
+type CardsBlockItem = {
+	id?: number;
+	titolo?: string;
+	card?: CardRelation[] | SingleCardItem[];
+};
+
+type SingleAccordionItem = {
+	id?: number;
+	titolo?: string;
+	descrizione?: string;
+	Espanso?: boolean;
+};
+
+type AccordionRelation = {
+	single_accordion_id?: SingleAccordionItem | number | null;
+};
+
+type AccordionBlockItem = {
+	id?: number;
+	Titolo?: string;
+	titolo?: string;
+	label?: string;
+	link?: string;
+	accordion?: AccordionRelation[] | SingleAccordionItem[];
+};
+
+type GoogleReviewsBlockItem = {
+	id?: number;
+	titolo?: string;
+	sottotitolo?: string;
+	google_place_id?: string;
+	google_business_query?: string;
+	numero_recensioni?: number;
+	cta_label?: string;
+	cta_href?: string;
+};
+
+type EditorEntry = {
+	collection?: string;
+	item?:
+		| HeroBlockItem
+		| TitleBlockItem
+		| SliderBlockItem
+		| CardsBlockItem
+		| AccordionBlockItem
+		| GoogleReviewsBlockItem
+		| number
+		| string
+		| null;
+};
+
+type Page = {
+	title?: string;
+	slug?: string | { slug?: string };
+	description?: string;
+	Titolo?: string;
+	Sottotitolo?: string;
+	contenuto?: string;
+	hide_page_header?: boolean;
+	featured_image?: string;
+	editor?: EditorEntry[];
+};
+
+interface Props {
+	page: Page | null;
+	notFoundTitle?: string;
+	notFoundMessage?: string;
+	showHeader?: boolean;
+}
+
+const {
+	page,
+	notFoundTitle = 'Pagina non trovata',
+	notFoundMessage = 'La pagina richiesta non esiste.',
+	showHeader = true,
+} = Astro.props;
+
+const blocks = Array.isArray(page?.editor) ? page.editor : [];
+const pageTitle = page?.title || page?.Titolo || '';
+const pageDescription = page?.description || '';
+const rawPageSlug = page?.slug;
+const pageSlug =
+	typeof rawPageSlug === 'string'
+		? rawPageSlug
+		: rawPageSlug && typeof rawPageSlug === 'object' && 'slug' in rawPageSlug
+		? String(rawPageSlug.slug || '')
+		: '';
+const isContattiPage = pageSlug.trim().toLowerCase() === 'contatti';
+const isPrezziPage = pageSlug.trim().toLowerCase() === 'prezzi';
+const showPageHeader = page ? showHeader && !page.hide_page_header : false;
+const pageHeaderImage = page?.featured_image ? resolveImageSrc(page.featured_image) : '';
+
+function resolveImageSrc(value: string) {
+	if (!value) return '';
+	return directusAssetUrl(value, { format: 'webp', quality: 78, width: 1600, height: 900, fit: 'cover' });
+}
+
+function resolveCollection(block: EditorEntry) {
+	if (block.collection) return block.collection;
+	const item = block.item;
+	if (item && typeof item === 'object') {
+		if ('accordion' in item) {
+			return 'accordion_block';
+		}
+		if ('google_place_id' in item || 'google_business_query' in item || 'numero_recensioni' in item) {
+			return 'google_reviews_block';
+		}
+		if ('card' in item) {
+			return 'cards_block';
+		}
+		if ('paragrafo' in item || 'sottotitolo' in item || 'titolo' in item) {
+			return 'hero_block';
+		}
+		if ('slider' in item) {
+			return 'slider_block';
+		}
+		if ('title' in item) {
+			return 'title_block';
+		}
+	}
+	return null;
+}
+
+function normalizeSlides(input: SliderItem | number | null | undefined) {
+	if (!input || typeof input !== 'object') return [];
+	const rawSlides = (input as SliderItem).slides;
+	const slidesArray = Array.isArray(rawSlides)
+		? rawSlides
+		: rawSlides && typeof rawSlides === 'object' && Array.isArray((rawSlides as any).data)
+		? (rawSlides as any).data
+		: [];
+	return slidesArray
+		.map((slide) => {
+			if (!slide) return null;
+			if ('item' in slide && typeof slide.item === 'object') return slide.item;
+			if ('titolo' in slide || 'sottotitolo' in slide || 'immagine' in slide) {
+				return slide as SlideItem;
+			}
+			return null;
+		})
+		.filter((slide): slide is SlideItem => Boolean(slide));
+}
+
+function normalizeCards(input: CardRelation[] | SingleCardItem[] | undefined) {
+	if (!Array.isArray(input)) return [];
+	return input
+		.map((entry) => {
+			if (!entry || typeof entry !== 'object') return null;
+			if ('single_card_id' in entry) {
+				return entry.single_card_id && typeof entry.single_card_id === 'object'
+					? (entry.single_card_id as SingleCardItem)
+					: null;
+			}
+			if ('titolo_card' in entry || 'descrizione' in entry || 'immagine' in entry || 'href' in entry) {
+				return entry as SingleCardItem;
+			}
+			return null;
+		})
+		.filter((card): card is SingleCardItem => Boolean(card));
+}
+
+function normalizeAccordionItems(input: AccordionRelation[] | SingleAccordionItem[] | undefined) {
+	if (!Array.isArray(input)) return [];
+	return input
+		.map((entry) => {
+			if (!entry || typeof entry !== 'object') return null;
+			if ('single_accordion_id' in entry) {
+				return entry.single_accordion_id && typeof entry.single_accordion_id === 'object'
+					? (entry.single_accordion_id as SingleAccordionItem)
+					: null;
+			}
+			if ('titolo' in entry || 'descrizione' in entry) {
+				return entry as SingleAccordionItem;
+			}
+			return null;
+		})
+		.filter((accordion): accordion is SingleAccordionItem => Boolean(accordion));
+}
+
+function toSlug(value: string) {
+	return value
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/^-+|-+$/g, '');
+}
+
+function getBlockDomId(block: EditorEntry, collection: string, index: number) {
+	const itemId =
+		block.item && typeof block.item === 'object' && 'id' in block.item && block.item.id != null
+			? toSlug(String(block.item.id))
+			: '';
+	const collectionSlug = toSlug(collection) || 'block';
+	return itemId
+		? `block-${collectionSlug}-${itemId}-${index + 1}`
+		: `block-${collectionSlug}-${index + 1}`;
+}
+---
+
+{page ? (
+	<>
+		{showPageHeader ? (
+			<div
+				class="page_header"
+				style={pageHeaderImage ? `background-image: url('${pageHeaderImage}')` : undefined}
+			>
+				<div class="page_header_inner">
+					{pageTitle && <h1 data-aos="fade-up" data-aos-duration="1500">{pageTitle}</h1>}
+					{pageDescription && <p data-aos="fade-up" data-aos-duration="1800">{pageDescription}</p>}
+				</div>
+			</div>
+		) : (
+			<>
+				{pageTitle && (
+					<h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">
+						{pageTitle}
+					</h1>
+				)}
+			</>
+)}
+		{page?.contenuto && <div>{page.contenuto}</div>}
+		{blocks.map((block, index) => {
+			const collection = resolveCollection(block);
+			if (!collection) return null;
+			if (!block.item || typeof block.item !== 'object') return null;
+			let blockContent: any = null;
+
+			switch (collection) {
+				case 'hero_block': {
+					const hero = block.item as HeroBlockItem;
+					blockContent = (
+						<HeroBlock
+							titolo={hero.titolo}
+							sottotitolo={hero.sottotitolo}
+							paragrafo={hero.paragrafo}
+							href={hero.href}
+							label={hero.label}
+							immagine={hero.immagine}
+							inverti={hero.inverti}
+							background_color={hero.background_color}
+						/>
+					);
+					break;
+				}
+				case 'title_block': {
+					const title = block.item as TitleBlockItem;
+					blockContent = <TitleBlock item={String(title.id ?? '')} titolo={title.title} />;
+					break;
+				}
+				case 'slider_block': {
+					const sliderBlock = block.item as SliderBlockItem;
+					const slides = normalizeSlides(
+						sliderBlock?.slider && typeof sliderBlock.slider === 'object'
+							? sliderBlock.slider
+							: null
+					);
+					blockContent = <SliderBlock slides={slides} />;
+					break;
+				}
+				case 'cards_block': {
+					const cardsBlock = block.item as CardsBlockItem;
+					const cards = normalizeCards(cardsBlock.card);
+					blockContent = <CardsBlock titolo={cardsBlock.titolo} card={cards} compactMedia={isContattiPage} />;
+					break;
+				}
+				case 'accordion_block': {
+					const accordionBlock = block.item as AccordionBlockItem;
+					const items = normalizeAccordionItems(accordionBlock.accordion);
+					blockContent = (
+						<AccordionBlock
+							titolo={accordionBlock.Titolo || accordionBlock.titolo}
+							label={accordionBlock.label}
+							link={accordionBlock.link}
+							accordion={items}
+						/>
+					);
+					break;
+				}
+				case 'google_reviews_block':
+				case 'google_reviews': {
+					const googleReviewsBlock = block.item as GoogleReviewsBlockItem;
+					blockContent = (
+						<GoogleReviewsBlock
+							titolo={googleReviewsBlock.titolo}
+							sottotitolo={googleReviewsBlock.sottotitolo}
+							google_place_id={googleReviewsBlock.google_place_id}
+							google_business_query={googleReviewsBlock.google_business_query}
+							numero_recensioni={googleReviewsBlock.numero_recensioni}
+							min_rating={isContattiPage ? 3 : 1}
+							cta_label={googleReviewsBlock.cta_label}
+							cta_href={googleReviewsBlock.cta_href}
+						/>
+					);
+					break;
+				}
+				default:
+					return null;
+			}
+
+			return (
+				<section id={getBlockDomId(block, collection, index)} class={`editor_block editor_block_${collection}`}>
+					{blockContent}
+				</section>
+			);
+		})}
+		{isPrezziPage && (
+			<section class="pricing_section" aria-labelledby="pricing-title">
+				<div class="pricing_intro">
+					<p class="pricing_eyebrow">Scegli il piano</p>
+					<h2 id="pricing-title">Prezzi semplici per iniziare subito</h2>
+					<p>Parti gratis oppure abilita la gestione completa del circolo con il piano PRO.</p>
+				</div>
+				<div class="pricing_grid">
+					<article class="pricing_card">
+						<h3>FREE</h3>
+						<div class="pricing_price">Gratis</div>
+						<p>Ideale per provare Golfista e iniziare a gestire la presenza del tuo circolo.</p>
+						<ul>
+							<li>Scheda circolo</li>
+							<li>Presenza nella piattaforma</li>
+							<li>Funzioni base</li>
+						</ul>
+						<a class="pricing_button" href="https://manager.golfista.app" target="_blank" rel="noopener noreferrer">Attiva FREE</a>
+					</article>
+					<article class="pricing_card pricing_card_featured">
+						<div class="pricing_badge">Consigliato</div>
+						<h3>PRO</h3>
+						<div class="pricing_price">59,90€ <span>/ mese</span></div>
+						<p class="pricing_annual">oppure 499€ per tutto l'anno anticipato</p>
+						<p>Per circoli che vogliono usare gli strumenti avanzati di gestione e comunicazione.</p>
+						<ul>
+							<li>Gestionale completo</li>
+							<li>Statistiche avanzate</li>
+							<li>News e aggiornamenti gare</li>
+							<li>Supporto operativo</li>
+						</ul>
+						<a class="pricing_button" href="https://manager.golfista.app" target="_blank" rel="noopener noreferrer">Vai a manager.golfista.app</a>
+					</article>
+				</div>
+			</section>
+		)}
+	</>
+) : (
+	<>
+		<h1>{notFoundTitle}</h1>
+		<p>{notFoundMessage}</p>
+	</>
+)}

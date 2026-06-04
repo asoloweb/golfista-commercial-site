@@ -1,24 +1,10 @@
-# Astro Starter Kit: Basics
+# Astro Starter Kit: 09_02_26
 
 ```sh
-npm create astro@latest -- --template basics
+npm create astro@latest -- --template minimal
 ```
 
-<!-- ASTRO:REMOVE:START -->
-
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
-
-<!-- ASTRO:REMOVE:END -->
-
 > 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-<!-- ASTRO:REMOVE:START -->
-
-![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
-
-<!-- ASTRO:REMOVE:END -->
 
 ## 🚀 Project Structure
 
@@ -27,20 +13,17 @@ Inside of your Astro project, you'll see the following folders and files:
 ```text
 /
 ├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
+├── src/
+│   └── pages/
+│       └── index.astro
 └── package.json
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+
+There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+
+Any static assets, like images, can be placed in the `public/` directory.
 
 ## 🧞 Commands
 
@@ -54,6 +37,15 @@ All commands are run from the root of the project, from a terminal:
 | `npm run preview`         | Preview your build locally, before deploying     |
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
+
+## Google Reviews Block
+
+Per usare il blocco slider recensioni Google, configura almeno:
+
+- `GOOGLE_MAPS_API_KEY` oppure `GOOGLE_PLACES_API_KEY`
+- opzionale: `GOOGLE_MYBUSINESS_PLACE_ID`
+
+Se `GOOGLE_MYBUSINESS_PLACE_ID` non e impostato, il blocco tenta la ricerca automatica dal campo `google_business_query`.
 
 ## 👀 Want to learn more?
 

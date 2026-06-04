@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageContent from '../components/PageContent.astro';
+import { directusItems } from '../lib/directus';
+
+type Page = {
+	status?: string;
+	slug?: string;
+	title?: string;
+	Titolo?: string;
+	seo_title?: string;
+	seo_desc?: string;
+	hide_page_header?: boolean;
+	page_header?: string;
+	editor?: unknown[];
+};
+
+async function fetchPageBySlug(slug: string) {
+	const pages = await directusItems<Page>('pages', {
+		fields:
+			'*,editor.sort,editor.collection,editor.item.*,editor.item.slider.*,editor.item.slider.slides.collection,editor.item.slider.slides.item.*,editor.item.card.single_card_id.*,editor.item.card.single_card_id.link.id,editor.item.card.single_card_id.link.slug,editor.item.card.single_card_id.link.title,editor.item.accordion.single_accordion_id.*',
+		'filter[status][_eq]': 'published',
+		'filter[slug][_eq]': slug,
+		'sort[]': 'sort',
+	});
+	return pages[0] ?? null;
+}
+
+const routeSlug = String(Astro.params.slug || '').trim();
+const page =
+	(Astro.props?.page as Page | undefined) ||
+	(routeSlug ? await fetchPageBySlug(routeSlug) : null);
+
+if (!page) {
+	Astro.response.status = 404;
+}
+
+const fallbackTitle = routeSlug ? `Pagina non trovata: ${routeSlug}` : 'Pagina non trovata';
+---
+
+<BaseLayout
+	title={page?.title || page?.Titolo || fallbackTitle}
+	seoTitle={page?.seo_title}
+	seoDescription={page?.seo_desc}
+	noindex={!page}
+>
+	<PageContent page={page} />
+</BaseLayout>

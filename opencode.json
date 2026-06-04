@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "golfista-admin": {
+      "type": "remote",
+      "url": "https://admin.golfista.app/mcp",
+      "headers": {
+        "Authorization": "Bearer DiuSUAdx35N5PL26hjHPipj_fr8GRJDb"
+      },
+      "enabled": true
+    },
+    "supabase": {
+      "type": "remote",
+      "url": "https://db.golfista.app/mcp",
+      "enabled": true
+    },
+    "coolify": {
+      "type": "local",
+      "command": [
+        "/usr/local/bin/npx",
+        "-y",
+        "@masonator/coolify-mcp"
+      ],
+      "env": {
+        "COOLIFY_BASE_URL": "https://coolify.golfista.app",
+        "COOLIFY_ACCESS_TOKEN": "${COOLIFY_ACCESS_TOKEN}"
+      },
+      "enabled": true
+    }
+  }
+}
