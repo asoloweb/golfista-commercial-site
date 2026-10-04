@@ -152,11 +152,55 @@ const pageSlug =
 const isContattiPage = pageSlug.trim().toLowerCase() === 'contatti';
 const isPrezziPage = pageSlug.trim().toLowerCase() === 'prezzi';
 const showPageHeader = page ? showHeader && !page.hide_page_header : false;
-const pageHeaderImage = page?.featured_image ? resolveImageSrc(page.featured_image) : '';
+
+const curatedHeroImages: Record<string, string> = {
+	'home:1': '/images/golf/golfer-swing.jpg',
+	'home:2': '/images/golf/golf-course-sunset.jpg',
+	'gestionale:3': '/images/golf/golf-community-mobile.jpg',
+	'gestionale:4': '/images/golf/golf-bag-fairway.jpg',
+	'app:5': '/images/golf/golf-putting.jpg',
+	'app:6': '/images/golf/golfer-sunset.jpg',
+	'chi-siamo:7': '/images/golf/golf-players-together.jpg',
+};
+
+const curatedPageHeaderImages: Record<string, string> = {
+	gestionale: '/images/golf/golf-carts-sunset.jpg',
+	app: '/images/golf/golf-swing-course.jpg',
+	contatti: '/images/golf/golf-ball-tee.jpg',
+	'chi-siamo': '/images/golf/golf-course-twilight.jpg',
+	prezzi: '/images/golf/golf-sunset-pond.jpg',
+};
+
+const curatedSlideImages: Record<string, string> = {
+	'1:1': '/images/golf/slide-home-aerial-course.jpg',
+	'1:7': '/images/golf/slide-home-fairway.jpg',
+	'2:3': '/images/golf/slide-manager-golfer.jpg',
+	'2:4': '/images/golf/slide-manager-overview.jpg',
+	'3:5': '/images/golf/slide-app-putting.jpg',
+};
+
+const curatedSlideTitles: Record<string, string> = {
+	'1:1': 'CONTROLLA IL TUO CIRCOLO CON <span>GOLFISTA</span>',
+};
+
+const pageHeaderImage = curatedPageHeaderImages[pageSlug] || (page?.featured_image ? resolveImageSrc(page.featured_image) : '');
 
 function resolveImageSrc(value: string) {
 	if (!value) return '';
 	return directusAssetUrl(value, { format: 'webp', quality: 78, width: 1600, height: 900, fit: 'cover' });
+}
+
+function getCuratedHeroImage(item: HeroBlockItem) {
+	const id = item.id != null ? String(item.id) : '';
+	return curatedHeroImages[`${pageSlug}:${id}`] || item.immagine || '';
+}
+
+function getCuratedSlides(sliderId: number | undefined, slides: SlideItem[]) {
+	return slides.map((slide) => ({
+		...slide,
+		immagine: curatedSlideImages[`${sliderId ?? ''}:${slide.id ?? ''}`] || slide.immagine,
+		titolo: curatedSlideTitles[`${sliderId ?? ''}:${slide.id ?? ''}`] || slide.titolo,
+	}));
 }
 
 function resolveCollection(block: EditorEntry) {
@@ -286,6 +330,14 @@ function getBlockDomId(block: EditorEntry, collection: string, index: number) {
 			const collection = resolveCollection(block);
 			if (!collection) return null;
 			if (!block.item || typeof block.item !== 'object') return null;
+			const isRemovedPricingIntro =
+				isPrezziPage &&
+				collection === 'hero_block' &&
+				String((block.item as HeroBlockItem).titolo || '')
+					.replace(/<[^>]*>/g, '')
+					.trim()
+					.toLowerCase() === 'piani semplici, valore immediato';
+			if (isRemovedPricingIntro) return null;
 			let blockContent: any = null;
 
 			switch (collection) {
@@ -298,7 +350,7 @@ function getBlockDomId(block: EditorEntry, collection: string, index: number) {
 							paragrafo={hero.paragrafo}
 							href={hero.href}
 							label={hero.label}
-							immagine={hero.immagine}
+							immagine={getCuratedHeroImage(hero)}
 							inverti={hero.inverti}
 							background_color={hero.background_color}
 						/>
@@ -312,12 +364,11 @@ function getBlockDomId(block: EditorEntry, collection: string, index: number) {
 				}
 				case 'slider_block': {
 					const sliderBlock = block.item as SliderBlockItem;
+					const slider = sliderBlock?.slider && typeof sliderBlock.slider === 'object' ? sliderBlock.slider : null;
 					const slides = normalizeSlides(
-						sliderBlock?.slider && typeof sliderBlock.slider === 'object'
-							? sliderBlock.slider
-							: null
+						slider
 					);
-					blockContent = <SliderBlock slides={slides} />;
+					blockContent = <SliderBlock slides={getCuratedSlides(slider?.id, slides)} />;
 					break;
 				}
 				case 'cards_block': {

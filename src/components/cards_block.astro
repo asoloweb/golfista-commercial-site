@@ -96,22 +96,24 @@ const cards = normalizeCards(card);
 
 <style>
 	.cards_block {
-		margin-bottom:40px;
+		margin-bottom: 40px;
+		padding: 0 20px;
 	}
 
 	.cards_block_inner {
 		max-width: var(--max-width);
 		margin: 0 auto;
-		padding:30px;
-		border-radius:20px;
-		background-color:#fff;
+		padding: 48px;
+		border-radius: var(--radius-lg);
+		background-color: var(--surface);
+		box-shadow: var(--shadow-card);
 	}
 
 	.cards_block_title {
-		margin: 40px 0;
+		margin: 0 0 32px;
 		color: #000;
-		font-size:60px;
-		line-height: 60px;
+		font-size: clamp(42px, 6vw, 64px);
+		line-height: .95;
 	}
 
 	.cards_block_title :global(span) {
@@ -126,29 +128,30 @@ const cards = normalizeCards(card);
 		display: grid;
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 		gap: 24px;
-		margin-bottom:40px;
+		margin-bottom: 0;
 	}
 
 	.cards_card {
 		display: flex;
 		flex-direction: column;
 		gap: 12px;
-		padding: 18px;
-		background: var(--bianco);
-		border-radius: 18px;
+		padding: 26px 20px;
+		background: var(--surface-muted);
+		border: 1px solid var(--border);
+		border-radius: 22px;
 		color: var(--nero);
 		transition: transform 200ms ease, box-shadow 200ms ease;
 		min-height: 100%;
-		box-shadow: 4px 11px 20px #00000029;
+		box-shadow: none;
 		text-align: center;
 		align-items: center;
-		min-height: 240px;
+		min-height: 250px;
 		justify-content: center;
 	}
 
 	a.cards_card:hover {
 		transform: translateY(-4px);
-		box-shadow: 0 16px 30px rgba(0, 0, 0, 0.15);
+		box-shadow: var(--shadow-card);
 	}
 
 	.cards_card_title {
@@ -173,17 +176,20 @@ const cards = normalizeCards(card);
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 96px;
-		height: 96px;
+		width: 88px;
+		height: 88px;
 		margin-bottom: 8px;
-		border-radius: 24px;
-		background: rgba(0, 236, 16, 0.12);
+		border-radius: 50%;
+		background: var(--primary);
+		box-shadow: 0 12px 22px rgba(0, 236, 16, 0.24);
 	}
 
 	.cards_card_icon img {
 		display: block;
-		width: 58px;
-		height: 58px;
+		width: 42px;
+		height: 42px;
+		object-fit: contain;
+		filter: brightness(0);
 	}
 
 	.cards_block_compact_media .cards_card_media img {
@@ -200,8 +206,16 @@ const cards = normalizeCards(card);
 	}
 
 	@media (max-width: 640px) {
+		.cards_block {
+			padding: 0 10px;
+		}
+
+		.cards_block_inner {
+			padding: 32px 20px;
+		}
+
 		.cards_grid {
-			grid-template-columns: 1fr 1fr;
+			grid-template-columns: 1fr;
 		}
 	}
 </style>

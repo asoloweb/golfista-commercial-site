@@ -319,14 +319,16 @@ function formatFullDate(value: number | undefined) {
 <style>
 	.google_reviews_block {
 		margin: 40px 0;
+		padding: 0 20px;
 	}
 
 	.google_reviews_inner {
 		max-width: var(--max-width);
 		margin: 0 auto;
-		padding: 30px;
-		border-radius: 20px;
-		background: #fff;
+		padding: 48px;
+		border-radius: var(--radius-lg);
+		background: var(--surface);
+		box-shadow: var(--shadow-card);
 	}
 
 	.google_reviews_header {
@@ -340,8 +342,8 @@ function formatFullDate(value: number | undefined) {
 
 	.google_reviews_title {
 		margin: 0;
-		font-size: 60px;
-		line-height: 1.1;
+		font-size: clamp(42px, 5vw, 64px);
+		line-height: .95;
 	}
 
 	.google_reviews_subtitle {
@@ -373,7 +375,8 @@ function formatFullDate(value: number | undefined) {
 		margin-top: 10px;
 		font-weight: 700;
 		text-decoration: underline;
-		color:var(--primary);
+		color: var(--nero);
+		text-decoration-color: var(--primary);
 	}
 
 	.google_reviews_slider {
@@ -383,9 +386,9 @@ function formatFullDate(value: number | undefined) {
 
 	.google_review_slide {
 		text-align: left;
-		background: var(--bianco);
-		border: 1px solid #e8e8e8;
-		border-radius: 16px;
+		background: var(--surface-muted);
+		border: 1px solid var(--border);
+		border-radius: 22px;
 		padding: 20px;
 		min-height: 280px;
 		justify-content: flex-start;
@@ -499,8 +502,12 @@ function formatFullDate(value: number | undefined) {
 	}
 
 	@media (max-width: 768px) {
+		.google_reviews_block {
+			padding: 0 10px;
+		}
+
 		.google_reviews_inner {
-			padding: 20px;
+			padding: 32px 20px;
 		}
 
 		.google_reviews_title {

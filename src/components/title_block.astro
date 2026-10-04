@@ -24,28 +24,33 @@ const {
 
 <style>
 	.title_block {
-		padding: 30px 0;
+		width: min(calc(100% - 40px), var(--max-width));
+		padding: 54px 30px;
 		text-align: center;
-		background-color: #f9f9f9;
-		margin-bottom: 30px;
+		background-color: var(--surface);
+		border-radius: var(--radius-lg);
+		box-shadow: var(--shadow-card);
+		margin: 0 auto 40px;
 	}
 	.title_content {
-		max-width: 800px;
+		max-width: 860px;
 		margin: 0 auto;
 		padding: 0 15px;
 	}
 	h1 {
-		color: #333;
-		font-size: 2.5rem;
-		margin-bottom: 15px;
+		color: var(--nero);
+		font-size: clamp(48px, 6vw, 72px);
+		line-height: .95;
+		margin: 0 0 18px;
 	}
 	h2 {
-		color: #666;
-		font-size: 1.5rem;
+		color: var(--nero);
+		font-family: var(--font-body);
+		font-size: 1.25rem;
 		margin-bottom: 20px;
 	}
 	p {
-		color: #444;
+		color: var(--nero);
 		line-height: 1.6;
 	}
 </style>

@@ -26,7 +26,6 @@ const details = circolo
 			['Telefono', circolo.telefono],
 			['Email', circolo.mail],
 			['Segretario', circolo.segretario],
-			['Coordinate', circolo.lat && circolo.lon ? `${circolo.lat}, ${circolo.lon}` : ''],
 		].filter(([, value]) => Boolean(value))
 	: [];
 ---

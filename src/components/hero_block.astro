@@ -65,15 +65,15 @@ function resolveImageSrc(value: string) {
 
 <style>
 	.hero_block {
-		padding: 30px;
-		margin-bottom: 50px;
+		padding: 40px;
 		display: flex;
-		gap: 50px;
-		border-radius: 40px;
+		gap: 40px;
+		border-radius: var(--radius-lg);
 		max-width: var(--max-width);
 		margin: auto;
-		margin-bottom:40px;
-		background-color:#fff;
+		margin-bottom: 40px;
+		background-color: var(--surface);
+		box-shadow: var(--shadow-card);
 	}
 	.colonna {
 		flex: 1;
@@ -90,17 +90,17 @@ function resolveImageSrc(value: string) {
 	}
 
 	.colonna_testo h3 {
-		font-size: 25px;
+		font-size: 22px;
 		margin: 0;
 		margin-bottom: 25px;
 	}
 
 	.colonna_testo .title {
-		font-size: 60px;
+		font-size: clamp(46px, 5.2vw, 68px);
 		font-family: var(--font-heading);
-		line-height: 55px;
+		line-height: .95;
 		font-weight: bold;
-		margin-top: 40px;
+		margin-top: 0;
 		margin-bottom: 20px;
 		font-weight: 500;
 	}
@@ -108,7 +108,7 @@ function resolveImageSrc(value: string) {
 	.colonna_immagine img {
 		object-fit: cover;
 		height: 100%;
-    	border-radius: 20px;
+		border-radius: 22px;
 	}
 
 	.hero_button {
@@ -129,9 +129,27 @@ function resolveImageSrc(value: string) {
 	}
 
 	@media (max-width: 980px) {
+		.hero_block {
+			padding: 30px;
+			gap: 28px;
+		}
 		.colonna_testo .title {
 			font-size: 52px;
 			line-height: 45px;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.hero_block,
+		.hero_block_inverted {
+			flex-direction: column-reverse;
+			margin-left: 10px;
+			margin-right: 10px;
+			padding: 24px 20px;
+		}
+
+		.colonna_testo .title {
+			font-size: 46px;
 		}
 	}
 </style>
