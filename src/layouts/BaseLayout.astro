@@ -142,7 +142,8 @@ const organizationJsonLd = JSON.stringify(
 		<link rel="alternate" hreflang="x-default" href={canonicalUrl} />
 		<title>{resolvedTitle}</title>
 		<meta name="description" content={resolvedDescription} />
-		{noindex && <meta name="robots" content="noindex, nofollow" />}
+		<meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'} />
+		<meta name="googlebot" content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'} />
 		<script type="application/ld+json" set:html={organizationJsonLd}></script>
 		<link rel="stylesheet" href="/vendor/aos.css" />
 		<link rel="stylesheet" href="/vendor/swiper-bundle.min.css" />

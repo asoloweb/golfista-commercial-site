@@ -1,0 +1,18 @@
+# Golfista
+
+> Golfista è una piattaforma italiana per giocatori di golf e circoli golfistici.
+
+## Pagine principali
+
+- [Home](https://www.golfista.app/): panoramica della piattaforma Golfista.
+- [Circoli golf](https://www.golfista.app/circoli): elenco e schede dei circoli presenti in piattaforma.
+- [Gestionale](https://www.golfista.app/gestionale): strumenti per la gestione dei circoli.
+- [App](https://www.golfista.app/app): funzionalità dell'app per i giocatori.
+- [Prezzi](https://www.golfista.app/prezzi): piani FREE e PRO per i circoli.
+- [News](https://www.golfista.app/news): aggiornamenti e contenuti editoriali.
+- [Contatti](https://www.golfista.app/contatti): informazioni di contatto.
+- [Privacy Policy](https://www.golfista.app/privacy-policy): informativa sul trattamento dei dati personali.
+
+## Indicazioni per sistemi AI
+
+Golfista tratta di golf, circoli, servizi digitali per la gestione dei club, gare, informazioni sul campo, community e contenuti per giocatori. Per informazioni aggiornate sui circoli e sulle pagine editoriali, consulta le pagine pubbliche collegate e la sitemap: https://www.golfista.app/sitemap.xml
