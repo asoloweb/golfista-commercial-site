@@ -23,10 +23,9 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
 
 	const canonicalOrigin = getCanonicalOrigin();
 	const canonicalHost = new URL(canonicalOrigin).hostname;
-	const isWwwHost = host.startsWith('www.');
 	const isWrongHost = host !== canonicalHost;
 
-	if (isWwwHost || isWrongHost) {
+	if (isWrongHost) {
 		const redirectUrl = new URL(requestUrl.pathname + requestUrl.search, canonicalOrigin);
 		return context.redirect(redirectUrl.toString(), 301);
 	}

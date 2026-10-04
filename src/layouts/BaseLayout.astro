@@ -19,8 +19,8 @@ const organizationSameAs = (import.meta.env.PUBLIC_ORGANIZATION_SAME_AS || '')
 	.split(',')
 	.map((entry) => entry.trim())
 	.filter(Boolean);
-const umamiScriptSrc = import.meta.env.PUBLIC_UMAMI_SCRIPT_SRC || '';
-const umamiWebsiteId = import.meta.env.PUBLIC_UMAMI_WEBSITE_ID || '';
+const umamiScriptSrc = import.meta.env.PUBLIC_UMAMI_SCRIPT_SRC || 'https://umami.asoloweb.it/script.js';
+const umamiWebsiteId = import.meta.env.PUBLIC_UMAMI_WEBSITE_ID || 'b3cc9fb1-46cb-44a9-9a6f-b4c23126b713';
 const googleAdsId = import.meta.env.PUBLIC_GOOGLE_ADS_ID || '';
 const iubendaWidgetSrc = import.meta.env.PUBLIC_IUBENDA_WIDGET_SRC || '';
 
