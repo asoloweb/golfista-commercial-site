@@ -62,6 +62,31 @@ function getCardHref(card: SingleCard) {
 	return '';
 }
 
+const cardIconClasses: Record<string, string> = {
+	'1': 'fa-golf-ball-tee',
+	'2': 'fa-bullhorn',
+	'3': 'fa-mobile-screen-button',
+	'4': 'fa-phone',
+	'5': 'fa-envelope',
+	'6': 'fa-whatsapp',
+	'7': 'fa-map-location-dot',
+	'8': 'fa-location-dot',
+	'9': 'fa-handshake',
+	'10': 'fa-star',
+	'11': 'fa-camera',
+	'12': 'fa-flag',
+	'13': 'fa-cloud-sun',
+	'14': 'fa-code-compare',
+	'15': 'fa-chart-line',
+	'16': 'fa-newspaper',
+	'17': 'fa-trophy',
+};
+
+function getCardIconClass(card: SingleCard) {
+	const id = card.id != null ? String(card.id) : '';
+	return cardIconClasses[id] || '';
+}
+
 const cards = normalizeCards(card);
 ---
 
@@ -74,16 +99,20 @@ const cards = normalizeCards(card);
 				{cards.map((single) => {
 					const href = getCardHref(single);
 					const Tag = href ? 'a' : 'div';
-					const isIcon = Boolean(single.icon_url);
-					const imageSrc = single.icon_url || resolveImageSrc(single.immagine, compactMedia);
+					const iconClass = getCardIconClass(single);
+					const imageSrc = iconClass ? '' : resolveImageSrc(single.immagine, compactMedia);
 
 					return (
 						<Tag class="cards_card" href={href || undefined}>
-							{imageSrc && (
-								<div class={`cards_card_media ${isIcon ? 'cards_card_icon' : ''}`}>
+							{iconClass ? (
+								<div class="cards_card_icon" aria-hidden="true">
+									<i class={`fa-solid ${iconClass}`}></i>
+								</div>
+							) : imageSrc ? (
+								<div class="cards_card_media">
 									<img src={imageSrc} alt={single.titolo_card || ''} loading="lazy" />
 								</div>
-							)}
+							) : null}
 							{single.titolo_card && <h3 class="cards_card_title" set:html={single.titolo_card} />}
 							{single.descrizione && <p class="cards_card_description" set:html={single.descrizione} />}
 						</Tag>
@@ -184,12 +213,9 @@ const cards = normalizeCards(card);
 		box-shadow: 0 12px 22px rgba(0, 236, 16, 0.24);
 	}
 
-	.cards_card_icon img {
-		display: block;
-		width: 42px;
-		height: 42px;
-		object-fit: contain;
-		filter: brightness(0);
+	.cards_card_icon i {
+		color: var(--nero);
+		font-size: 38px;
 	}
 
 	.cards_block_compact_media .cards_card_media img {

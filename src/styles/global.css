@@ -227,6 +227,7 @@ main {
 }
 
 .TopBarSocialLinks svg {
+	  display: none;
   width: 22px;
   height: 22px;
   fill: currentColor;
@@ -287,6 +288,7 @@ main {
 }
 
 .FooterSocialLinks svg {
+	  display: none;
   width: 22px;
   height: 22px;
   fill: none;
@@ -302,6 +304,17 @@ main {
   background: transparent;
   padding: 8px;
   cursor: pointer;
+}
+
+.hamburger_button i {
+  font-size: 30px;
+  color: var(--nero);
+}
+
+.TopBarSocialLinks i,
+.FooterSocialLinks i {
+  font-size: 22px;
+  line-height: 1;
 }
 
 .mburger {

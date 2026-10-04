@@ -96,7 +96,7 @@ const faqJsonLd =
 					return (
 						<details class="accordion_item" open={item.Espanso === true}>
 							<summary class="accordion_summary" aria-controls={panelId}>
-								<span class="accordion_icon" aria-hidden="true">+</span>
+								<span class="accordion_icon" aria-hidden="true"><i class="fa-solid fa-plus"></i></span>
 								<span class="accordion_item_title" set:html={item.titolo || `Voce ${index + 1}`} />
 							</summary>
 							<div class="accordion_content" id={panelId}>

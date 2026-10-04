@@ -180,6 +180,7 @@ const socialLinks = [
 		<div class="FooterSocialLinks" aria-label="Social">
 			{socialLinks.map((social) => (
 				<a href={social.href} target="_blank" rel="noopener noreferrer" aria-label={social.label}>
+					<i class={`fa-brands ${social.type === 'instagram' ? 'fa-instagram' : 'fa-facebook-f'}`} aria-hidden="true"></i>
 					{social.type === 'instagram' ? (
 						<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"></circle></svg>
 					) : (
