@@ -36,7 +36,8 @@ function resolveImageSrc(value: string) {
 	return directusAssetUrl(value);
 }
 
-let logoLightSrc = import.meta.env.PUBLIC_LOGO_LIGHT || '/favicon.svg';
+const faviconSrc = '/favicon.png';
+let logoLightSrc = import.meta.env.PUBLIC_LOGO_LIGHT || faviconSrc;
 let siteName = 'Golfista';
 let organizationEmail = '';
 let organizationPhone = '';
@@ -59,11 +60,14 @@ try {
 	console.error('Error fetching options for favicon:', error);
 }
 
-const resolvedTitle = seoTitle || title;
+const rawTitle = (seoTitle || title || siteName).trim();
+const resolvedTitle = rawTitle.toLowerCase().includes(siteName.toLowerCase()) ? rawTitle : `${rawTitle} | ${siteName}`;
+const rawDescription = typeof seoDescription === 'string' ? seoDescription.trim() : '';
+const isGenericDescription = /^la home page di golfista\.?$/i.test(rawDescription);
 const resolvedDescription =
-	typeof seoDescription === 'string' && seoDescription.trim().length > 0
-		? seoDescription.trim()
-		: `${resolvedTitle} | ${siteName}`;
+	rawDescription.length > 0 && !isGenericDescription
+		? rawDescription
+		: `${rawTitle}. Scopri Golfista, la piattaforma digitale per giocatori di golf e circoli.`;
 
 const absoluteLogoUrl = (() => {
 	try {
@@ -72,6 +76,7 @@ const absoluteLogoUrl = (() => {
 		return logoLightSrc;
 	}
 })();
+const absoluteSocialImageUrl = new URL('/images/golf/golf-course-sunset.jpg', siteUrl).toString();
 
 function getFaviconMimeType(src: string) {
 	const cleanedSrc = src.split('?')[0].split('#')[0].toLowerCase();
@@ -83,7 +88,7 @@ function getFaviconMimeType(src: string) {
 	return undefined;
 }
 
-const faviconMimeType = getFaviconMimeType(logoLightSrc);
+const faviconMimeType = getFaviconMimeType(faviconSrc);
 const canonicalUrl = (() => {
 	const path = canonicalPath || Astro.url?.pathname || '/';
 	try {
@@ -131,9 +136,9 @@ const organizationJsonLd = JSON.stringify(
 <html lang="it">
 	<head>
 		<meta charset="utf-8" />
-		<link rel="icon" type={faviconMimeType} href={logoLightSrc} />
-		<link rel="shortcut icon" type={faviconMimeType} href={logoLightSrc} />
-		<link rel="apple-touch-icon" href={logoLightSrc} />
+		<link rel="icon" type={faviconMimeType} href={faviconSrc} sizes="any" />
+		<link rel="shortcut icon" type={faviconMimeType} href={faviconSrc} />
+		<link rel="apple-touch-icon" href={faviconSrc} />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="theme-color" content="#000000" />
 		<meta name="generator" content={Astro.generator} />
@@ -142,6 +147,18 @@ const organizationJsonLd = JSON.stringify(
 		<link rel="alternate" hreflang="x-default" href={canonicalUrl} />
 		<title>{resolvedTitle}</title>
 		<meta name="description" content={resolvedDescription} />
+		<meta name="author" content={siteName} />
+		<meta property="og:type" content="website" />
+		<meta property="og:locale" content="it_IT" />
+		<meta property="og:site_name" content={siteName} />
+		<meta property="og:title" content={resolvedTitle} />
+		<meta property="og:description" content={resolvedDescription} />
+		<meta property="og:url" content={canonicalUrl} />
+		<meta property="og:image" content={absoluteSocialImageUrl} />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={resolvedTitle} />
+		<meta name="twitter:description" content={resolvedDescription} />
+		<meta name="twitter:image" content={absoluteSocialImageUrl} />
 		<meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'} />
 		<meta name="googlebot" content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'} />
 		<script type="application/ld+json" set:html={organizationJsonLd}></script>
