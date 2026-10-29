@@ -1,9 +1,8 @@
 ---
 import { Image } from 'astro:assets';
-import { directusAssetUrl } from '../lib/directus';
 
 interface Props {
-	item: string;
+	item?: string;
 	titolo?: string;
 	sottotitolo?: string;
 	paragrafo?: string;
@@ -15,35 +14,28 @@ interface Props {
 }
 
 const { 
-	item, 
 	titolo = '', 
 	sottotitolo = '', 
 	paragrafo = '', 
 	href = '', 
 	label = '', 
 	immagine = '',
-	inverti = false,
-	background_color = ''
+	inverti = false
 } = Astro.props;
 
 function resolveImageSrc(value: string) {
 	if (!value) return '';
-	return directusAssetUrl(value, { format: 'webp', quality: 80, width: 1200, height: 900, fit: 'cover' });
+	return value;
 }
 ---
 
 <div
-	data-aos="fade-up"
-     data-aos-duration="1500"
 	class={`hero_block${inverti ? ' hero_block_inverted' : ''}`}
-	style={background_color ? `background-color: ${background_color};` : undefined}
 >
 	{immagine && (
 		<div class="colonna colonna_immagine">
 			<Image
 				class="hero_image"
-				data-aos="fade-up"
-				data-aos-duration="2000"
 				src={resolveImageSrc(immagine)}
 				alt={sottotitolo || titolo}
 				width={1200}
@@ -52,11 +44,11 @@ function resolveImageSrc(value: string) {
 		</div>
 	)}
 	<div class="colonna colonna_testo">
-		{titolo && <div class="title" set:html={titolo} />}
+		{titolo && <h2 class="title" set:html={titolo} />}
 		{sottotitolo && <h3 set:html={sottotitolo} />}
 		{paragrafo && <div class="hero_text" set:html={paragrafo} />}
 		{label && href && (
-			<a class="hero_button MainButton" href={href}>
+			<a class="hero_button" href={href}>
 				{label}
 			</a>
 		)}
@@ -65,18 +57,19 @@ function resolveImageSrc(value: string) {
 
 <style>
 	.hero_block {
-		padding: 40px;
+		padding: 48px;
 		display: flex;
-		gap: 40px;
-		border-radius: var(--radius-lg);
-		max-width: var(--max-width);
-		margin: auto;
-		margin-bottom: 40px;
-		background-color: var(--surface);
-		box-shadow: var(--shadow-card);
+		gap: 48px;
+		border: 1px solid rgba(14,14,15,.1);
+		border-radius: 30px;
+		width: min(1240px, calc(100% - 40px));
+		margin: 40px auto;
+		background: #fbf7f5;
+		color: var(--lex-dark);
 	}
 	.colonna {
 		flex: 1;
+		min-width: 0;
 	}
 
 	.hero_block_inverted {
@@ -90,38 +83,58 @@ function resolveImageSrc(value: string) {
 	}
 
 	.colonna_testo h3 {
-		font-size: 22px;
+		font-size: 18px;
+		font-weight: 500;
+		line-height: 1.5;
 		margin: 0;
 		margin-bottom: 25px;
 	}
 
 	.colonna_testo .title {
-		font-size: clamp(46px, 5.2vw, 68px);
+		font-size: clamp(32px, 3.8vw, 48px);
 		font-family: var(--font-heading);
-		line-height: .95;
-		font-weight: bold;
+		line-height: 1.06;
+		letter-spacing: -.05em;
+		overflow-wrap: anywhere;
 		margin-top: 0;
 		margin-bottom: 20px;
-		font-weight: 500;
+		font-weight: 600;
 	}
 
 	.colonna_immagine img {
+		width: 100%;
 		object-fit: cover;
 		height: 100%;
 		border-radius: 22px;
 	}
 
 	.hero_button {
-		display: inline-block;
-		color: var(--secondary);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		align-self: flex-start;
+		min-height: 52px;
+		max-width: 100%;
+		padding: 14px 24px;
+		border-radius: 999px;
+		background: #000;
+		color: #fff;
+		font-size: 14px;
+		font-weight: 600;
+		text-align: center;
 		text-decoration: none;
 	}
+	.hero_button:hover { background: #00ec10; color: #000; }
+	.hero_button:focus-visible { outline: 3px solid #000; outline-offset: 4px; }
+	.title :global(span) { padding-inline: .12em; background: #00ec10; color: #000; border-radius: 6px; }
 	.hero_text {
 		margin: 0 0 30px;
-		line-height: 24px;
-		font-size: 19px;
-		font-weight: 300;
+		color: #5d5d63;
+		line-height: 1.7;
+		font-size: 15px;
+		overflow-wrap: anywhere;
 	}
+	.hero_text :global(p:last-child) { margin-bottom: 0; }
 	.hero_image {
 		max-width: 100%;
 		height: auto;
@@ -133,23 +146,15 @@ function resolveImageSrc(value: string) {
 			padding: 30px;
 			gap: 28px;
 		}
-		.colonna_testo .title {
-			font-size: 52px;
-			line-height: 45px;
-		}
 	}
 
 	@media (max-width: 640px) {
 		.hero_block,
 		.hero_block_inverted {
 			flex-direction: column-reverse;
-			margin-left: 10px;
-			margin-right: 10px;
+			width: calc(100% - 28px);
+			margin: 28px auto;
 			padding: 24px 20px;
-		}
-
-		.colonna_testo .title {
-			font-size: 46px;
 		}
 	}
 </style>

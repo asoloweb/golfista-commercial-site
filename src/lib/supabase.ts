@@ -9,6 +9,13 @@ const supabaseAnonKey =
 	'';
 
 export const SUPABASE_URL = rawSupabaseUrl.replace(/\/+$/, '');
+export const hasSupabasePublicConfig = Boolean(supabaseAnonKey);
+
+export function assertSupabasePublicConfig() {
+	if (!hasSupabasePublicConfig) {
+		throw new Error('Missing PUBLIC_SUPABASE_ANON_KEY: configure it in the build environment to generate the Circoli pages.');
+	}
+}
 
 export type Circolo = {
 	idcircolo: number;

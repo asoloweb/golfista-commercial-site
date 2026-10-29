@@ -1,6 +1,4 @@
 ---
-import { directusAssetUrl } from '../lib/directus';
-
 interface SlideItem {
 	titolo?: string;
 	sottotitolo?: string;
@@ -9,176 +7,51 @@ interface SlideItem {
 	immagine?: string;
 }
 
-interface Props {
+interface Props extends SlideItem {
 	slides?: SlideItem[];
-	titolo?: string;
-	sottotitolo?: string;
-	label?: string;
-	href?: string;
 }
 
-const {
-	slides = [],
-	titolo = '',
-	sottotitolo = '',
-	label = '',
-	href = '',
-} = Astro.props;
-
-const resolvedSlides =
-	slides.length > 0
-		? slides
-		: [
-				{
-					titolo,
-					sottotitolo,
-					label,
-					href,
-				},
-		  ];
-
-const hasMultipleSlides = resolvedSlides.length > 1;
-
-const sliderId = `slider-${Math.random().toString(36).slice(2)}`;
-
-function resolveImageSrc(value: string | undefined) {
-	if (!value) return '';
-	return directusAssetUrl(value, { format: 'webp', quality: 78, width: 1280, height: 720, fit: 'cover' });
-}
+const { slides = [], titolo = '', sottotitolo = '', label = '', href = '' } = Astro.props;
+const resolvedSlides = slides.length > 0 ? slides : [{ titolo, sottotitolo, label, href }];
 ---
 
-<div
-	class="slider_block swiper"
-	id={sliderId}
-	data-swiper-enabled={hasMultipleSlides ? 'true' : 'false'}
->
-	<div class="swiper-wrapper">
-		{resolvedSlides.map((slide) => (
-			<div
-				class="swiper-slide single_slide"
-				style={slide.immagine ? `background-image: url('${resolveImageSrc(slide.immagine)}')` : ''}
-			>
-				{slide.titolo && <h1 data-aos="fade-up" data-aos-duration="1500" set:html={slide.titolo} />}
-				{slide.sottotitolo && <h2 data-aos="fade-up" data-aos-duration="1800" set:html={slide.sottotitolo} />}
-				{slide.label && slide.href && (
-					<button data-aos="fade-up" data-aos-duration="2000" class="slider_button MainButton" type="button" data-href={slide.href}>
-						{slide.label}
-					</button>
-				)}
-				{slide.immagine && (
-					<span class="slide_image_sr" aria-hidden="true"></span>
-				)}
-			</div>
-		))}
-	</div>
-	{hasMultipleSlides && <div class="swiper-pagination"></div>}
-	{hasMultipleSlides && <div class="swiper-button-prev"></div>}
-	{hasMultipleSlides && <div class="swiper-button-next"></div>}
+<div class="slider_block">
+	{resolvedSlides.map((slide) => (
+		<article class="slide_panel">
+			{slide.titolo && <h2 set:html={slide.titolo} />}
+			{slide.sottotitolo && <p set:html={slide.sottotitolo} />}
+			{slide.label && slide.href && <a class="slider_button" href={slide.href}>{slide.label} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>}
+		</article>
+	))}
 </div>
 
-
 <style>
-		.title_block {
-			margin: 32px 0 16px;
-			border-left: 6px solid var(--secondary);
-			padding-left: 14px;
-		}
-
-		.title_block h1 {
-		margin: 0;
-		color: var(--primary);
-		}
-
-		.slider_block {
-			display: grid;
-			gap: 16px;
-			height: clamp(430px, calc(100vh - 260px), 720px);
-			width: min(calc(100% - 40px), 1600px);
-			margin: 0 auto 40px;
-			border-radius: var(--radius-lg);
-			overflow: hidden;
-		}
-
-		.slider_block .single_slide {
-		min-height: 220px;
-		padding: 60px;
-			border-radius: var(--radius-lg);
-		background-size: cover;
-		background-position: center;
-		color: var(--bianco);
-			position: relative;
-			overflow: hidden;
-		}
-
-		.slider_block .single_slide::before {
-			content: '';
-			position: absolute;
-			inset: 0;
-			background: linear-gradient(90deg, rgba(0, 0, 0, .68) 0%, rgba(0, 0, 0, .36) 55%, rgba(0, 0, 0, .08) 100%);
-		}
-
-		.slider_button {
-		background-color: transparent;
-		color: var(--secondary);
-		border: navajowhite;
-		font-size: 22px;
-		font-weight: bold;
-		font-family: var(--font-heading);
-		}
-
-		.single_slide h1 {
-			font-size: clamp(58px, 9vw, 112px);
-			line-height: .9;
-			margin:0;
-			max-width: 65%;
-			text-shadow: 5px 3px 20px #000;
-		}
-
-		.single_slide h2 {
-			max-width: calc(var(--max-width)/2);
-			text-shadow: 5px 3px 20px #000;
-			font-size: clamp(22px, 3vw, 36px);
-			line-height: 1.1;
-		}
-
-		.slider_block .single_slide > * {
-		position: relative;
-		z-index: 1;
-		}
-
-	.single_slide {
-		padding: 60px;
-		background-size: cover !important;
-		background-position: center;
-		min-height: 240px;
+	.slider_block {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+		gap: 20px;
+		width: min(1240px, calc(100% - 40px));
+		margin: 40px auto;
+	}
+	.slide_panel {
 		display: flex;
+		min-width: 0;
 		flex-direction: column;
-		align-items: start;
-		justify-content: center;
-		gap: 8px;
+		align-items: flex-start;
+		padding: 40px;
+		border: 1px solid rgba(14,14,15,.1);
+		border-radius: 30px;
+		background: var(--lex-dark);
+		color: var(--lex-cream, #ddd);
 	}
-	.slide_image_sr {
-		display: none;
-	}
-	:global(.swiper-button-prev),
-	:global(.swiper-button-next) {
-		color: var(--bianco);
-	}
-
-	@media (max-width: 640px) {
-		.slider_block {
-			width: calc(100% - 20px);
-			height: 480px;
-		}
-
-		.slider_block .single_slide,
-		.single_slide {
-			padding: 32px 24px;
-		}
-
-		.single_slide h1 {
-			font-size:45px;
-			line-height:50px;
-		}
+	.slide_panel h2 { max-width: 800px; margin: 0; color: inherit; font-size: clamp(32px, 4vw, 48px); line-height: 1.06; letter-spacing: -.05em; overflow-wrap: anywhere; }
+	.slide_panel h2 :global(span) { padding-inline: .12em; border-radius: 6px; background: #00ec10; color: #000; }
+	.slide_panel p { max-width: 680px; margin: 20px 0 28px; color: #bdbdc1; font-size: 15px; line-height: 1.7; }
+	.slider_button { display: inline-flex; max-width: 100%; min-height: 52px; align-items: center; justify-content: center; gap: 12px; margin-top: auto; padding: 14px 24px; border-radius: 999px; background: #00ec10; color: #000; font-size: 14px; font-weight: 600; text-align: center; }
+	.slider_button:hover { background: #fff; }
+	.slider_button:focus-visible { outline: 3px solid #00ec10; outline-offset: 5px; }
+	@media (max-width: 720px) {
+		.slider_block { width: calc(100% - 28px); margin: 28px auto; }
+		.slide_panel { padding: 30px 24px; }
 	}
 </style>

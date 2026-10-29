@@ -1,7 +1,7 @@
 ---
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { directusAssetUrl, directusSingleton } from '../lib/directus';
+import CookieBanner from '../components/CookieBanner.astro';
 import '../styles/global.css';
 
 export interface Props {
@@ -10,10 +10,10 @@ export interface Props {
 	seoDescription?: string;
 	canonicalPath?: string;
 	noindex?: boolean;
+	appendSiteName?: boolean;
 }
 
-const { title, seoTitle, seoDescription, canonicalPath, noindex = false } = Astro.props;
-const shouldLoadThirdPartyScripts = !import.meta.env.DEV;
+const { title, seoTitle, seoDescription, canonicalPath, noindex = false, appendSiteName = true } = Astro.props;
 const siteUrl = (import.meta.env.PUBLIC_SITE_URL || 'https://www.golfista.app').replace(/\/+$/, '');
 const organizationSameAs = (import.meta.env.PUBLIC_ORGANIZATION_SAME_AS || '')
 	.split(',')
@@ -22,52 +22,22 @@ const organizationSameAs = (import.meta.env.PUBLIC_ORGANIZATION_SAME_AS || '')
 const umamiScriptSrc = import.meta.env.PUBLIC_UMAMI_SCRIPT_SRC || 'https://umami.asoloweb.it/script.js';
 const umamiWebsiteId = import.meta.env.PUBLIC_UMAMI_WEBSITE_ID || 'b3cc9fb1-46cb-44a9-9a6f-b4c23126b713';
 const googleAdsId = import.meta.env.PUBLIC_GOOGLE_ADS_ID || '';
-const iubendaWidgetSrc = import.meta.env.PUBLIC_IUBENDA_WIDGET_SRC || '';
 
-type Options = {
-	logo_light?: string;
-	site_name?: string;
-	contact_email?: string;
-	contact_phone?: string;
-	contact_address?: string;
-};
+const faviconSrc = '/golfista/app-icon.png';
+const logoLightSrc = '/golfista/logo-dark.svg';
+const siteName = 'Golfista';
+const organizationEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'info@golfista.app';
+const organizationPhone = import.meta.env.PUBLIC_CONTACT_PHONE || '+39 338 1164785';
+const organizationStreetAddress = 'Via Cime 15, 31020 San Zenone degli Ezzelini (TV), Italia';
 
-function resolveImageSrc(value: string) {
-	return directusAssetUrl(value);
-}
-
-const faviconSrc = '/favicon.png';
-let logoLightSrc = import.meta.env.PUBLIC_LOGO_LIGHT || faviconSrc;
-let siteName = 'Golfista';
-let organizationEmail = '';
-let organizationPhone = '';
-let organizationStreetAddress = '';
-
-try {
-	const options = await directusSingleton<Options>('options', {
-		fields: 'logo_light,site_name,contact_email,contact_phone,contact_address',
-	});
-	if (options?.logo_light) {
-		logoLightSrc = resolveImageSrc(options.logo_light);
-	}
-	if (options?.site_name) {
-		siteName = options.site_name;
-	}
-	organizationEmail = options?.contact_email || '';
-	organizationPhone = options?.contact_phone || '';
-	organizationStreetAddress = options?.contact_address || '';
-} catch (error) {
-	console.error('Error fetching options for favicon:', error);
-}
-
-const rawTitle = (seoTitle || title || siteName).trim();
-const resolvedTitle = rawTitle.toLowerCase().includes(siteName.toLowerCase()) ? rawTitle : `${rawTitle} | ${siteName}`;
-const rawDescription = typeof seoDescription === 'string' ? seoDescription.trim() : '';
+const rawTitle = seoTitle?.trim() || title?.trim() || 'App e gestionale per circoli golf';
+const resolvedTitle = !appendSiteName || /\bgolfista\b/i.test(rawTitle) ? rawTitle : `${rawTitle} | ${siteName}`;
+const rawDescription = typeof seoDescription === 'string' ? seoDescription.replace(/\s+/g, ' ').trim() : '';
 const isGenericDescription = /^la home page di golfista\.?$/i.test(rawDescription);
 const resolvedDescription =
 	rawDescription.length > 0 && !isGenericDescription
 		? rawDescription
-		: `${rawTitle}. Scopri Golfista, la piattaforma digitale per giocatori di golf e circoli.`;
+		: `${rawTitle}: informazioni sulla piattaforma Golfista per giocatori e circoli golf.`;
 
 const absoluteLogoUrl = (() => {
 	try {
@@ -140,7 +110,7 @@ const organizationJsonLd = JSON.stringify(
 		<link rel="shortcut icon" type={faviconMimeType} href={faviconSrc} />
 		<link rel="apple-touch-icon" href={faviconSrc} />
 		<meta name="viewport" content="width=device-width" />
-		<meta name="theme-color" content="#000000" />
+		<meta name="theme-color" content="#0E0E0F" />
 		<meta name="generator" content={Astro.generator} />
 		<link rel="canonical" href={canonicalUrl} />
 		<link rel="alternate" hreflang="it-IT" href={canonicalUrl} />
@@ -165,61 +135,6 @@ const organizationJsonLd = JSON.stringify(
 		<link rel="stylesheet" href="/vendor/aos.css" />
 		<link rel="stylesheet" href="/vendor/swiper-bundle.min.css" />
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
-		{shouldLoadThirdPartyScripts && iubendaWidgetSrc && (
-			<>
-				<script
-					type="text/javascript"
-					src={iubendaWidgetSrc}
-				></script>
-			</>
-		)}
-		{shouldLoadThirdPartyScripts && umamiScriptSrc && umamiWebsiteId && (
-			<>
-				<script is:inline define:vars={{ umamiScriptSrc, umamiWebsiteId }}>
-					const host = window.location.hostname;
-					const isLocalhost =
-						host === 'localhost' || host === '127.0.0.1' || host === '::1' || host.endsWith('.local');
-
-					if (!isLocalhost) {
-						const umamiScript = document.createElement('script');
-						umamiScript.defer = true;
-						umamiScript.src = umamiScriptSrc;
-						umamiScript.setAttribute('data-website-id', umamiWebsiteId);
-						document.head.appendChild(umamiScript);
-					}
-				</script>
-			</>
-		)}
-		{shouldLoadThirdPartyScripts && googleAdsId && (
-		<script is:inline define:vars={{ googleAdsId }}>
-			const host = window.location.hostname;
-			const isLocalhost =
-				host === 'localhost' || host === '127.0.0.1' || host === '::1' || host.endsWith('.local');
-
-			const attributionParams = new URLSearchParams(window.location.search || '');
-			for (const key of ['gclid', 'gbraid', 'wbraid']) {
-				const value = attributionParams.get(key);
-				if (value) {
-					sessionStorage.setItem(`attribution_${key}`, value);
-				}
-			}
-
-			if (!isLocalhost) {
-				const gtagScript = document.createElement('script');
-				gtagScript.async = true;
-				gtagScript.src = `https://www.googletagmanager.com/gtag/js?id=${googleAdsId}`;
-				document.head.appendChild(gtagScript);
-
-				window.dataLayer = window.dataLayer || [];
-				window.gtag = function () {
-					window.dataLayer.push(arguments);
-				};
-				window.gtag('js', new Date());
-				window.gtag('config', googleAdsId);
-			}
-		</script>
-		)}
-
 	</head>
 	<body>
 		<Header />
@@ -227,6 +142,11 @@ const organizationJsonLd = JSON.stringify(
 			<slot />
 		</main>
 		<Footer />
+		<CookieBanner
+			umamiScriptSrc={umamiScriptSrc}
+			umamiWebsiteId={umamiWebsiteId}
+			googleAdsId={googleAdsId}
+		/>
 		<script defer src="/vendor/aos.js"></script>
 		<script defer src="/scripts/aos-init.js"></script>
 		<script defer src="/scripts/swiper-init.js"></script>

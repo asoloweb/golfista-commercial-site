@@ -1,0 +1,2210 @@
+---
+import 'mapbox-gl/dist/mapbox-gl.css';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { circoloSlug, fetchCircoli } from '../lib/supabase';
+
+function pickRandom<T>(items: T[], count: number) {
+	const pool = [...items];
+	for (let index = pool.length - 1; index > 0; index -= 1) {
+		const randomIndex = Math.floor(Math.random() * (index + 1));
+		[pool[index], pool[randomIndex]] = [pool[randomIndex], pool[index]];
+	}
+	return pool.slice(0, count);
+}
+
+const circoli = await fetchCircoli();
+const circoliConLogo = circoli.flatMap((circolo) => {
+	const localLogo = `/loghi/${circolo.idcircolo}.png`;
+	const logo = existsSync(join(process.cwd(), 'public', 'loghi', `${circolo.idcircolo}.png`))
+		? localLogo
+		: circolo.logo_url;
+
+	if (!logo || !circolo.nomecircolo) return [];
+
+	return [{
+		nome: circolo.nomecircolo,
+		logo,
+		href: `/circoli/${circoloSlug(circolo)}`,
+	}];
+});
+const brandCircoli = pickRandom(circoliConLogo, 20);
+const showDemoVideo = false;
+
+const featureCards = [
+	{
+		kicker: 'Controllo in tempo reale dei giocatori',
+		text: 'Segui chi è in campo, la buca attuale e l’avanzamento del giro con una mappa aggiornata in tempo reale.',
+		cta: 'Scopri di più',
+		href: '/gestionale',
+		image: '/images/features/monitoraggio-giocatori.webp',
+		mobileImage: '/images/features/mappa-giocatori.webp',
+		imageWidth: 1440,
+		imageHeight: 810,
+		imageAlt: 'Mappa in tempo reale dei giocatori sul campo',
+		tone: 'cream',
+	},
+	{
+		kicker: 'Gestione completa delle convenzioni tra circoli',
+		text: 'Organizza accordi, green fee e reciprocità tra circoli in un unico spazio sempre aggiornato.',
+		cta: 'Scopri di più',
+		href: '/gestionale',
+		image: '/images/features/convenzioni.webp',
+		imageWidth: 1440,
+		imageHeight: 870,
+		imageAlt: 'Gestione delle convenzioni tra circoli',
+		tone: 'dark',
+	},
+	{
+		kicker: 'Foto, recensioni e commenti',
+		text: 'Raccogli e condividi contenuti del circolo, recensioni dei giocatori e feedback in modo semplice.',
+		cta: 'Scopri di più',
+		href: '/gestionale',
+		image: '/images/features/dettaglio-circolo.webp',
+		imageWidth: 1440,
+		imageHeight: 808,
+		imageAlt: 'Scheda del circolo Golfista con le sezioni recensioni e foto',
+		tone: 'cream',
+	},
+	{
+		kicker: 'Confronto tra circoli e statistiche',
+		text: 'Confronta performance e dati del tuo circolo con gli altri e monitora i trend più importanti.',
+		cta: 'Scopri di più',
+		href: '/gestionale',
+		image: '/images/features/dashboard.webp',
+		imageWidth: 1440,
+		imageHeight: 811,
+		imageAlt: 'Statistiche e confronto tra circoli',
+		tone: 'dark',
+	},
+];
+
+const keyFeatures = [
+	{ icon: 'fa-route', title: 'Gestione dei percorsi', text: 'Crea e aggiorna buche, distanze e informazioni utili di ogni percorso.', href: '/gestionale' },
+	{ icon: 'fa-location-dot', title: 'Inserimento punti di interesse', text: 'Aggiungi ristori, ostacoli e servizi direttamente sulla mappa del circolo.', href: '/gestionale' },
+	{ icon: 'fa-star-half-stroke', title: 'Moderazione recensioni', text: 'Approva e gestisci le recensioni per mantenere contenuti affidabili.', href: '/gestionale' },
+	{ icon: 'fa-images', title: 'Caricamento foto del circolo', text: 'Carica e organizza le immagini per raccontare il circolo ai giocatori.', href: '/gestionale' },
+	{ icon: 'fa-flag-checkered', title: 'Inserimento delle gare', text: 'Pubblica gare con date, formule e dettagli di partecipazione.', href: '/gestionale' },
+	{ icon: 'fa-id-card', title: 'Anagrafica del giocatore', text: 'Gestisci i dati dei giocatori in un profilo completo e aggiornato.', href: '/gestionale' },
+];
+
+const plans = [
+	{
+		name: 'Gratuito per sempre',
+		price: '€0',
+		description: 'Le funzioni essenziali per iniziare a gestire il circolo.',
+		details: 'Nessun costo.',
+		features: ['Gestione delle gare', 'Caricamento foto del circolo', 'Recensioni e commenti'],
+		cta: 'Registrati gratuitamente',
+		featured: false,
+	},
+	{
+		name: 'Pro',
+		price: '€59',
+		description: 'Tutte le funzionalità della piattaforma in un unico piano.',
+		details: 'Fatturazione mensile.',
+		features: [
+			'Tutte le funzionalità della piattaforma',
+			'Controllo in tempo reale dei giocatori',
+			'Gestione delle convenzioni tra circoli',
+			'Gestione dei percorsi e punti di interesse',
+			'Moderazione recensioni',
+			'Caricamento foto del circolo',
+			'Inserimento delle gare',
+			'Anagrafica dei giocatori',
+			'Confronto tra circoli e statistiche',
+		],
+		cta: 'Acquista ora',
+		featured: true,
+		badge: 'Abbonamento annuale a 499€',
+	},
+];
+
+const testimonials = [
+	{
+		name: 'Alessandro Crabbia',
+		role: 'Giocatore',
+		quote: 'Seguo la gara in tempo reale dal telefono: vedo chi è in campo, la posizione e l’avanzamento senza dover chiedere in giro. Finalmente tutto sotto controllo.',
+	},
+	{
+		name: 'Andrea Bolzan',
+		role: 'Giocatore',
+		quote: 'Dall’app trovo subito i circoli convenzionati e le condizioni per giocare. Organizzare una partita fuori dal mio circolo è diventato molto più semplice.',
+	},
+	{
+		name: 'Paolo De Antoni',
+		role: 'Giocatore',
+		quote: 'Leggo le recensioni e guardo le foto prima di scegliere dove giocare. È utile per capire com’è il percorso e cosa aspettarmi.',
+	},
+	{
+		name: 'Francesco di Nisio',
+		role: 'Giocatore',
+		quote: 'Mi iscrivo alle gare e consulto risultati e statistiche direttamente dall’app. Il mio profilo da giocatore è sempre aggiornato.',
+	},
+];
+
+const faqs = [
+	{
+		q: 'Che cos’è Golfista?',
+		a: 'Golfista è la piattaforma che aiuta circoli e golfisti a gestire gare, percorsi, convenzioni e contenuti in un unico posto, con il controllo dei giocatori in tempo reale.',
+	},
+	{
+		q: 'A chi è rivolta la piattaforma?',
+		a: 'A circoli, gestori e golfisti che vogliono organizzare le attività del circolo e seguire le gare in modo semplice, anche da mobile.',
+	},
+	{
+		q: 'Quanti giorni dura la prova gratuita?',
+		a: 'La prova gratuita dura 14 giorni. Puoi esplorare le funzionalità della piattaforma senza impegno.',
+	},
+	{
+		q: 'Come posso cancellare il rinnovo?',
+		a: 'Puoi disattivare il rinnovo in qualsiasi momento dalle impostazioni del tuo account sulla piattaforma. L’accesso resta attivo fino alla scadenza del periodo già pagato.',
+	},
+	{
+		q: 'È previsto un rimborso?',
+		a: 'No, non è previsto alcun rimborso. In caso di disdetta, l’abbonamento resta attivo fino alla fine del mese in corso.',
+	},
+	{
+		q: 'Golfista è affiliata a federazioni o altre organizzazioni?',
+		a: 'No. Golfista non è affiliata a nessun’altra società, organizzazione o federazione.',
+	},
+	{
+		q: 'Posso seguire una gara in tempo reale?',
+		a: 'Sì. La mappa mostra i giocatori in campo e il loro avanzamento, così puoi seguire la gara senza continue telefonate.',
+	},
+	{
+		q: 'Quali funzionalità include il piano Pro?',
+		a: 'Il piano Pro include tutte le funzionalità della piattaforma: controllo dei giocatori, convenzioni tra circoli, percorsi e punti di interesse, gare, foto, recensioni, anagrafica e statistiche.',
+	},
+	{
+		q: 'I dati del circolo e dei giocatori sono al sicuro?',
+		a: 'Sì. Adottiamo misure tecniche e organizzative per proteggere i dati e limitare l’accesso alle sole persone autorizzate.',
+	},
+	{
+		q: 'Serve installare un’app?',
+		a: 'Puoi usare Golfista dal browser oppure dall’app mobile, così hai le informazioni del circolo sempre a portata di mano.',
+	},
+];
+
+const allFaqs = faqs;
+
+---
+
+<div class="lp">
+	<section class="lp-hero" id="overview" aria-labelledby="lp-hero-title">
+		<div class="lp-hero-glow" aria-hidden="true"></div>
+		<div class="lp-hero-grid-lines" aria-hidden="true"></div>
+
+		<div class="lp-container lp-hero-inner">
+			<div class="lp-hero-copy">
+
+				<h1 id="lp-hero-title">Gestisci<span class="lp-rotator" data-rotator-words="i giocatori|le convenzioni|le foto delle gare|le recensioni|le news|le statistiche" aria-hidden="true"><span class="lp-mark lp-rotator-word">i giocatori</span></span><span class="sr-only">i giocatori</span><br />del tuo circolo</h1>
+				<p class="lp-hero-sub">La piattaforma semplice e completa per gestire giocatori, convenzioni e contenuti del circolo, ovunque ti trovi.</p>
+				<div class="lp-actions">
+					<a class="lp-btn lp-btn-cream" href="#pricing">Inizia ora <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+				</div>
+				<p class="lp-note"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Nessuna carta di credito richiesta - 14 giorni di prova gratuita.</p>
+			</div>
+
+			<div class="lp-course">
+				<div class="lp-map-panel">
+					<div id="lp-course-map" class="lp-map" role="application" aria-label="Mappa 3D dell'Asolo Golf Club con i giocatori in movimento"></div>
+				</div>
+
+				<div class="lp-course-stats" aria-label="Statistiche del campo">
+					<article class="lp-course-stat">
+						<span class="lp-course-stat-icon"><i class="fa-solid fa-people-group" aria-hidden="true"></i></span>
+						<p>Totale giocatori in campo <span class="lp-live-badge">In tempo reale</span></p>
+						<strong>5</strong>
+						<small>In gioco ora</small>
+					</article>
+					<article class="lp-course-stat">
+						<span class="lp-course-stat-icon"><i class="fa-solid fa-clock" aria-hidden="true"></i></span>
+						<p>Media durata di un giro</p>
+						<strong>4h 12m</strong>
+						<small>18 buche</small>
+					</article>
+					<article class="lp-course-stat">
+						<span class="lp-course-stat-icon"><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i></span>
+						<p>Buca più lenta</p>
+						<strong>#5</strong>
+						<small>26 minuti</small>
+					</article>
+					<article class="lp-course-stat">
+						<span class="lp-course-stat-icon"><i class="fa-solid fa-bolt" aria-hidden="true"></i></span>
+						<p>Buca più veloce</p>
+						<strong>#12</strong>
+						<small>14 minuti</small>
+					</article>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	{brandCircoli.length > 0 && (
+		<section class="lp-brands" aria-label="Circoli presenti su Golfista">
+			<div class="lp-container">
+				<h2>Alcuni dei circoli su Golfista</h2>
+				<div class="lp-brand-marquee">
+					<div class="lp-brand-track" data-brand-track>
+						{[0, 1].map((copy) => (
+							<div class="lp-brand-group" aria-hidden={copy === 1 ? 'true' : undefined}>
+								{brandCircoli.map((circolo) => (
+									<a
+										class="lp-brand"
+										href={circolo.href}
+										aria-label={circolo.nome}
+										tabindex={copy === 1 ? -1 : undefined}
+										aria-hidden={copy === 1 ? 'true' : undefined}
+									>
+										<span class="lp-brand-logo">
+											<img src={circolo.logo} alt="" loading="lazy" decoding="async" />
+										</span>
+										<span class="lp-brand-name">{circolo.nome}</span>
+									</a>
+								))}
+							</div>
+						))}
+					</div>
+				</div>
+			</div>
+		</section>
+	)}
+
+	<section class="lp-section lp-features" id="features" aria-labelledby="lp-features-title">
+		<div class="lp-container">
+			<header class="lp-section-head">
+				<p class="lp-badge lp-badge-dark"><span class="lp-dot lp-dot-green"></span> Funzionalità principali</p>
+				<h2 id="lp-features-title">Il tuo circolo sempre <span class="lp-mark-dark">sotto controllo</span></h2>
+				<p>Tutto ciò che serve per gestire giocatori, convenzioni e contenuti del circolo in un’unica piattaforma.</p>
+			</header>
+
+			<div class="lp-beta-grid" id={!showDemoVideo ? 'how_it_works' : undefined}>
+				{featureCards.map((card) => (
+					<article class={`lp-beta-card lp-beta-${card.tone}`}>
+						<div class="lp-beta-copy">
+							<h3>{card.kicker}</h3>
+							<p>{card.text}</p>
+							{card.cta && <a class="lp-text-link" href={card.href}>{card.cta} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>}
+						</div>
+						<div class="lp-beta-media">
+							<picture>
+								{card.mobileImage && <source media="(max-width: 720px)" srcset={card.mobileImage} width="1440" height="828" />}
+								<img src={card.image} alt={card.imageAlt} width={card.imageWidth} height={card.imageHeight} loading="lazy" decoding="async" />
+							</picture>
+						</div>
+					</article>
+				))}
+			</div>
+		</div>
+	</section>
+
+	{showDemoVideo && <section class="lp-how" id="how_it_works" aria-labelledby="lp-how-title">
+		<div class="lp-container">
+			<h2 class="sr-only" id="lp-how-title">Come funziona</h2>
+			<div class="lp-video-panel">
+				<video
+					autoplay
+					muted
+					loop
+					playsinline
+					preload="metadata"
+					poster="/lexend/lexend_vid_home-6.webp"
+					aria-label="Panoramica video di Golfista"
+				>
+					<source src="/lexend/lexend_2.webm" type="video/webm" />
+				</video>
+			</div>
+		</div>
+	</section>}
+
+	<section class="lp-key-section" aria-labelledby="lp-key-title">
+		<div class="lp-container">
+			<header class="lp-key-head">
+				<p class="lp-badge lp-badge-dark"><span class="lp-dot lp-dot-green"></span> Altre funzionalità della piattaforma</p>
+				<h2 class="sr-only" id="lp-key-title">Altre funzionalità della piattaforma</h2>
+				<p>Strumenti semplici e completi per gestire ogni aspetto del circolo, dai percorsi alle gare fino ai contenuti e ai dati dei giocatori.</p>
+			</header>
+
+			<div class="lp-key-grid">
+				{keyFeatures.map((feature) => (
+					<a class="lp-key" href={feature.href} target={feature.href.startsWith('http') ? '_blank' : undefined} rel={feature.href.startsWith('http') ? 'noopener noreferrer' : undefined}>
+						<span class="lp-key-icon"><i class={`fa-solid ${feature.icon}`} aria-hidden="true"></i></span>
+						<strong>{feature.title}</strong>
+						<p>{feature.text}</p>
+						<i class="fa-solid fa-arrow-up-right lp-key-arrow" aria-hidden="true"></i>
+					</a>
+				))}
+			</div>
+
+			<div class="lp-view-row">
+				<a class="lp-btn lp-btn-dark" href="/gestionale">Vedi tutte le funzionalità <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+			</div>
+
+
+		</div>
+	</section>
+
+	<section class="lp-pricing" id="pricing" aria-labelledby="lp-pricing-title">
+		<div class="lp-container">
+			<header class="lp-section-head lp-section-head-light">
+				<p class="lp-badge lp-badge-on-dark"><span class="lp-dot"></span> Prezzi</p>
+				<h2 id="lp-pricing-title">Tutto questo al prezzo di <span class="lp-mark">un green fee al mese</span>!</h2>
+				<p>Nessun costo aggiuntivo. Nessun costo nascosto.</p>
+			</header>
+
+			<div class="lp-plans">
+				{plans.map((plan) => (
+					<article class={`lp-plan ${plan.featured ? 'is-featured' : ''}`}>
+						{plan.badge && <span class="lp-plan-badge">{plan.badge}</span>}
+						<p class="lp-plan-name">{plan.name}</p>
+						<div class="lp-plan-price"><strong>{plan.price}</strong><span>/ mese</span></div>
+						<p class="lp-plan-desc">{plan.description}</p>
+						<a class="lp-plan-btn" href="https://manager.golfista.app" target="_blank" rel="noopener noreferrer">{plan.cta}</a>
+						<p class="lp-plan-details">{plan.details}</p>
+						<ul>
+							{plan.features.map((feature) => <li><i class="fa-solid fa-check" aria-hidden="true"></i>{feature}</li>)}
+						</ul>
+					</article>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<section class="lp-testimonials" id="clients_feedback" aria-labelledby="lp-testimonials-title">
+		<div class="lp-container">
+			<header class="lp-section-head">
+				<p class="lp-badge lp-badge-dark"><span class="lp-dot lp-dot-green"></span> Giocatori che usano l'app</p>
+				<h2 id="lp-testimonials-title">Cosa dicono di noi <span class="lp-mark-dark">i golfisti</span></h2>
+			</header>
+
+			<div class="lp-quotes">
+				{testimonials.map(({ name, role, quote }) => (
+					<article class="lp-quote">
+						<div class="lp-stars" aria-label="5 stelle su 5">
+							{Array.from({ length: 5 }, () => <img src="/lexend/star-red.svg" alt="" aria-hidden="true" />)}
+						</div>
+						<p>“{quote}”</p>
+						<footer>
+							<span class="lp-quote-avatar">{name.split(' ').map((part) => part[0]).join('')}</span>
+							<span><strong>{name}</strong><small>{role}</small></span>
+						</footer>
+					</article>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<section class="lp-faq" aria-labelledby="lp-faq-title">
+		<div class="lp-container lp-faq-grid">
+			<div class="lp-faq-copy">
+				<p class="lp-badge lp-badge-dark"><span class="lp-dot lp-dot-green"></span> FAQ</p>
+				<h2 id="lp-faq-title">Domande frequenti</h2>
+				<p>Tutto quello che c’è da sapere su Golfista, abbonamenti e funzionalità della piattaforma.</p>
+				<a class="lp-btn lp-btn-dark" href="#pricing">Scopri i piani</a>
+			</div>
+			<div class="lp-faq-list">
+				{allFaqs.map((faq) => (
+					<details>
+						<summary>{faq.q}<span aria-hidden="true"><i class="fa-solid fa-plus"></i></span></summary>
+						<p>{faq.a}</p>
+					</details>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<section class="lp-cta" aria-labelledby="lp-cta-title">
+		<div class="lp-container lp-cta-grid">
+			<div class="lp-cta-copy">
+				<h2 id="lp-cta-title">Tutto il tuo circolo, in un’unica app.</h2>
+				<p>Inizia la prova gratuita di 14 giorni. Disdici quando vuoi.</p>
+				<a class="lp-btn lp-btn-cream" href="#pricing">Inizia ora <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+			</div>
+			<div class="lp-cta-visual">
+				<img src="/images/features/dashboard.webp" alt="Dashboard Golfista con statistiche e confronto tra circoli" width="1440" height="811" loading="lazy" decoding="async" />
+			</div>
+		</div>
+	</section>
+</div>
+
+<style>
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+
+	.lp {
+		--header-green: #00ec10;
+		color: var(--lex-dark);
+		background: #fff;
+	}
+
+	.lp > section {
+		width: 100%;
+		margin-inline: 0;
+	}
+
+	.lp-container {
+		width: min(1240px, calc(100% - 40px));
+		margin-inline: auto;
+	}
+
+	.lp-hero {
+		position: relative;
+		overflow: hidden;
+		margin-top: -104px;
+		padding: 178px 0 92px;
+		background: var(--lex-dark);
+		color: var(--lex-cream);
+	}
+
+	.lp-hero-glow {
+		position: absolute;
+		inset: -30% -10% auto auto;
+		width: 70vw;
+		height: 70vw;
+		border-radius: 50%;
+		background: radial-gradient(circle, rgba(20, 113, 91, 0.34) 0%, rgba(20, 113, 91, 0) 68%);
+		pointer-events: none;
+	}
+
+	.lp-hero-grid-lines {
+		position: absolute;
+		inset: 0;
+		opacity: 0.18;
+		background-image:
+			linear-gradient(rgba(241, 226, 222, 0.08) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(241, 226, 222, 0.08) 1px, transparent 1px);
+		background-size: 64px 64px;
+		mask-image: linear-gradient(to bottom, #000 0%, transparent 82%);
+		-webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 82%);
+		pointer-events: none;
+	}
+
+	.lp-hero-inner {
+		position: relative;
+		z-index: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 48px;
+	}
+
+	.lp-hero-copy {
+		width: 100%;
+		max-width: 1100px;
+		text-align: center;
+	}
+
+	.lp-badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 9px;
+		margin: 0 0 26px;
+		padding: 8px 14px;
+		border: 1px solid rgba(241, 226, 222, 0.2);
+		border-radius: 999px;
+		color: rgba(241, 226, 222, 0.78);
+		font-size: 11px;
+		font-weight: 500;
+		letter-spacing: 0.1em;
+		line-height: 1;
+		text-transform: uppercase;
+	}
+
+	.lp-dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--lex-cream);
+		box-shadow: 0 0 0 4px rgba(241, 226, 222, 0.1);
+	}
+
+	.lp-hero h1 {
+		margin: 0 auto;
+		color: var(--lex-cream);
+		font-size: clamp(48px, 5.5vw, 78px);
+		font-weight: 600;
+		line-height: 1.03;
+		letter-spacing: -0.06em;
+		text-wrap: balance;
+	}
+
+	.lp-mark,
+	.lp-mark-dark {
+		display: inline-block;
+		padding: 0 0.14em;
+		border-radius: 10px;
+		background: var(--header-green);
+		color: #000;
+		transform: rotate(-1.5deg);
+	}
+
+	.lp-mark-dark {
+		background: var(--header-green);
+		color: #000;
+	}
+
+	.lp-rotator {
+		display: inline-block;
+		margin-left: 0.1em;
+		vertical-align: baseline;
+	}
+
+	.lp-rotator-word {
+		transform-origin: center;
+		transition: opacity 0.22s ease, transform 0.22s ease;
+	}
+
+	.lp-rotator.is-leaving .lp-rotator-word {
+		opacity: 0;
+		transform: translateY(-0.3em) rotate(-4deg);
+	}
+
+	.lp-rotator.is-entering .lp-rotator-word {
+		opacity: 0;
+		transform: translateY(0.3em) rotate(4deg);
+		transition: none;
+	}
+
+	.lp-rotator .lp-mark {
+		background: var(--header-green);
+	}
+
+	.lp-hero-sub {
+		max-width: 680px;
+		margin: 26px auto 0;
+		color: rgba(241, 226, 222, 0.72);
+		font-size: 16px;
+		line-height: 1.7;
+	}
+
+	.lp-actions {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 12px;
+		margin-top: 32px;
+	}
+
+	.lp-btn {
+		display: inline-flex;
+		min-height: 54px;
+		align-items: center;
+		justify-content: center;
+		gap: 11px;
+		padding: 0 24px;
+		border: 1px solid transparent;
+		border-radius: 999px;
+		font-size: 14px;
+		font-weight: 600;
+		line-height: 1;
+		transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+	}
+
+	.lp-btn i {
+		font-size: 12px;
+	}
+
+	.lp-btn:hover {
+		transform: translateY(-2px);
+	}
+
+	.lp-btn-cream {
+		background: var(--lex-cream);
+		color: var(--lex-green-deep);
+	}
+
+	.lp-btn-cream:hover {
+		background: #fff;
+	}
+
+	.lp-btn-dark {
+		background: var(--lex-dark);
+		color: var(--lex-cream);
+	}
+
+	.lp-btn-dark:hover {
+		background: var(--lex-green);
+	}
+
+	.lp-note {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		margin: 20px 0 0;
+		color: rgba(241, 226, 222, 0.55);
+		font-size: 12.5px;
+	}
+
+	.lp-note i {
+		color: var(--lex-cream);
+	}
+
+	.lp-map-panel {
+		position: relative;
+		width: 100%;
+		overflow: hidden;
+		border: 1px solid rgba(241, 226, 222, 0.18);
+		border-radius: 30px;
+		background: #10251d;
+		box-shadow: 0 34px 90px rgba(0, 0, 0, 0.42);
+		isolation: isolate;
+	}
+
+	.lp-map-panel::after {
+		position: absolute;
+		z-index: 1;
+		inset: 0;
+		background: linear-gradient(180deg, rgba(14, 14, 15, 0.42), transparent 24%, transparent 72%, rgba(14, 14, 15, 0.34));
+		content: '';
+		pointer-events: none;
+	}
+
+	.lp-course {
+		display: grid;
+		width: 100%;
+		gap: 14px;
+	}
+
+	.lp-course-stats {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 12px;
+	}
+
+	.lp-course-stat {
+		display: flex;
+		min-height: 154px;
+		flex-direction: column;
+		align-items: flex-start;
+		padding: 24px;
+		border: 1px solid rgba(242, 242, 242, 0.18);
+		border-radius: 20px;
+		background: #000;
+		color: #f2f2f2;
+	}
+
+	.lp-course-stat-icon {
+		display: grid;
+		width: 42px;
+		height: 42px;
+		place-items: center;
+		margin-bottom: 16px;
+		border-radius: 12px;
+		background: transparent;
+		color: #f2f2f2;
+		font-size: 35px;
+	}
+
+	.lp-course-stat p {
+		margin: 0 0 10px;
+		color: #f2f2f2;
+		font-size: 13px;
+		font-weight: 500;
+		letter-spacing: -0.01em;
+		line-height: 1.4;
+	}
+
+	.lp-live-badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		margin-left: 6px;
+		padding: 3px 8px;
+		border: 1px solid rgba(0, 236, 16, 0.45);
+		border-radius: 999px;
+		background: rgba(0, 236, 16, 0.12);
+		color: var(--header-green);
+		font-size: 9.5px;
+		font-weight: 600;
+		line-height: 1.2;
+		vertical-align: middle;
+		white-space: nowrap;
+		animation: lp-live-badge-pulse 2s ease-in-out infinite;
+	}
+
+	.lp-live-badge::before {
+		width: 6px;
+		height: 6px;
+		flex: 0 0 auto;
+		border-radius: 50%;
+		background: currentColor;
+		box-shadow: 0 0 0 0 rgba(0, 236, 16, 0.55);
+		animation: lp-live-dot-pulse 1.4s ease-out infinite;
+		content: '';
+	}
+
+	@keyframes lp-live-badge-pulse {
+		0%,
+		100% {
+			box-shadow: 0 0 0 0 rgba(0, 236, 16, 0);
+		}
+
+		50% {
+			box-shadow: 0 0 0 4px rgba(0, 236, 16, 0.1);
+		}
+	}
+
+	@keyframes lp-live-dot-pulse {
+		0% {
+			box-shadow: 0 0 0 0 rgba(0, 236, 16, 0.55);
+			opacity: 1;
+		}
+
+		70% {
+			box-shadow: 0 0 0 5px rgba(0, 236, 16, 0);
+			opacity: 0.55;
+		}
+
+		100% {
+			box-shadow: 0 0 0 0 rgba(0, 236, 16, 0);
+			opacity: 1;
+		}
+	}
+
+	.lp-course-stat strong {
+		margin-top: auto;
+		color: #f2f2f2;
+		font-size: 30px;
+		font-weight: 600;
+		letter-spacing: -0.04em;
+		line-height: 1;
+	}
+
+	.lp-course-stat small {
+		margin-top: 6px;
+		color: #f2f2f2;
+		font-size: 11.5px;
+		font-weight: 500;
+	}
+
+	.lp-map {
+		width: 100%;
+		height: clamp(380px, 46vw, 590px);
+		background: #10251d;
+	}
+
+
+	:global(.lp-map .mapboxgl-ctrl-group) {
+		overflow: hidden;
+		border-radius: 12px;
+		box-shadow: 0 10px 26px rgba(0, 0, 0, 0.28);
+	}
+
+	:global(.lp-map .mapboxgl-ctrl-group button) {
+		width: 36px;
+		height: 36px;
+	}
+
+	:global(.lp-map .mapboxgl-ctrl-attrib) {
+		background: rgba(14, 14, 15, 0.62);
+		color: rgba(255, 255, 255, 0.76);
+		font-size: 9px;
+	}
+
+	:global(.lp-map .mapboxgl-ctrl-attrib a) {
+		color: rgba(255, 255, 255, 0.9);
+	}
+
+	:global(.lp-map-avatar) {
+		position: absolute;
+		display: flex;
+		width: fit-content;
+		flex-direction: column;
+		align-items: center;
+		gap: 5px;
+		pointer-events: auto;
+		cursor: pointer;
+		filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.28));
+	}
+
+	:global(.lp-map-avatar:focus-visible) {
+		border-radius: 999px;
+		outline: 3px solid #fff;
+		outline-offset: 4px;
+	}
+
+	:global(.lp-map-avatar img) {
+		width: 48px;
+		height: 48px;
+		border: 3px solid var(--lex-cream);
+		border-radius: 50%;
+		object-fit: cover;
+	}
+
+	:global(.lp-map-avatar::after) {
+		position: absolute;
+		top: 35px;
+		right: calc(50% - 25px);
+		width: 11px;
+		height: 11px;
+		border: 2px solid #10251d;
+		border-radius: 50%;
+		background: #48d597;
+		content: '';
+	}
+
+	:global(.lp-map-avatar-name) {
+		padding: 3px 8px;
+		border-radius: 999px;
+		background: rgba(14, 14, 15, 0.78);
+		color: #fff;
+		font-family: var(--font-body);
+		font-size: 9.5px;
+		font-weight: 600;
+		line-height: 1.2;
+		white-space: nowrap;
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+	}
+
+	:global(.lp-map-avatar-cart) {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		margin-top: 2px;
+		padding: 3px 7px;
+		border: 1px solid rgba(241, 226, 222, 0.26);
+		border-radius: 999px;
+		background: #12715b;
+		color: #fff;
+		font-family: var(--font-body);
+		font-size: 9px;
+		font-weight: 600;
+		line-height: 1.2;
+		white-space: nowrap;
+		box-shadow: 0 6px 14px rgba(0, 0, 0, 0.24);
+	}
+
+	:global(.lp-map-avatar-cart svg) {
+		width: 11px;
+		height: 11px;
+	}
+
+	:global(.lp-map-popup .mapboxgl-popup-content) {
+		padding: 0;
+		overflow: hidden;
+		border: 1px solid rgba(14, 14, 15, 0.08);
+		border-radius: 18px;
+		background: #fff;
+		box-shadow: 0 22px 55px rgba(0, 0, 0, 0.28);
+	}
+
+	:global(.lp-map-popup .mapboxgl-popup-close-button) {
+		top: 8px;
+		right: 8px;
+		width: 26px;
+		height: 26px;
+		padding: 0;
+		border-radius: 50%;
+		background: rgba(14, 14, 15, 0.52);
+		color: #fff;
+		font-size: 18px;
+		line-height: 24px;
+		text-align: center;
+	}
+
+	:global(.lp-map-popup .mapboxgl-popup-close-button:hover) {
+		background: rgba(14, 14, 15, 0.82);
+	}
+
+	:global(.lp-map-popup-card) {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: 14px 34px 14px 14px;
+	}
+
+	:global(.lp-map-popup-photo) {
+		width: 62px;
+		height: 62px;
+		flex: 0 0 auto;
+		border-radius: 14px;
+		object-fit: cover;
+	}
+
+	:global(.lp-map-popup-body) {
+		display: flex;
+		min-width: 0;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 4px;
+	}
+
+	:global(.lp-map-popup-eyebrow) {
+		color: rgba(14, 14, 15, 0.46);
+		font-family: var(--font-body);
+		font-size: 8.5px;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		line-height: 1.2;
+		text-transform: uppercase;
+	}
+
+	:global(.lp-map-popup-name) {
+		color: #101013;
+		font-family: var(--font-body);
+		font-size: 17px;
+		font-weight: 600;
+		letter-spacing: -0.02em;
+		line-height: 1.1;
+	}
+
+	:global(.lp-map-popup-position) {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		color: #12715b;
+		font-family: var(--font-body);
+		font-size: 11.5px;
+		font-weight: 600;
+		line-height: 1.3;
+	}
+
+	:global(.lp-map-popup-position i) {
+		font-size: 10px;
+	}
+
+	:global(.lp-map-popup-cart) {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		margin-top: 2px;
+		padding: 3px 8px;
+		border-radius: 999px;
+		background: #12715b;
+		color: #fff;
+		font-family: var(--font-body);
+		font-size: 10px;
+		font-weight: 600;
+		line-height: 1.2;
+	}
+
+	:global(.lp-map-popup-cart svg) {
+		width: 12px;
+		height: 12px;
+	}
+
+	.lp-brands {
+		padding: 40px 0 44px;
+		overflow: hidden;
+		background: #101012;
+		color: #ddd;
+	}
+
+	.lp-brands h2 {
+		margin: 0;
+		text-align: center;
+		color: rgba(242, 242, 242, 0.62);
+		font-size: 13px;
+		font-weight: 500;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+	}
+
+	.lp-brand-marquee {
+		position: relative;
+		margin-top: 24px;
+		overflow: hidden;
+		mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+		-webkit-mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+	}
+
+	.lp-brand-track {
+		display: flex;
+		width: max-content;
+		will-change: transform;
+	}
+
+	.lp-brand-group {
+		display: flex;
+		align-items: center;
+		gap: 18px;
+		padding-right: 18px;
+	}
+
+	.lp-brand {
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		color: #f2f2f2;
+		text-decoration: none;
+		transition: opacity 0.2s ease;
+	}
+
+	.lp-brand:hover {
+		opacity: 0.72;
+	}
+
+	.lp-brand-logo {
+		display: grid;
+		width: 56px;
+		height: 56px;
+		flex: 0 0 auto;
+		place-items: center;
+		overflow: hidden;
+		border-radius: 50%;
+		background: #fff;
+	}
+
+	.lp-brand-logo img {
+		width: 38px;
+		height: 38px;
+		object-fit: contain;
+	}
+
+	.lp-brand-name {
+		max-width: 190px;
+		overflow: hidden;
+		font-size: 12.5px;
+		font-weight: 500;
+		letter-spacing: -0.01em;
+		line-height: 1.2;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.lp-section {
+		padding: 108px 0;
+	}
+
+	.lp-features {
+		background: var(--lex-cream);
+	}
+
+	.lp-section-head {
+		max-width: 780px;
+		margin: 0 auto 52px;
+		text-align: center;
+	}
+
+	.lp-section-head h2 {
+		margin: 0;
+		font-size: clamp(36px, 4vw, 52px);
+		font-weight: 600;
+		line-height: 1.05;
+		letter-spacing: -0.055em;
+	}
+
+	.lp-section-head > p:last-child {
+		max-width: 680px;
+		margin: 18px auto 0;
+		color: #5d5d63;
+		font-size: 15px;
+		line-height: 1.7;
+	}
+
+	.lp-badge-dark {
+		border-color: rgba(14, 14, 15, 0.14);
+		color: #5d5d63;
+	}
+
+	.lp-dot-green {
+		background: var(--lex-green);
+		box-shadow: 0 0 0 4px rgba(20, 113, 91, 0.1);
+	}
+
+	.lp-beta-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 20px;
+	}
+
+	.lp-beta-card {
+		display: flex;
+		min-height: 480px;
+		flex-direction: column;
+		padding: 34px 34px 0;
+		overflow: hidden;
+		border-radius: 30px;
+	}
+
+	.lp-beta-cream {
+		border: 1px solid rgba(14, 14, 15, 0.1);
+		background: #fbf7f5;
+		color: var(--lex-dark);
+	}
+
+	.lp-beta-dark {
+		border: 1px solid rgba(241, 226, 222, 0.1);
+		background: var(--lex-dark);
+		color: var(--lex-cream);
+	}
+
+	.lp-beta-copy {
+		max-width: 450px;
+	}
+
+	.lp-beta-copy h3 {
+		margin: 0;
+		font-size: 25px;
+		font-weight: 600;
+		letter-spacing: -0.04em;
+	}
+
+	.lp-beta-copy p {
+		margin: 12px 0 0;
+		color: #5d5d63;
+		font-size: 14px;
+		line-height: 1.65;
+	}
+
+	.lp-beta-dark .lp-beta-copy p {
+		color: rgba(241, 226, 222, 0.64);
+	}
+
+	.lp-text-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 9px;
+		margin-top: 22px;
+		color: var(--lex-green);
+		font-size: 13px;
+		font-weight: 600;
+	}
+
+	.lp-beta-dark .lp-text-link {
+		color: var(--lex-cream);
+	}
+
+	.lp-text-link i {
+		font-size: 11px;
+		transition: transform 0.2s ease;
+	}
+
+	.lp-text-link:hover i {
+		transform: translateX(4px);
+	}
+
+	.lp-beta-media {
+		margin-top: auto;
+		padding-top: 28px;
+	}
+
+	.lp-beta-media img {
+		width: 100%;
+		border-radius: 18px 18px 0 0;
+		box-shadow: 0 18px 40px rgba(0, 0, 0, 0.16);
+	}
+
+	.lp-how {
+		padding: 26px 0 108px;
+		background: var(--lex-cream);
+	}
+
+	.lp-video-panel {
+		overflow: hidden;
+		border: 1px solid rgba(14, 14, 15, 0.12);
+		border-radius: 32px;
+		background: var(--lex-dark);
+		box-shadow: 0 30px 70px rgba(14, 14, 15, 0.16);
+		aspect-ratio: 16 / 9;
+	}
+
+	.lp-video-panel video {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.lp-key-section {
+		padding: 108px 0;
+		background: #fff;
+	}
+
+	.lp-key-head {
+		max-width: 730px;
+		margin-bottom: 44px;
+	}
+
+	.lp-key-head > p:last-child {
+		margin: 0;
+		color: #5d5d63;
+		font-size: 15px;
+		line-height: 1.7;
+	}
+
+	.lp-key-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 12px;
+	}
+
+	.lp-key {
+		position: relative;
+		display: flex;
+		min-height: 220px;
+		flex-direction: column;
+		align-items: flex-start;
+		justify-content: flex-start;
+		gap: 12px;
+		padding: 30px;
+		border: 1px solid rgba(14, 14, 15, 0.1);
+		border-radius: 30px;
+		background: #fbf7f5;
+		color: var(--lex-dark);
+		transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+	}
+
+	.lp-key:hover {
+		border-color: rgba(20, 113, 91, 0.35);
+		background: var(--lex-cream);
+		transform: translateY(-3px);
+	}
+
+	.lp-key-icon {
+		display: grid;
+		width: 40px;
+		height: 40px;
+		place-items: center;
+		background: transparent;
+		color: var(--lex-green);
+		font-size: 40px;
+		line-height: 1;
+	}
+
+	.lp-key strong {
+		max-width: 85%;
+		font-size: 18px;
+		font-weight: 600;
+		line-height: 1.3;
+		letter-spacing: -0.03em;
+	}
+
+	.lp-key p {
+		margin: 0;
+		color: #5d5d63;
+		font-size: 13.5px;
+		line-height: 1.6;
+	}
+
+	.lp-key-arrow {
+		position: absolute;
+		top: 22px;
+		right: 20px;
+		color: #8a8a90;
+		font-size: 12px;
+	}
+
+	.lp-view-row {
+		display: flex;
+		justify-content: center;
+		margin-top: 28px;
+	}
+
+	.lp-pricing {
+		padding: 108px 0;
+		background: var(--lex-dark);
+		color: var(--lex-cream);
+	}
+
+	.lp-pricing .lp-section-head h2 {
+		color: var(--lex-cream);
+	}
+
+	.lp-pricing .lp-section-head > p:last-child {
+		color: rgba(241, 226, 222, 0.62);
+	}
+
+	.lp-badge-on-dark {
+		border-color: rgba(241, 226, 222, 0.2);
+		color: rgba(241, 226, 222, 0.72);
+	}
+
+	.lp-plans {
+		display: grid;
+		max-width: 860px;
+		margin-inline: auto;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 16px;
+		align-items: stretch;
+	}
+
+	.lp-plan {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		padding: 32px;
+		border: 1px solid rgba(14, 14, 15, 0.1);
+		border-radius: 26px;
+		background: #fbf7f5;
+		color: var(--lex-dark);
+	}
+
+	.lp-plan.is-featured {
+		border-color: transparent;
+		background: var(--header-green);
+		color: #000;
+	}
+
+	.lp-plan-badge {
+		position: absolute;
+		top: 22px;
+		right: 22px;
+		padding: 6px 10px;
+		border-radius: 999px;
+		background: var(--lex-cream);
+		color: var(--lex-green-deep);
+		font-size: 10px;
+		font-weight: 600;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+
+	.lp-plan-name {
+		margin: 0;
+		color: #000;
+		font-size: 22px;
+		font-weight: 600;
+		letter-spacing: -0.03em;
+	}
+
+	.lp-plan.is-featured .lp-plan-name {
+		color: #000;
+	}
+
+	.lp-plan-price {
+		display: flex;
+		align-items: baseline;
+		gap: 5px;
+		margin-top: 18px;
+	}
+
+	.lp-plan-price strong {
+		font-size: clamp(46px, 4vw, 58px);
+		font-weight: 600;
+		line-height: 1;
+		letter-spacing: -0.06em;
+	}
+
+	.lp-plan-price span {
+		font-size: 14px;
+		opacity: 0.6;
+	}
+
+	.lp-plan-desc {
+		min-height: 46px;
+		margin: 16px 0 0;
+		color: #5d5d63;
+		font-size: 13.5px;
+		line-height: 1.55;
+	}
+
+	.lp-plan.is-featured .lp-plan-desc {
+		color: rgba(0, 0, 0, 0.7);
+	}
+
+	.lp-plan-btn {
+		display: inline-flex;
+		min-height: 48px;
+		align-items: center;
+		justify-content: center;
+		margin-top: 24px;
+		border-radius: 999px;
+		background: var(--lex-dark);
+		color: var(--lex-cream);
+		font-size: 13px;
+		font-weight: 600;
+		transition: background 0.2s ease, color 0.2s ease;
+	}
+
+	.lp-plan-btn:hover {
+		background: var(--lex-green);
+		color: #fff;
+	}
+
+	.lp-plan.is-featured .lp-plan-btn {
+		background: #000;
+		color: #fff;
+	}
+
+	.lp-plan.is-featured .lp-plan-btn:hover {
+		background: #111;
+		color: #fff;
+	}
+
+	.lp-plan-details {
+		margin: 12px 0 0;
+		color: #77777d;
+		font-size: 11.5px;
+		text-align: center;
+	}
+
+	.lp-plan.is-featured .lp-plan-details {
+		color: rgba(0, 0, 0, 0.58);
+	}
+
+	.lp-plan ul {
+		display: grid;
+		gap: 12px;
+		margin: 26px 0 0;
+		padding: 24px 0 0;
+		border-top: 1px solid rgba(14, 14, 15, 0.1);
+		list-style: none;
+	}
+
+	.lp-plan.is-featured ul {
+		border-color: rgba(0, 0, 0, 0.18);
+	}
+
+	.lp-plan li {
+		display: flex;
+		align-items: flex-start;
+		gap: 10px;
+		color: #424247;
+		font-size: 13px;
+		line-height: 1.4;
+	}
+
+	.lp-plan.is-featured li {
+		color: rgba(0, 0, 0, 0.82);
+	}
+
+	.lp-plan li i {
+		margin-top: 3px;
+		color: var(--lex-green);
+		font-size: 10px;
+	}
+
+	.lp-plan.is-featured li i {
+		color: #000;
+	}
+
+
+
+	.lp-testimonials {
+		padding: 108px 0;
+		background: var(--lex-cream);
+	}
+
+	.lp-quotes {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 16px;
+	}
+
+	.lp-quote {
+		display: flex;
+		min-height: 260px;
+		flex-direction: column;
+		padding: 30px;
+		border: 1px solid rgba(14, 14, 15, 0.08);
+		border-radius: 24px;
+		background: #fff;
+	}
+
+	.lp-stars {
+		display: flex;
+		gap: 3px;
+	}
+
+	.lp-stars img {
+		width: 15px;
+		height: 15px;
+	}
+
+	.lp-quote > p {
+		margin: 22px 0 0;
+		font-size: 16px;
+		line-height: 1.6;
+		letter-spacing: -0.015em;
+	}
+
+	.lp-quote footer {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		margin-top: auto;
+		padding-top: 26px;
+	}
+
+	.lp-quote-avatar {
+		display: grid;
+		width: 42px;
+		height: 42px;
+		place-items: center;
+		border-radius: 50%;
+		background: var(--lex-green);
+		color: var(--lex-cream);
+		font-size: 12px;
+		font-weight: 600;
+	}
+
+	.lp-quote footer strong {
+		display: block;
+		font-size: 14px;
+		font-weight: 600;
+	}
+
+	.lp-quote footer small {
+		display: block;
+		margin-top: 3px;
+		color: #77777d;
+		font-size: 11.5px;
+	}
+
+	.lp-faq {
+		padding: 108px 0;
+		background: #fff;
+	}
+
+	.lp-faq-grid {
+		display: grid;
+		grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.2fr);
+		gap: 64px;
+		align-items: start;
+	}
+
+	.lp-faq-copy {
+		position: sticky;
+		top: 130px;
+	}
+
+	.lp-faq-copy h2 {
+		margin: 0;
+		font-size: clamp(34px, 3.6vw, 46px);
+		font-weight: 600;
+		line-height: 1.07;
+		letter-spacing: -0.055em;
+	}
+
+	.lp-faq-copy > p:not(.lp-badge) {
+		max-width: 380px;
+		margin: 18px 0 26px;
+		color: #5d5d63;
+		font-size: 14px;
+		line-height: 1.7;
+	}
+
+	.lp-faq-list {
+		display: grid;
+		gap: 8px;
+	}
+
+	.lp-faq-list details {
+		border: 1px solid rgba(14, 14, 15, 0.1);
+		border-radius: 16px;
+		background: #fbf7f5;
+	}
+
+	.lp-faq-list summary {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 20px;
+		padding: 20px 22px;
+		font-size: 14.5px;
+		font-weight: 500;
+		letter-spacing: -0.015em;
+		list-style: none;
+		cursor: pointer;
+	}
+
+	.lp-faq-list summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.lp-faq-list summary span {
+		display: grid;
+		width: 28px;
+		height: 28px;
+		flex: 0 0 auto;
+		place-items: center;
+		border-radius: 50%;
+		background: var(--lex-cream);
+		color: var(--lex-green-deep);
+		font-size: 10px;
+		transition: transform 0.2s ease;
+	}
+
+	.lp-faq-list details[open] summary span {
+		transform: rotate(45deg);
+	}
+
+	.lp-faq-list details > p {
+		margin: 0;
+		padding: 0 22px 22px;
+		color: #5d5d63;
+		font-size: 13.5px;
+		line-height: 1.65;
+	}
+
+	.lp-cta {
+		padding: 40px 0;
+		background: #fff;
+	}
+
+	.lp-cta-grid {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+		gap: 54px;
+		align-items: center;
+		padding: 58px;
+		overflow: hidden;
+		border-radius: 34px;
+		background: var(--lex-green-deep);
+		color: var(--lex-cream);
+	}
+
+	.lp-cta-copy h2 {
+		max-width: 560px;
+		margin: 0;
+		font-size: clamp(38px, 4.4vw, 58px);
+		font-weight: 600;
+		line-height: 1.03;
+		letter-spacing: -0.06em;
+	}
+
+	.lp-cta-copy > p {
+		margin: 20px 0 28px;
+		color: rgba(241, 226, 222, 0.72);
+		font-size: 15px;
+	}
+
+	.lp-cta-visual {
+		transform: rotate(2deg);
+	}
+
+	.lp-cta-visual img {
+		width: 100%;
+		border: 1px solid rgba(241, 226, 222, 0.18);
+		border-radius: 20px;
+		box-shadow: 0 30px 70px rgba(0, 0, 0, 0.28);
+	}
+
+	@media (max-width: 1100px) {
+		.lp-hero-inner {
+			gap: 42px;
+		}
+	}
+
+	@media (max-width: 900px) {
+		.lp-section,
+		.lp-key-section,
+		.lp-pricing,
+		.lp-testimonials,
+		.lp-faq {
+			padding: 80px 0;
+		}
+
+		.lp-how {
+			padding: 12px 0 80px;
+		}
+
+		.lp-beta-grid,
+		.lp-plans,
+		.lp-quotes,
+		.lp-faq-grid,
+		.lp-cta-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.lp-key-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.lp-faq-copy {
+			position: static;
+		}
+
+		.lp-cta-grid {
+			gap: 38px;
+			padding: 42px;
+		}
+
+		.lp-course-stats {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	@media (max-width: 720px) {
+		.lp-container {
+			width: min(1240px, calc(100% - 28px));
+		}
+
+		.lp-hero {
+			padding: 154px 0 66px;
+		}
+
+		.lp-hero h1 {
+			font-size: clamp(40px, 10vw, 58px);
+		}
+
+		.lp-hero-sub {
+			font-size: 14.5px;
+		}
+
+		.lp-map {
+			height: 420px;
+		}
+
+		.lp-course-stat {
+			min-height: 146px;
+			padding: 20px;
+			border-radius: 20px;
+		}
+
+		.lp-course-stat-icon {
+			margin-bottom: 14px;
+		}
+
+		.lp-course-stat strong {
+			font-size: 27px;
+		}
+
+		:global(.lp-map-avatar img) {
+			width: 40px;
+			height: 40px;
+			border-width: 2px;
+		}
+
+		:global(.lp-map-avatar::after) {
+			top: 29px;
+			right: calc(50% - 21px);
+		}
+
+		.lp-brand-group {
+			gap: 16px;
+			padding-right: 16px;
+		}
+
+		.lp-brand {
+			gap: 8px;
+		}
+
+		.lp-brand-logo {
+			width: 48px;
+			height: 48px;
+		}
+
+		.lp-brand-logo img {
+			width: 32px;
+			height: 32px;
+		}
+
+		.lp-brand-name {
+			max-width: 140px;
+			font-size: 11.5px;
+		}
+
+		.lp-beta-card {
+			min-height: 410px;
+			padding: 26px 24px 0;
+		}
+
+		.lp-cta {
+			padding: 20px 0;
+		}
+
+		.lp-cta-grid {
+			padding: 34px 26px;
+		}
+	}
+
+	@media (max-width: 520px) {
+		.lp-key-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		:global(.lp-map-avatar-name) {
+			display: none;
+		}
+
+		:global(.lp-map-avatar-cart) {
+			padding: 2px 6px;
+			font-size: 8px;
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.lp-rotator-word {
+			transition: none;
+		}
+
+		.lp-live-badge,
+		.lp-live-badge::before {
+			animation: none;
+		}
+	}
+</style>
+
+<script>
+	import gsap from 'gsap';
+	import mapboxgl from 'mapbox-gl';
+	import { ASOLO_GOLF_CLUB, MAPBOX_PUBLIC_TOKEN, MAPBOX_STYLE_URL } from '../lib/mapbox';
+
+	type RoutePoint = [number, number];
+	type Movable = {
+		name: string;
+		image: string;
+		position: string;
+		cart?: string;
+		route: RoutePoint[];
+		duration: number;
+		offset: number;
+	};
+
+	const rotator = document.querySelector<HTMLElement>('[data-rotator-words]');
+	const rotatorWord = rotator?.querySelector<HTMLElement>('.lp-rotator-word');
+	const rotatorWords = rotator?.dataset.rotatorWords?.split('|').filter(Boolean) ?? [];
+
+	if (rotator && rotatorWord && rotatorWords.length > 1 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+		let rotatorIndex = 0;
+
+		window.setInterval(() => {
+			rotator.classList.add('is-leaving');
+			window.setTimeout(() => {
+				rotatorIndex = (rotatorIndex + 1) % rotatorWords.length;
+				rotatorWord.textContent = rotatorWords[rotatorIndex];
+				rotator.classList.remove('is-leaving');
+				rotator.classList.add('is-entering');
+				window.requestAnimationFrame(() => {
+					window.requestAnimationFrame(() => rotator.classList.remove('is-entering'));
+				});
+			}, 220);
+		}, 2600);
+	}
+
+	const brandTrack = document.querySelector<HTMLElement>('[data-brand-track]');
+
+	if (brandTrack && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+		gsap.to(brandTrack, {
+			xPercent: -50,
+			duration: 42,
+			ease: 'none',
+			repeat: -1,
+		});
+	}
+
+	const mapElement = document.getElementById('lp-course-map');
+
+	if (mapElement && MAPBOX_PUBLIC_TOKEN) {
+		mapboxgl.accessToken = MAPBOX_PUBLIC_TOKEN;
+
+		const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		const isCompact = window.matchMedia('(max-width: 720px)').matches;
+		const map = new mapboxgl.Map({
+			container: mapElement,
+			style: MAPBOX_STYLE_URL,
+			center: [ASOLO_GOLF_CLUB.lng, ASOLO_GOLF_CLUB.lat],
+			zoom: isCompact ? 15.5 : 16.2,
+			pitch: isCompact ? 48 : 62,
+			bearing: -22,
+			antialias: true,
+			locale: {
+				'AttributionControl.ToggleAttribution': 'Migliora questa mappa',
+				'FullscreenControl.Enter': 'Entra a schermo intero',
+				'FullscreenControl.Exit': 'Esci da schermo intero',
+				'GeolocateControl.FindMyLocation': 'Trova la mia posizione',
+				'GeolocateControl.LocationNotAvailable': 'Posizione non disponibile',
+				'LogoControl.Title': 'Logo Mapbox',
+				'Map.Title': 'Mappa',
+				'NavigationControl.ResetBearing': 'Ripristina orientamento',
+				'NavigationControl.ZoomIn': 'Aumenta zoom',
+				'NavigationControl.ZoomOut': 'Riduci zoom',
+				'ScrollZoomBlocker.CtrlMessage': 'Usa Ctrl + scroll per lo zoom della mappa',
+				'ScrollZoomBlocker.CmdMessage': 'Usa ⌘ + scroll per lo zoom della mappa',
+				'TouchPanBlocker.Message': 'Usa due dita per spostare la mappa',
+			},
+			cooperativeGestures: true,
+			scrollZoom: false,
+			boxZoom: false,
+			doubleClickZoom: false,
+			touchZoomRotate: false,
+		});
+
+		const movers: Movable[] = [
+			{
+				name: 'Marco',
+				image: '/images/golf/golfer-swing.jpg',
+				position: 'Green #9',
+				route: [
+					[-0.0028, 0.001],
+					[-0.0021, 0.0018],
+					[-0.0008, 0.0019],
+					[0.0005, 0.0015],
+					[0.0014, 0.0007],
+					[0.0009, -0.0003],
+					[-0.0004, -0.0008],
+					[-0.0018, -0.0005],
+					[-0.0027, 0.0002],
+				],
+				duration: 54,
+				offset: 0.08,
+			},
+			{
+				name: 'Giulia',
+				image: '/images/golf/golf-players-together.jpg',
+				position: 'Fairway #4',
+				route: [
+					[0.0018, 0.0014],
+					[0.0027, 0.0006],
+					[0.0024, -0.0007],
+					[0.0012, -0.0012],
+					[0.0001, -0.0008],
+					[-0.0002, 0.0002],
+					[0.0007, 0.001],
+				],
+				duration: 62,
+				offset: 0.42,
+			},
+			{
+				name: 'Luca',
+				image: '/images/golf/slide-manager-golfer.jpg',
+				position: 'Tee #12',
+				route: [
+					[-0.0016, -0.001],
+					[-0.0004, -0.0015],
+					[0.0008, -0.0018],
+					[0.0017, -0.0012],
+					[0.0012, -0.0002],
+					[0.0002, 0.0001],
+					[-0.0009, -0.0003],
+					[-0.0018, -0.0007],
+				],
+				duration: 47,
+				offset: 0.66,
+			},
+			{
+				name: 'Sofia',
+				image: '/images/golf/golfer-sunset.jpg',
+				position: 'Green #16',
+				route: [
+					[-0.003, -0.0004],
+					[-0.0022, -0.0012],
+					[-0.0007, -0.0014],
+					[0.0004, -0.001],
+					[0.0009, -0.0002],
+					[0.0002, 0.0006],
+					[-0.001, 0.0008],
+					[-0.0022, 0.0004],
+				],
+				duration: 58,
+				offset: 0.24,
+			},
+			{
+				name: 'Paolo',
+				image: '/images/golf/golf-carts-sunset.jpg',
+				position: 'Fairway #7',
+				cart: '22',
+				route: [
+					[-0.0024, 0.0022],
+					[-0.0008, 0.0025],
+					[0.0008, 0.0021],
+					[0.0018, 0.0012],
+					[0.0011, 0.0003],
+					[-0.0005, 0.0002],
+					[-0.002, 0.0009],
+				],
+				duration: 70,
+				offset: 0.55,
+			},
+		];
+
+		const routeLength = (route: RoutePoint[]) => {
+			let length = 0;
+			for (let index = 0; index < route.length; index += 1) {
+				const [x1, y1] = route[index];
+				const [x2, y2] = route[(index + 1) % route.length];
+				length += Math.hypot(x2 - x1, y2 - y1);
+			}
+			return length;
+		};
+
+		const pointOnRoute = (route: RoutePoint[], length: number, progress: number): [number, number] => {
+			let remaining = (((progress % 1) + 1) % 1) * length;
+			for (let index = 0; index < route.length; index += 1) {
+				const [x1, y1] = route[index];
+				const [x2, y2] = route[(index + 1) % route.length];
+				const segment = Math.hypot(x2 - x1, y2 - y1);
+				if (remaining <= segment) {
+					const ratio = segment > 0 ? remaining / segment : 0;
+					return [ASOLO_GOLF_CLUB.lng + x1 + (x2 - x1) * ratio, ASOLO_GOLF_CLUB.lat + y1 + (y2 - y1) * ratio];
+				}
+				remaining -= segment;
+			}
+			return [ASOLO_GOLF_CLUB.lng + route[0][0], ASOLO_GOLF_CLUB.lat + route[0][1]];
+		};
+
+		const createAvatar = (avatar: Movable) => {
+			const element = document.createElement('div');
+			element.className = 'lp-map-avatar';
+
+			const image = document.createElement('img');
+			image.src = avatar.image;
+			image.alt = '';
+			image.loading = 'lazy';
+			image.decoding = 'async';
+
+			const name = document.createElement('span');
+			name.className = 'lp-map-avatar-name';
+			name.textContent = avatar.name;
+
+			element.append(image, name);
+
+			if (avatar.cart) {
+				const cart = document.createElement('span');
+				cart.className = 'lp-map-avatar-cart';
+				cart.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14V8h9l3 6"></path><path d="M3 14h14"></path><circle cx="8" cy="18" r="2"></circle><circle cx="17" cy="18" r="2"></circle><path d="M8 8V4h6"></path></svg><span>${avatar.cart}</span>`;
+				element.append(cart);
+			}
+
+			return element;
+		};
+
+		const createPlayerPopupContent = (avatar: Movable) => {
+			const card = document.createElement('div');
+			card.className = 'lp-map-popup-card';
+			card.setAttribute('role', 'dialog');
+			card.setAttribute('aria-label', `Dettagli di ${avatar.name}`);
+
+			const photo = document.createElement('img');
+			photo.className = 'lp-map-popup-photo';
+			photo.src = avatar.image;
+			photo.alt = '';
+			photo.loading = 'lazy';
+			photo.decoding = 'async';
+
+			const body = document.createElement('div');
+			body.className = 'lp-map-popup-body';
+
+			const eyebrow = document.createElement('span');
+			eyebrow.className = 'lp-map-popup-eyebrow';
+			eyebrow.textContent = 'Giocatore in campo';
+
+			const name = document.createElement('strong');
+			name.className = 'lp-map-popup-name';
+			name.textContent = avatar.name;
+
+			const position = document.createElement('span');
+			position.className = 'lp-map-popup-position';
+			position.innerHTML = `<i class="fa-solid fa-location-dot" aria-hidden="true"></i><span>${avatar.position}</span>`;
+
+			body.append(eyebrow, name, position);
+
+			if (avatar.cart) {
+				const cart = document.createElement('span');
+				cart.className = 'lp-map-popup-cart';
+				cart.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14V8h9l3 6"></path><path d="M3 14h14"></path><circle cx="8" cy="18" r="2"></circle><circle cx="17" cy="18" r="2"></circle><path d="M8 8V4h6"></path></svg><span>Cart #${avatar.cart}</span>`;
+				body.append(cart);
+			}
+
+			card.append(photo, body);
+			return card;
+		};
+
+		let animationFrame = 0;
+		let lastFrame = 0;
+		const startedAt = performance.now();
+
+		map.on('load', () => {
+			map.setConfigProperty('basemap', 'showRoadLabels', false);
+			map.setConfigProperty('basemap', 'showPlaceLabels', false);
+			map.setConfigProperty('basemap', 'showPointOfInterestLabels', false);
+			map.setConfigProperty('basemap', 'showTransitLabels', false);
+			map.setConfigProperty('basemap', 'show3dObjects', true);
+			map.setConfigProperty('basemap', 'lightPreset', 'day');
+
+			if (!map.getSource('lp-terrain')) {
+				map.addSource('lp-terrain', {
+					type: 'raster-dem',
+					url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+					tileSize: 256,
+					maxzoom: 14,
+				});
+			}
+			map.setTerrain({ source: 'lp-terrain', exaggeration: 1.3 });
+
+			let playerPopup: mapboxgl.Popup | null = null;
+			let playerPopupName: string | null = null;
+
+			const openPlayerPopup = (avatar: Movable, marker: mapboxgl.Marker) => {
+				playerPopup?.remove();
+				const popup = new mapboxgl.Popup({
+					className: 'lp-map-popup',
+					closeButton: true,
+					closeOnClick: true,
+					offset: [0, -34],
+					maxWidth: '280px',
+				})
+					.setLngLat(marker.getLngLat())
+					.setDOMContent(createPlayerPopupContent(avatar))
+					.addTo(map);
+
+				playerPopup = popup;
+				playerPopupName = avatar.name;
+				popup.on('close', () => {
+					if (playerPopup === popup) {
+						playerPopup = null;
+						playerPopupName = null;
+					}
+				});
+			};
+
+			const markers = movers.map((avatar, index) => {
+				const length = routeLength(avatar.route);
+				const element = createAvatar(avatar);
+				const marker = new mapboxgl.Marker({ element, anchor: 'center' })
+					.setLngLat(pointOnRoute(avatar.route, length, avatar.offset))
+					.addTo(map);
+
+				element.setAttribute('role', 'button');
+				element.setAttribute('tabindex', '0');
+				element.setAttribute(
+					'aria-label',
+					`${avatar.name}, ${avatar.position}${avatar.cart ? `, cart ${avatar.cart}` : ''}. Apri dettagli`,
+				);
+				const open = () => openPlayerPopup(avatar, marker);
+				element.addEventListener('click', (event) => {
+					event.stopPropagation();
+					open();
+				});
+				element.addEventListener('keydown', (event) => {
+					if (event.key === 'Enter' || event.key === ' ') {
+						event.preventDefault();
+						open();
+					}
+				});
+
+				return { avatar, length, marker, phase: index * 0.13 };
+			});
+
+			if (reduceMotion) return;
+
+			const animate = (now: number) => {
+				if (!document.hidden && now - lastFrame > 60) {
+					lastFrame = now;
+					const elapsed = (now - startedAt) / 1000;
+					for (const mover of markers) {
+						const progress = elapsed / mover.avatar.duration + mover.avatar.offset + mover.phase;
+						mover.marker.setLngLat(pointOnRoute(mover.avatar.route, mover.length, progress));
+					}
+					if (playerPopup && playerPopupName) {
+						const selected = markers.find((mover) => mover.avatar.name === playerPopupName);
+						if (selected) playerPopup.setLngLat(selected.marker.getLngLat());
+					}
+				}
+				animationFrame = window.requestAnimationFrame(animate);
+			};
+
+			animationFrame = window.requestAnimationFrame(animate);
+		});
+
+		window.addEventListener(
+			'pagehide',
+			() => {
+				window.cancelAnimationFrame(animationFrame);
+				map.remove();
+			},
+			{ once: true },
+		);
+	}
+</script>

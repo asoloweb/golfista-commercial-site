@@ -1,0 +1,93 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import LegalPage from '../components/LegalPage.astro';
+
+export const prerender = true;
+---
+
+<BaseLayout
+	title="Cookie policy"
+	seoTitle="Cookie policy"
+	seoDescription="Scopri cookie e tecnologie usati dal sito Golfista, le finalità e i tempi di conservazione. Consulta come gestire le preferenze e revocare il consenso."
+>
+	<LegalPage title="Cookie policy">
+		<p>Questa cookie policy descrive i cookie e le tecnologie simili utilizzati dal sito <strong>golfista.app</strong>, le finalità, i tempi di conservazione e le modalità con cui l'utente può gestire le proprie preferenze.</p>
+
+		<h2>1. Cosa sono i cookie</h2>
+		<p>I cookie sono piccoli file di testo salvati dal browser durante la navigazione. Tecnologie analoghe, come localStorage e sessionStorage, permettono di conservare informazioni sul dispositivo. In questa policy il termine “cookie” comprende, ove applicabile, anche tali tecnologie.</p>
+
+		<h2>2. Titolare del trattamento</h2>
+		<p><strong>Asoloweb di Alessandro Crabbia</strong><br />Via Cime 15, 31020 San Zenone degli Ezzelini (TV), Italia<br />Email: <a href="mailto:info@golfista.app">info@golfista.app</a></p>
+
+		<h2>3. Categorie utilizzate</h2>
+		<ul>
+			<li><strong>Necessari:</strong> consentono il funzionamento del sito, la sicurezza e la memorizzazione delle preferenze cookie. Non richiedono consenso.</li>
+			<li><strong>Funzionali:</strong> migliorano l'esperienza, ad esempio conservando preferenze tecniche della mappa. Sono attivati solo quando necessari alla funzione richiesta.</li>
+			<li><strong>Analitici:</strong> raccolgono statistiche aggregate sull'utilizzo del sito. Sono attivati solo previo consenso.</li>
+			<li><strong>Marketing:</strong> misurano l'efficacia delle campagne pubblicitarie e possono essere impostati da fornitori terzi. Sono attivati solo previo consenso.</li>
+		</ul>
+
+		<h2>4. Cookie e tecnologie del sito</h2>
+		<table>
+			<thead>
+				<tr>
+					<th>Nome / fornitore</th>
+					<th>Categoria</th>
+					<th>Finalità</th>
+					<th>Durata</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td><code>golfista_cookie_consent_v1</code> (Golfista, localStorage)</td>
+					<td>Necessario</td>
+					<td>Memorizza la scelta espressa nel banner cookie e la data del consenso.</td>
+					<td>6 mesi</td>
+				</tr>
+				<tr>
+					<td>Preferenze mappa Mapbox (localStorage)</td>
+					<td>Funzionale</td>
+					<td>Conserva impostazioni tecniche della mappa necessarie alla visualizzazione e all'esperienza d'uso.</td>
+					<td>Fino alla cancellazione dal browser</td>
+				</tr>
+				<tr>
+					<td>Umami (Umami Software / installazione Asoloweb)</td>
+					<td>Analitico</td>
+					<td>Statistiche aggregate sulle visite, senza profilazione pubblicitaria. Caricato solo con consenso analitico.</td>
+					<td>Nessun cookie di tracciamento; conservazione delle statistiche secondo la configurazione del servizio</td>
+				</tr>
+				<tr>
+					<td><code>_gcl_au</code>, <code>_gcl_aw</code> (Google Ads)</td>
+					<td>Marketing</td>
+					<td>Misurazione delle conversioni e attribuzione delle campagne. Caricati solo con consenso marketing.</td>
+					<td>Fino a 90 giorni</td>
+				</tr>
+				<tr>
+					<td><code>attribution_gclid</code>, <code>attribution_gbraid</code>, <code>attribution_wbraid</code> (Golfista, sessionStorage)</td>
+					<td>Marketing</td>
+					<td>Conserva gli identificativi delle campagne presenti nell'indirizzo della pagina, solo dopo il consenso marketing.</td>
+					<td>Sessione del browser o revoca del consenso</td>
+				</tr>
+			</tbody>
+		</table>
+		<p>Se non viene prestato il consenso analitico o marketing, i relativi script non vengono caricati. I cookie tecnici necessari restano attivi per garantire il funzionamento del sito.</p>
+
+		<h2>5. Risorse e servizi di terze parti</h2>
+		<p>Il sito può caricare risorse tecniche da fornitori esterni, tra cui Mapbox per le mappe e Font Awesome per le icone. Tali richieste comportano la trasmissione dell'indirizzo IP e di dati tecnici del browser ai rispettivi fornitori, secondo le loro informative.</p>
+		<p>Ulteriori informazioni sui fornitori e sul trattamento dei dati sono disponibili nell'<a href="/privacy-policy">informativa privacy</a>.</p>
+
+		<h2>6. Gestire le preferenze</h2>
+		<p>Puoi accettare tutti i cookie, rifiutare quelli non necessari o scegliere singole categorie tramite il banner cookie. Puoi modificare la scelta in qualsiasi momento:</p>
+		<p><button type="button" data-cookie-preferences>Gestisci preferenze cookie</button></p>
+		<p>Puoi inoltre eliminare o bloccare i cookie dalle impostazioni del browser. La disattivazione dei cookie necessari può compromettere alcune funzioni del sito. Le preferenze già espresse restano valide fino alla revoca o alla scadenza.</p>
+
+		<h2>7. Conservazione del consenso</h2>
+		<p>La preferenza viene conservata per un massimo di sei mesi. Trascorso questo periodo, il banner può essere mostrato nuovamente per richiedere una scelta aggiornata. La revoca del consenso non pregiudica la liceità dei trattamenti effettuati prima della revoca.</p>
+
+		<h2>8. Aggiornamenti</h2>
+		<p>Questa cookie policy può essere aggiornata in caso di modifiche tecniche, normative o dei fornitori utilizzati. La versione vigente è pubblicata su questa pagina con la data di ultimo aggiornamento.</p>
+
+		<h2>9. Contatti</h2>
+		<p>Per informazioni sui cookie o per esercitare i diritti previsti dal GDPR: <a href="mailto:info@golfista.app">info@golfista.app</a>.</p>
+	</LegalPage>
+</BaseLayout>

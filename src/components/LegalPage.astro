@@ -1,0 +1,184 @@
+---
+import PageHero from './PageHero.astro';
+
+interface Props {
+	title: string;
+	updated?: string;
+	updatedDateTime?: string;
+}
+
+const { title, updated = '29 ottobre 2026', updatedDateTime = '2026-10-29' } = Astro.props;
+const pathname = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const legalLinks = [
+	{ label: 'Privacy', href: '/privacy-policy' },
+	{ label: 'Condizioni del servizio', href: '/condizioni-del-servizio' },
+	{ label: 'Cookie policy', href: '/cookie-policy' },
+];
+---
+
+<article class="legal_policy" aria-labelledby="legal-title">
+	<PageHero title={title} eyebrow="Informazioni legali" id="legal-title">
+		<p class="legal_policy_updated">Ultimo aggiornamento: <time datetime={updatedDateTime}>{updated}</time></p>
+	</PageHero>
+	<div class="legal_policy_body">
+		<nav class="legal_policy_nav" aria-label="Documenti legali">
+			{legalLinks.map((link) => (
+				<a
+					href={link.href}
+					class:list={{ 'is-active': pathname === link.href }}
+					aria-current={pathname === link.href ? 'page' : undefined}
+				>
+					{link.label}
+				</a>
+			))}
+		</nav>
+		<div class="legal_policy_content">
+			<slot />
+		</div>
+	</div>
+</article>
+
+<style>
+	.legal_policy {
+		padding-bottom: 88px;
+		background: #fff;
+		color: var(--lex-dark);
+	}
+
+	.legal_policy_body {
+		width: min(calc(100% - 40px), 960px);
+		margin: 48px auto 0;
+	}
+
+	.legal_policy_updated {
+		margin: 0;
+		color: #5d5d63;
+		font-size: 13px;
+	}
+
+	.legal_policy_nav {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 8px;
+		margin-bottom: 24px;
+	}
+
+	.legal_policy_nav a {
+		display: inline-flex;
+		min-height: 42px;
+		align-items: center;
+		padding: 0 14px;
+		border: 1px solid rgba(14, 14, 15, 0.14);
+		border-radius: 999px;
+		color: var(--lex-dark);
+		font-size: 12.5px;
+		font-weight: 500;
+		transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+	}
+
+	.legal_policy_nav a:hover,
+	.legal_policy_nav a.is-active {
+		border-color: #00ec10;
+		background: #00ec10;
+		color: #000;
+	}
+
+	.legal_policy_content {
+		min-width: 0;
+		padding: 48px;
+		border: 1px solid rgba(14, 14, 15, 0.1);
+		border-radius: 30px;
+		background: #fbf7f5;
+		font-size: 15.5px;
+		line-height: 1.75;
+		overflow-wrap: anywhere;
+	}
+
+	.legal_policy_content :global(h2) {
+		margin: 48px 0 14px;
+		font-size: clamp(25px, 3vw, 32px);
+		line-height: 1.15;
+	}
+
+	.legal_policy_content :global(h2:first-child) {
+		margin-top: 0;
+	}
+
+	.legal_policy_content :global(h3) {
+		margin: 30px 0 10px;
+		font-size: 21px;
+	}
+
+	.legal_policy_content :global(p),
+	.legal_policy_content :global(ul),
+	.legal_policy_content :global(ol),
+	.legal_policy_content :global(table) {
+		margin: 0 0 18px;
+	}
+
+	.legal_policy_content :global(li + li) {
+		margin-top: 9px;
+	}
+
+	.legal_policy_content :global(a) {
+		color: inherit;
+		font-weight: 700;
+		text-decoration: underline;
+		text-decoration-color: var(--primary);
+		text-underline-offset: 4px;
+	}
+
+	.legal_policy_content :global(table) {
+		display: block;
+		width: 100%;
+		overflow-x: auto;
+		border-collapse: collapse;
+		font-size: 14px;
+		line-height: 1.5;
+	}
+
+	.legal_policy_content :global(th),
+	.legal_policy_content :global(td) {
+		padding: 12px 14px;
+		border: 1px solid var(--border);
+		text-align: left;
+		vertical-align: top;
+	}
+
+	.legal_policy_content :global(th) {
+		background: var(--lex-cream-soft);
+		font-weight: 600;
+	}
+
+	.legal_policy_content :global(button) {
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: inherit;
+		font: inherit;
+		font-weight: 700;
+		text-decoration: underline;
+		text-decoration-color: var(--primary);
+		text-underline-offset: 4px;
+		cursor: pointer;
+	}
+
+	@media (max-width: 640px) {
+		.legal_policy_body {
+			width: calc(100% - 32px);
+			margin-top: 32px;
+		}
+
+		.legal_policy_content {
+			padding: 28px 20px;
+			font-size: 14px;
+		}
+
+		.legal_policy_nav a {
+			min-height: 34px;
+			padding: 0 11px;
+			font-size: 11.5px;
+		}
+	}
+</style>

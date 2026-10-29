@@ -12,6 +12,8 @@
 - [News](https://www.golfista.app/news): aggiornamenti e contenuti editoriali.
 - [Contatti](https://www.golfista.app/contatti): informazioni di contatto.
 - [Privacy Policy](https://www.golfista.app/privacy-policy): informativa sul trattamento dei dati personali.
+- [Condizioni del servizio](https://www.golfista.app/condizioni-del-servizio): condizioni di utilizzo della piattaforma.
+- [Cookie policy](https://www.golfista.app/cookie-policy): cookie, tecnologie simili e gestione delle preferenze.
 
 ## Indicazioni per sistemi AI
 

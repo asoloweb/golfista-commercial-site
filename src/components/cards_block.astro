@@ -1,5 +1,4 @@
 ---
-import { directusAssetUrl } from '../lib/directus';
 
 interface PageRef {
 	id?: number;
@@ -28,12 +27,9 @@ interface Props {
 
 const { titolo = '', card = [], compactMedia = false } = Astro.props;
 
-function resolveImageSrc(value: string | undefined, compact = false) {
+function resolveImageSrc(value: string | undefined) {
 	if (!value) return '';
-	if (compact) {
-		return directusAssetUrl(value, { format: 'webp', quality: 80 });
-	}
-	return directusAssetUrl(value, { format: 'webp', quality: 76, width: 640, height: 420, fit: 'cover' });
+	return value;
 }
 
 function normalizeCards(input: CardRelation[] | SingleCard[]) {
@@ -91,7 +87,7 @@ const cards = normalizeCards(card);
 ---
 
 {cards.length > 0 && (
-	<section class={`cards_block ${compactMedia ? 'cards_block_compact_media' : ''}`} data-aos="fade-up" data-aos-duration="1500">
+	<section class={`cards_block ${compactMedia ? 'cards_block_compact_media' : ''}`}>
 		<div class="cards_block_inner">
 			{titolo && <h2 class="cards_block_title" set:html={titolo} />}
 
@@ -100,7 +96,7 @@ const cards = normalizeCards(card);
 					const href = getCardHref(single);
 					const Tag = href ? 'a' : 'div';
 					const iconClass = getCardIconClass(single);
-					const imageSrc = iconClass ? '' : resolveImageSrc(single.immagine, compactMedia);
+					const imageSrc = iconClass ? '' : resolveImageSrc(single.immagine);
 
 					return (
 						<Tag class="cards_card" href={href || undefined}>
@@ -125,38 +121,37 @@ const cards = normalizeCards(card);
 
 <style>
 	.cards_block {
-		margin-bottom: 40px;
-		padding: 0 20px;
+		width: 100%;
+		margin: 0;
+		padding: 64px 0;
+		background: var(--lex-cream, #ddd);
 	}
 
 	.cards_block_inner {
-		max-width: var(--max-width);
+		width: min(1240px, calc(100% - 40px));
 		margin: 0 auto;
-		padding: 48px;
-		border-radius: var(--radius-lg);
-		background-color: var(--surface);
-		box-shadow: var(--shadow-card);
 	}
 
 	.cards_block_title {
 		margin: 0 0 32px;
 		color: #000;
-		font-size: clamp(42px, 6vw, 64px);
-		line-height: .95;
+		max-width: 780px;
+		font-size: clamp(34px, 4vw, 52px);
+		line-height: 1.05;
+		letter-spacing: -.05em;
 	}
 
 	.cards_block_title :global(span) {
-		color: var(--primary);
-	}
-
-	.cards_block_inner :global(span) {
-		color: var(--primary);
+		padding-inline: .12em;
+		border-radius: 6px;
+		background: #00ec10;
+		color: #000;
 	}
 
 	.cards_grid {
 		display: grid;
 		grid-template-columns: repeat(3, minmax(0, 1fr));
-		gap: 24px;
+		gap: 16px;
 		margin-bottom: 0;
 	}
 
@@ -164,35 +159,36 @@ const cards = normalizeCards(card);
 		display: flex;
 		flex-direction: column;
 		gap: 12px;
-		padding: 26px 20px;
-		background: var(--surface-muted);
-		border: 1px solid var(--border);
-		border-radius: 22px;
-		color: var(--nero);
-		transition: transform 200ms ease, box-shadow 200ms ease;
-		min-height: 100%;
-		box-shadow: none;
-		text-align: center;
-		align-items: center;
-		min-height: 250px;
-		justify-content: center;
+		min-width: 0;
+		padding: 30px;
+		background: #fbf7f5;
+		border: 1px solid rgba(14,14,15,.1);
+		border-radius: 30px;
+		color: var(--lex-dark);
+		transition: border-color 200ms ease, background 200ms ease;
+		text-align: left;
+		align-items: flex-start;
+		overflow-wrap: anywhere;
 	}
 
 	a.cards_card:hover {
-		transform: translateY(-4px);
-		box-shadow: var(--shadow-card);
+		border-color: #000;
+		background: #fff;
 	}
+	a.cards_card:focus-visible { outline: 3px solid #000; outline-offset: 4px; }
 
 	.cards_card_title {
 		margin: 4px 0 0;
-		font-size: 22px;
-		line-height: 24px;
+		font-size: 20px;
+		line-height: 1.3;
+		letter-spacing: -.03em;
 	}
 
 	.cards_card_description {
 		margin: 4px 0 0;
-		font-size: 16px;
-		line-height: 22px;
+		color: #5d5d63;
+		font-size: 15px;
+		line-height: 1.7;
 	}
 
 	.cards_card_media img {
@@ -205,16 +201,14 @@ const cards = normalizeCards(card);
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 88px;
-		height: 88px;
+		width: 42px;
+		height: 42px;
 		margin-bottom: 8px;
-		border-radius: 50%;
-		background: var(--primary);
-		box-shadow: 0 12px 22px rgba(0, 236, 16, 0.24);
+		background: transparent;
 	}
 
 	.cards_card_icon i {
-		color: var(--nero);
+		color: #00ec10;
 		font-size: 38px;
 	}
 
@@ -233,11 +227,11 @@ const cards = normalizeCards(card);
 
 	@media (max-width: 640px) {
 		.cards_block {
-			padding: 0 10px;
+			padding: 48px 0;
 		}
 
 		.cards_block_inner {
-			padding: 32px 20px;
+			width: calc(100% - 28px);
 		}
 
 		.cards_grid {

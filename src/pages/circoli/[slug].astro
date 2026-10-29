@@ -1,17 +1,30 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { circoloIdFromSlug, fetchCircoloById } from '../../lib/supabase';
+import { assertSupabasePublicConfig, circoloIdFromSlug, circoloSlug, fetchCircoloById, fetchCircoli } from '../../lib/supabase';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+	assertSupabasePublicConfig();
+	const circoli = await fetchCircoli();
+	return circoli.map((circolo) => ({ params: { slug: circoloSlug(circolo) }, props: { circolo } }));
+}
 
 const routeSlug = String(Astro.params.slug || '').trim();
 const circoloId = circoloIdFromSlug(routeSlug);
-const circolo = circoloId ? await fetchCircoloById(circoloId) : null;
+const circolo = Astro.props.circolo || (circoloId ? await fetchCircoloById(circoloId) : null);
 
 if (!circolo) {
 	Astro.response.status = 404;
 }
 
 const title = circolo?.nomecircolo || 'Circolo non trovato';
-const description = circolo?.desc_ai || [circolo?.indirizzo, circolo?.paese, circolo?.provincia].filter(Boolean).join(', ');
+const seoName = circolo?.nomecircolo?.trim() || (circolo ? `Circolo golf ${circolo.idcircolo}` : 'Circolo non trovato');
+const seoLocation = [circolo?.paese?.trim(), circolo?.provincia?.trim()].filter(Boolean).join(', ');
+const seoTitle = seoLocation ? `${seoName} - ${seoLocation}` : seoName;
+const description = circolo
+	? `Consulta la scheda di ${seoName}${seoLocation ? ` (${seoLocation})` : ''} su Golfista: informazioni e recapiti disponibili del circolo.`
+	: 'Il circolo richiesto non esiste o non è disponibile. Consulta l’elenco dei circoli golf presenti su Golfista.';
 const mapHref =
 	circolo?.lat && circolo?.lon
 		? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${circolo.lat},${circolo.lon}`)}`
@@ -32,14 +45,17 @@ const details = circolo
 
 <BaseLayout
 	title={title}
-	seoTitle={title}
-	seoDescription={description || `Scheda del circolo ${title} su Golfista.`}
+	seoTitle={seoTitle}
+	seoDescription={description}
 	canonicalPath={routeSlug ? `/circoli/${routeSlug}` : '/circoli'}
 	noindex={!circolo}
 >
 	{circolo ? (
 		<>
 			<section class="club_detail_hero">
+				<div class="club_hero_inner">
+				<a href="/circoli" class="back_link"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Tutti i circoli</a>
+				<div class="club_cover_frame">
 				{coverImage && (
 					<img
 						src={coverImage}
@@ -51,8 +67,8 @@ const details = circolo
 						onerror="if(!this.dataset.triedOne){this.dataset.triedOne='1';this.src=this.dataset.fallbackOne;}else if(!this.dataset.triedTwo){this.dataset.triedTwo='1';this.src=this.dataset.fallbackTwo;}else{this.style.display='none';}"
 					/>
 				)}
+				</div>
 				<div class="club_detail_overlay">
-					<a href="/circoli" class="back_link"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Tutti i circoli</a>
 					<div class="club_identity">
 						<img
 							src={logoImage}
@@ -68,6 +84,7 @@ const details = circolo
 							)}
 						</div>
 					</div>
+				</div>
 				</div>
 			</section>
 
@@ -97,7 +114,7 @@ const details = circolo
 
 						<div class="club_actions">
 							{circolo.website && (
-								<a href={circolo.website} target="_blank" rel="noopener noreferrer" class="MainButton">
+								<a href={circolo.website} target="_blank" rel="noopener noreferrer" class="primary_button">
 									Sito web
 								</a>
 							)}
@@ -113,46 +130,52 @@ const details = circolo
 		<section class="club_not_found">
 			<h1>Circolo non trovato</h1>
 			<p>Il circolo richiesto non esiste o non è disponibile.</p>
-			<a href="/circoli" class="MainButton">Torna ai circoli</a>
+			<a href="/circoli" class="primary_button">Torna ai circoli</a>
 		</section>
 	)}
 </BaseLayout>
 
 <style>
 	.club_detail_hero {
-		position: relative;
-		min-height: 430px;
-		background: #101810;
-		color: #fff;
+		padding: 36px 20px 0;
+		background: var(--lex-cream, #ddd);
+		color: #0e0e0f;
+	}
+
+	.club_hero_inner {
+		max-width: 1240px;
+		margin: 0 auto;
+	}
+
+	.club_cover_frame {
+		margin-top: 28px;
+		aspect-ratio: 3 / 1;
+		border: 1px solid rgba(14, 14, 15, 0.1);
+		border-radius: 30px;
 		overflow: hidden;
+		background: #0e0e0f;
 	}
 
 	.club_cover {
-		position: absolute;
-		inset: 0;
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-		opacity: 0.55;
 	}
 
 	.club_detail_overlay {
-		position: relative;
-		z-index: 1;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-end;
-		max-width: var(--max-width);
-		min-height: 430px;
-		margin: 0 auto;
-		padding: 42px 20px;
+		padding: 36px 0 0;
 	}
 
 	.back_link {
-		align-self: flex-start;
-		margin-bottom: auto;
-		color: inherit;
-		font-weight: 700;
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		padding: 10px 16px;
+		border: 1px solid rgba(14, 14, 15, 0.1);
+		border-radius: 999px;
+		background: #fbf7f5;
+		font-size: 13px;
+		font-weight: 500;
 		text-decoration: none;
 	}
 
@@ -160,56 +183,89 @@ const details = circolo
 		display: flex;
 		align-items: center;
 		gap: 24px;
+		overflow-wrap: anywhere;
+	}
+
+	.club_identity > div {
+		min-width: 0;
 	}
 
 	.club_logo {
+		flex-shrink: 0;
 		width: 110px;
 		height: 110px;
 		object-fit: contain;
-		border-radius: 24px;
-		background: #fff;
+		border: 1px solid rgba(14, 14, 15, 0.1);
+		border-radius: 30px;
+		background: #fbf7f5;
 		padding: 14px;
 	}
 
 	.eyebrow {
-		margin: 0 0 8px;
-		font-weight: 700;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--primary);
+		display: inline-block;
+		margin: 0 0 14px;
+		padding: 6px 12px;
+		border: 1px solid rgba(14, 14, 15, 0.1);
+		border-radius: 999px;
+		font-size: 12px;
+		font-weight: 500;
 	}
 
 	.club_identity h1 {
 		margin: 0;
-		font-size: clamp(38px, 6vw, 82px);
-		line-height: 0.95;
+		font-size: clamp(38px, 5.5vw, 72px);
+		line-height: 1.08;
+		letter-spacing: -0.055em;
+	}
+
+	.club_identity h1 + p {
+		margin: 16px 0 0;
+		font-size: 15px;
+		color: #55555b;
 	}
 
 	.club_detail_body,
 	.club_not_found {
-		padding: 56px 20px 80px;
+		padding: 40px 20px 88px;
+		background: var(--lex-cream, #ddd);
+		color: #0e0e0f;
 	}
 
 	.club_detail_grid {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) 360px;
-		gap: 28px;
-		max-width: var(--max-width);
+		grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
+		align-items: start;
+		gap: 24px;
+		max-width: 1240px;
 		margin: 0 auto;
 	}
 
 	.club_description,
 	.club_sidebar,
 	.club_not_found {
-		border-radius: 26px;
-		background: #fff;
-		padding: 30px;
-		box-shadow: 0 12px 34px rgba(0, 0, 0, 0.08);
+		min-width: 0;
+		border: 1px solid rgba(14, 14, 15, 0.1);
+		border-radius: 30px;
+		background: #fbf7f5;
+		padding: 32px;
+		overflow-wrap: anywhere;
 	}
 
-	.rich_text p {
-		font-size: 18px;
-		line-height: 1.7;
+	.club_description h2,
+	.club_sidebar h2 {
+		margin: 0 0 24px;
+		font-size: 28px;
+		letter-spacing: -0.045em;
+	}
+
+	.club_description p {
+		font-size: 15.5px;
+		line-height: 1.85;
+		color: #55555b;
+	}
+
+	.club_description p:last-child {
+		margin-bottom: 0;
 	}
 
 	dl {
@@ -218,17 +274,19 @@ const details = circolo
 
 	dl div {
 		padding: 14px 0;
-		border-bottom: 1px solid #e8e8e8;
+		border-bottom: 1px solid rgba(14, 14, 15, 0.1);
 	}
 
 	dt {
-		font-weight: 800;
-		color: var(--primary);
+		font-size: 12px;
+		font-weight: 500;
+		color: #66666c;
 	}
 
 	dd {
 		margin: 5px 0 0;
-		line-height: 1.45;
+		font-size: 14px;
+		line-height: 1.65;
 	}
 
 	.club_actions {
@@ -237,20 +295,41 @@ const details = circolo
 		margin-top: 24px;
 	}
 
+	.primary_button,
 	.secondary_button {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		min-height: 46px;
-		border: 1px solid var(--primary);
+		min-height: 48px;
+		padding: 12px 20px;
+		border: 1px solid rgba(14, 14, 15, 0.2);
 		border-radius: 999px;
-		color: inherit;
-		font-weight: 700;
+		color: #0e0e0f;
+		font-size: 13px;
+		font-weight: 500;
+		text-align: center;
 		text-decoration: none;
 	}
 
+	.primary_button {
+		background: #00ec10;
+		border-color: transparent;
+	}
+
+	.primary_button:hover,
+	.secondary_button:hover,
+	.back_link:hover {
+		background: #0e0e0f;
+		color: #fbf7f5;
+	}
+
+	a:focus-visible {
+		outline: 3px solid #0e0e0f;
+		outline-offset: 4px;
+	}
+
 	.club_not_found {
-		max-width: 760px;
+		width: min(760px, calc(100% - 40px));
 		margin: 60px auto;
 	}
 
@@ -262,6 +341,26 @@ const details = circolo
 		.club_identity {
 			align-items: flex-start;
 			flex-direction: column;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.club_detail_hero {
+			padding: 24px 14px 0;
+		}
+		.club_cover_frame {
+			aspect-ratio: 16 / 10;
+		}
+		.club_detail_body {
+			padding: 28px 14px 56px;
+		}
+		.club_description,
+		.club_sidebar {
+			padding: 24px;
+		}
+		.club_logo {
+			width: 88px;
+			height: 88px;
 		}
 	}
 </style>

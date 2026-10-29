@@ -1,241 +1,729 @@
 ---
+import { primaryNavigation, socialLinks } from '../data/navigation';
 
-import { directusAssetUrl, directusItems, directusSingleton } from '../lib/directus';
-
-interface MenuItem {
-	id?: number | string;
-	sort?: number | null;
-	label?: string;
-	custom_href?: string;
-	pages?: { pages_id?: PageItem | number | string }[] | PageItem[];
-}
-
-interface Menu {
-	id: number;
-	slug?: string;
-	titolo?: string;
-	menu_items?: MenuItem[] | (number | string)[];
-}
-
-interface PageItem {
-	id?: number;
-	slug?: string;
-	title?: string;
-}
-
-interface Options {
-	logo_dark?: string;
-	logo_light?: string;
-	site_name?: string;
-	contact_address?: string;
-	contact_phone?: string;
-	contact_email?: string;
-	maps_url?: string;
-	instagram_url?: string;
-	facebook_url?: string;
-}
-
-let logoDarkSrc =
-	import.meta.env.PUBLIC_LOGO_DARK || import.meta.env.PUBLIC_LOGO_LIGHT || '/favicon.svg';
-let options: Options | null = null;
-const currentPath = Astro.url?.pathname ?? '/';
-
-let menuItems: MenuItem[] = [];
-
-try {
-	options = await directusSingleton<Options>('options', {
-		fields: 'logo_dark,site_name,contact_address,contact_phone,contact_email,maps_url,instagram_url,facebook_url',
-	});
-	if (options?.logo_dark) {
-		logoDarkSrc = resolveImageSrc(options.logo_dark);
-	}
-
-	const menus = await directusItems<Menu>('Menus', {
-		'filter[slug][_eq]': 'main',
-		fields:
-			'menu_items.menu_items_id.id,menu_items.menu_items_id.sort,menu_items.menu_items_id.label,menu_items.menu_items_id.custom_href,menu_items.menu_items_id.pages.pages_id.id,menu_items.menu_items_id.pages.pages_id.slug,menu_items.menu_items_id.pages.pages_id.title',
-	});
-	const menu = menus[0];
-	const rawItems = Array.isArray(menu?.menu_items) ? menu.menu_items : [];
-	const itemObjects = rawItems
-		.map((item) => {
-			if (!item || typeof item !== 'object') return null;
-			if ('menu_items_id' in item && item.menu_items_id && typeof item.menu_items_id === 'object') {
-				return item.menu_items_id as MenuItem;
-			}
-			return item as MenuItem;
-		})
-		.filter((item): item is MenuItem => Boolean(item));
-
-	menuItems = itemObjects.sort((a, b) => (a.sort ?? 9999) - (b.sort ?? 9999));
-} catch (error) {
-	console.error('Error fetching menu from Directus:', error);
-}
-
-function resolveImageSrc(value: string) {
-	return directusAssetUrl(value);
-}
-
-function getItemPage(item: MenuItem): PageItem | null {
-	const rawPages = item.pages;
-	if (!rawPages || !Array.isArray(rawPages)) return null;
-	const normalizedPages = rawPages
-		.map((page) => {
-			if (!page) return null;
-			if (typeof page === 'object' && 'pages_id' in page) {
-				return page.pages_id && typeof page.pages_id === 'object'
-					? (page.pages_id as PageItem)
-					: null;
-			}
-			if (typeof page === 'object' && 'slug' in page) {
-				return page as PageItem;
-			}
-			return null;
-		})
-		.filter((page): page is PageItem => Boolean(page));
-
-	return normalizedPages[0] ?? null;
-}
-
-function getItemHref(item: MenuItem) {
-	if (item.custom_href) return normalizeHref(item.custom_href);
-	const page = getItemPage(item);
-	if (!page?.slug || page.slug === 'home') return '/';
-	return `/${page.slug}`;
-}
-
-function normalizeHref(href: string) {
-	const raw = String(href || '').trim();
-	if (!raw) return '/';
-	if (raw.startsWith('#')) return raw;
-	if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
-	if (raw.startsWith('mailto:') || raw.startsWith('tel:')) return raw;
-	return raw.startsWith('/') ? raw : `/${raw}`;
-}
-
-function normalizePath(path: string) {
-	if (!path) return '/';
-	let cleanPath = path.split('?')[0].split('#')[0];
-	if (cleanPath.length > 1 && cleanPath.endsWith('/')) {
-		cleanPath = cleanPath.slice(0, -1);
-	}
-	return cleanPath;
-}
-
-function isCurrentMenuItem(href: string) {
-	if (!href) return false;
-	const base = Astro.url?.origin || 'http://localhost';
-	try {
-		const url = new URL(href, base);
-		return normalizePath(url.pathname) === normalizePath(currentPath);
-	} catch {
-		return false;
-	}
-}
-
-function getItemTitle(item: MenuItem, index: number) {
-	return (
-		item.label ||
-		getItemPage(item)?.title ||
-		`Link ${index + 1}`
-	);
-}
-
-function getMenuItemIdClass(item: MenuItem, index: number) {
-	const raw = item.id != null ? String(item.id) : `index-${index + 1}`;
-	const safe = raw.toLowerCase().replace(/[^a-z0-9_-]+/g, '-');
-	return `menu_item_id_${safe}`;
-}
-
-const siteName = options?.site_name || 'Golfista';
-const topbarLinks = [
-	options?.contact_address
-		? { href: options.maps_url || undefined, label: options.contact_address, external: Boolean(options.maps_url) }
-		: null,
-	options?.contact_phone
-		? { href: `tel:${options.contact_phone.replace(/\s+/g, '')}`, label: options.contact_phone }
-		: null,
-	options?.contact_email ? { href: `mailto:${options.contact_email}`, label: options.contact_email } : null,
-].filter(Boolean) as { href?: string; label: string; external?: boolean }[];
-const socialLinks = [
-	options?.instagram_url ? { href: options.instagram_url, label: 'Instagram', type: 'instagram' } : null,
-	options?.facebook_url ? { href: options.facebook_url, label: 'Facebook', type: 'facebook' } : null,
-].filter(Boolean) as { href: string; label: string; type: 'instagram' | 'facebook' }[];
+const navLinks = primaryNavigation;
+const isHome = Astro.url.pathname === '/';
 ---
-{topbarLinks.length > 0 && (
-	<div class="TopBar">
-		{topbarLinks.map((link) => (
-			<a href={link.href || '#'} target={link.external ? '_blank' : undefined}>
-				{link.label}
+
+<header class:list={['site-nav', { 'site-nav--home': isHome, 'is-stuck': !isHome }]}>
+	<div class="site-nav__container">
+		<div class="site-nav__bar">
+			<a class="site-nav__brand" href="/" aria-label="Golfista, vai alla homepage">
+				<img class="site-nav__logo site-nav__logo--light" src="/golfista/logo-white.svg" alt="Golfista" width="888" height="262" />
+				<img class="site-nav__logo site-nav__logo--dark" src="/golfista/logo-dark.svg" alt="" width="888" height="262" />
 			</a>
-		))}
-		{socialLinks.length > 0 && (
-			<div class="TopBarSocialLinks" aria-label="Social">
-				{socialLinks.map((social) => (
-					<a href={social.href} target="_blank" rel="noopener noreferrer" aria-label={social.label}>
-						<i class={`fa-brands ${social.type === 'instagram' ? 'fa-instagram' : 'fa-facebook-f'}`} aria-hidden="true"></i>
-						{social.type === 'instagram' ? (
-							<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.8 2h8.4A5.8 5.8 0 0122 7.8v8.4a5.8 5.8 0 01-5.8 5.8H7.8A5.8 5.8 0 012 16.2V7.8A5.8 5.8 0 017.8 2zm8.2 3H8a3 3 0 00-3 3v8a3 3 0 003 3h8a3 3 0 003-3V8a3 3 0 00-3-3zm-4 3a4 4 0 110 8 4 4 0 010-8zm0 2.4a1.6 1.6 0 100 3.2 1.6 1.6 0 000-3.2zM17.3 6.4a1.1 1.1 0 110 2.2 1.1 1.1 0 010-2.2z"></path></svg>
-						) : (
-							<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V4h-3c-3 0-5 2-5 5v3H6v4h3v6h4v-6h3l1-4h-4V9c0-.6.4-1 1-1z"></path></svg>
-						)}
+
+			<nav class="site-nav__links" aria-label="Sezioni della pagina">
+				{navLinks.map((item, index) => (
+					<a
+						class:list={['site-nav__link', { 'is-active': isHome && index === 0 }]}
+						href={item.href}
+					>
+						{item.label}
 					</a>
 				))}
+			</nav>
+
+			<div class="site-nav__actions">
+				<a class="site-nav__cta" href="/#pricing">Vedi i prezzi</a>
 			</div>
-		)}
+
+			<button
+				class="site-nav__toggle"
+				type="button"
+				aria-label="Apri menu"
+				aria-expanded="false"
+				aria-controls="site-menu"
+			>
+				<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+					<rect class="line-1" y="3" width="20" height="2"></rect>
+					<rect class="line-2" y="9" width="20" height="2"></rect>
+					<rect class="line-3" y="9" width="20" height="2"></rect>
+					<rect class="line-4" y="15" width="20" height="2"></rect>
+				</svg>
+			</button>
+		</div>
 	</div>
-)}
-<header class="site-header">
-	<nav aria-label="Menu principale">
-		<div>
-			<a href="/" aria-label={`Vai alla home page di ${siteName}`}>
-				<img class="MenuLogo" src={logoDarkSrc} alt={siteName} />
-			</a>
-		</div>
-		<div class="MenuItemsContainer">
-		{menuItems.map((item, index) => {
-			const href = getItemHref(item);
-			const title = getItemTitle(item, index);
-			const isCurrent = isCurrentMenuItem(href);
-			const idClass = getMenuItemIdClass(item, index);
-			const className = isCurrent
-				? `menu_item current_menu_item ${idClass}`
-				: `menu_item ${idClass}`;
-			return (
-				<a href={href} class={className}>
-					{title}
-				</a>
-			);
-		})}
-		</div>
-		<button class="hamburger_button mburger" type="button" aria-label="Menu" aria-expanded="false">
-			<i class="fa-solid fa-bars" aria-hidden="true"></i>
-		</button>
-	</nav>
 </header>
+
+<div class="site-menu" id="site-menu" role="dialog" aria-modal="true" aria-label="Menu" aria-hidden="true" inert>
+	<div class="site-menu__overlay" data-menu-close></div>
+
+	<aside class="site-menu__bar">
+		<header class="site-menu__head">
+			<a href="/" aria-label="Golfista, vai alla homepage">
+				<img src="/golfista/logo-dark.svg" alt="Golfista" width="888" height="262" />
+			</a>
+			<button class="site-menu__close" type="button" aria-label="Chiudi menu" data-menu-close>
+				<svg viewBox="0 0 24 24" aria-hidden="true">
+					<path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+				</svg>
+			</button>
+		</header>
+
+		<div class="site-menu__panel">
+			<form class="site-menu__search" role="search">
+				<input type="search" name="s" placeholder="Cerca..." aria-label="Cerca" autocomplete="off" />
+				<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+			</form>
+
+			<nav aria-label="Menu mobile">
+				<ul class="site-menu__nav">
+					{navLinks.map((item) => (
+						<li><a href={item.href}>{item.label}</a></li>
+					))}
+				</ul>
+			</nav>
+
+			<ul class="site-menu__account">
+				<li><a href="https://manager.golfista.app">Crea un account</a></li>
+				<li><a href="https://manager.golfista.app">Accedi</a></li>
+				<li>
+					<a class="site-menu__buy" href="https://manager.golfista.app" target="_blank" rel="noopener noreferrer">
+						Vai alla piattaforma
+						<i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+					</a>
+				</li>
+			</ul>
+
+			<ul class="site-menu__social" aria-label="Social">
+				{socialLinks.map((link) => (
+					<li><a href={link.href} target="_blank" rel="noopener noreferrer" aria-label={link.label}><i class={`fa-brands ${link.icon}`} aria-hidden="true"></i></a></li>
+				))}
+			</ul>
+
+			<div class="site-menu__theme">
+				<span>Seleziona tema:</span>
+				<label class="site-menu__switch">
+					<input type="checkbox" aria-label="Seleziona tema" />
+					<span aria-hidden="true"></span>
+				</label>
+			</div>
+		</div>
+	</aside>
+</div>
 
 <script is:inline>
 (() => {
-	const button = document.querySelector('.hamburger_button');
-	const menu = document.querySelector('.MenuItemsContainer');
-	const header = document.querySelector('.site-header');
-	if (!button || !menu) return;
-	button.addEventListener('click', () => {
-		const isOpen = menu.classList.toggle('is-open');
-		button.classList.toggle('is-active', isOpen);
-		button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-	});
+	const header = document.querySelector('.site-nav');
+	const toggle = header?.querySelector('.site-nav__toggle');
+	const menu = document.getElementById('site-menu');
+	if (!header || !toggle || !menu) return;
 
-	if (!header) return;
+	const isHome = header.classList.contains('site-nav--home');
+	const closeButtons = menu.querySelectorAll('[data-menu-close]');
+	const closeButton = menu.querySelector('.site-menu__close');
+	const searchForm = menu.querySelector('.site-menu__search');
+	const navItems = [...menu.querySelectorAll('.site-menu__nav a')];
+	const desktopLinks = [...header.querySelectorAll('.site-nav__link')];
+	let lastFocused = null;
 
-	const setSticky = () => {
-		const shouldStick = window.scrollY > 10;
-		header.classList.toggle('is-sticky', shouldStick);
-		document.body.style.paddingTop = shouldStick ? `${header.offsetHeight}px` : '';
+	const setScrollState = () => {
+		header.classList.toggle('is-stuck', !isHome || window.scrollY >= 1200);
 	};
 
-	setSticky();
-	window.addEventListener('scroll', setSticky, { passive: true });
-	window.addEventListener('resize', setSticky);
+	const setActiveLink = () => {
+		if (!isHome || !desktopLinks.length) return;
+		const sections = ['overview', 'features', 'how_it_works', 'pricing', 'clients_feedback']
+			.map((id) => document.getElementById(id))
+			.filter(Boolean);
+		if (!sections.length) return;
+
+		const marker = window.scrollY + window.innerHeight * 0.35;
+		let activeId = sections[0].id;
+		for (const section of sections) {
+			if (section.getBoundingClientRect().top + window.scrollY <= marker) activeId = section.id;
+		}
+		for (const link of desktopLinks) {
+			link.classList.toggle('is-active', (link.getAttribute('href') || '').endsWith(`#${activeId}`));
+		}
+	};
+
+	const onScroll = () => {
+		setScrollState();
+		setActiveLink();
+	};
+
+	const openMenu = () => {
+		lastFocused = document.activeElement;
+		document.body.classList.add('site-menu-open');
+		menu.classList.add('is-open');
+		menu.removeAttribute('inert');
+		menu.setAttribute('aria-hidden', 'false');
+		toggle.setAttribute('aria-expanded', 'true');
+		toggle.setAttribute('aria-label', 'Chiudi menu');
+		toggle.classList.add('is-open');
+		window.setTimeout(() => {
+			if (menu.classList.contains('is-open')) closeButton?.focus();
+		}, 300);
+	};
+
+	const closeMenu = () => {
+		document.body.classList.remove('site-menu-open');
+		menu.classList.remove('is-open');
+		menu.setAttribute('aria-hidden', 'true');
+		menu.setAttribute('inert', '');
+		toggle.setAttribute('aria-expanded', 'false');
+		toggle.setAttribute('aria-label', 'Apri menu');
+		toggle.classList.remove('is-open');
+		if (lastFocused instanceof HTMLElement) lastFocused.focus();
+	};
+
+	toggle.addEventListener('click', () => {
+		if (menu.classList.contains('is-open')) closeMenu();
+		else openMenu();
+	});
+
+	closeButtons.forEach((button) => button.addEventListener('click', closeMenu));
+	navItems.forEach((link) => link.addEventListener('click', closeMenu));
+	searchForm?.addEventListener('submit', (event) => event.preventDefault());
+
+	document.addEventListener('keydown', (event) => {
+		if (event.key === 'Escape' && menu.classList.contains('is-open')) closeMenu();
+	});
+
+	menu.addEventListener('keydown', (event) => {
+		if (event.key !== 'Tab' || !menu.classList.contains('is-open')) return;
+		const focusable = [...menu.querySelectorAll('a[href], button:not([disabled]), input:not([disabled])')]
+			.filter((element) => element instanceof HTMLElement && element.offsetParent !== null);
+		if (!focusable.length) return;
+		const first = focusable[0];
+		const last = focusable[focusable.length - 1];
+		if (event.shiftKey && document.activeElement === first) {
+			event.preventDefault();
+			last.focus();
+		} else if (!event.shiftKey && document.activeElement === last) {
+			event.preventDefault();
+			first.focus();
+		}
+	});
+
+	window.addEventListener('resize', () => {
+		if (window.innerWidth > 1080 && menu.classList.contains('is-open')) closeMenu();
+	});
+
+	window.addEventListener('scroll', onScroll, { passive: true });
+	window.addEventListener('load', onScroll);
+	setScrollState();
+	setActiveLink();
 })();
 </script>
+
+<style>
+	.site-nav {
+		--header-green: #00ec10;
+		--header-green-ink: #087a38;
+		--header-dark: #101013;
+		position: absolute;
+		inset: 0 0 auto;
+		z-index: 1100;
+		padding-top: 24px;
+		color: rgba(255, 255, 255, 0.94);
+		font-family: var(--font-body);
+	}
+
+	.site-nav.is-stuck {
+		position: fixed;
+	}
+
+	.site-nav__container {
+		width: 100%;
+		max-width: 1280px;
+		margin: 0 auto;
+		padding: 0 16px;
+		transition: max-width 0.25s ease;
+	}
+
+	.site-nav__bar {
+		position: relative;
+		display: flex;
+		width: 100%;
+		height: 80px;
+		align-items: center;
+	}
+
+	.site-nav__brand {
+		display: flex;
+		height: 58px;
+		flex: 0 0 auto;
+		align-items: center;
+	}
+
+	.site-nav__logo {
+		width: auto;
+		height: 58px;
+	}
+
+	.site-nav__logo--dark {
+		display: none;
+	}
+
+	.site-nav.is-stuck .site-nav__logo--light {
+		display: none;
+	}
+
+	.site-nav.is-stuck .site-nav__logo--dark {
+		display: block;
+	}
+
+	.site-nav__links {
+		position: absolute;
+		left: 50%;
+		display: flex;
+		align-items: center;
+		gap: 40px;
+		transform: translateX(-50%);
+	}
+
+	.site-nav__link {
+		display: flex;
+		align-items: center;
+		color: rgba(255, 255, 255, 0.94);
+		font-size: 18px;
+		font-weight: 500;
+		line-height: 1.5;
+		white-space: nowrap;
+		transition: color 0.18s ease;
+	}
+
+	.site-nav__link:hover,
+	.site-nav__link.is-active {
+		color: var(--header-green);
+	}
+
+	.site-nav__actions {
+		display: flex;
+		align-items: center;
+		margin-left: auto;
+	}
+
+	.site-nav__cta {
+		display: inline-flex;
+		height: 40px;
+		align-items: center;
+		justify-content: center;
+		padding: 0 24px;
+		border: 1px solid var(--header-green);
+		border-radius: 80px;
+		background: var(--header-green);
+		color: var(--header-dark);
+		font-size: 16px;
+		font-weight: 500;
+		line-height: 1;
+		white-space: nowrap;
+		transition: background 0.18s ease, border-color 0.18s ease;
+	}
+
+	.site-nav__cta:hover {
+		border-color: #00d40e;
+		background: #00d40e;
+	}
+
+	.site-nav__toggle {
+		display: none;
+		width: 20px;
+		height: 20px;
+		margin-left: auto;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: #fff;
+		cursor: pointer;
+		transition: color 0.18s ease;
+	}
+
+	.site-nav__toggle svg {
+		display: block;
+		width: 20px;
+		height: 20px;
+	}
+
+	.site-nav__toggle rect {
+		fill: currentColor;
+		transform-box: fill-box;
+		transform-origin: center;
+		transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+	}
+
+	.site-nav__toggle svg > .line-3 {
+		opacity: 0;
+	}
+
+	.site-nav__toggle.is-open svg > .line-1 {
+		opacity: 0;
+		transform: translateY(6px) scaleX(0);
+	}
+
+	.site-nav__toggle.is-open svg > .line-2 {
+		transform: rotate(45deg);
+	}
+
+	.site-nav__toggle.is-open svg > .line-3 {
+		opacity: 1;
+		transform: rotate(-45deg);
+	}
+
+	.site-nav__toggle.is-open svg > .line-4 {
+		opacity: 0;
+		transform: translateY(-6px) scaleX(0);
+	}
+
+	.site-nav.is-stuck {
+		padding-top: 12px;
+		color: var(--header-dark);
+	}
+
+	.site-nav.is-stuck .site-nav__container {
+		max-width: 1080px;
+	}
+
+	.site-nav.is-stuck .site-nav__bar {
+		height: 56px;
+		gap: 24px;
+		padding: 0 16px;
+		border: 1px solid rgba(0, 0, 0, 0.15);
+		border-radius: 800px;
+		background: rgba(255, 255, 255, 0.8);
+		box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.15);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+	}
+
+	.site-nav.is-stuck .site-nav__brand,
+	.site-nav.is-stuck .site-nav__logo {
+		height: 32px;
+	}
+
+	.site-nav.is-stuck .site-nav__links {
+		position: static;
+		gap: 20px;
+		margin-inline: auto;
+		transform: none;
+	}
+
+	.site-nav.is-stuck .site-nav__actions {
+		flex-shrink: 0;
+		margin-left: 0;
+	}
+
+	.site-nav.is-stuck .site-nav__cta {
+		height: 36px;
+		padding-inline: 16px;
+		font-size: 13px;
+	}
+
+	.site-nav.is-stuck .site-nav__link {
+		color: var(--header-dark);
+		font-size: 14px;
+	}
+
+	.site-nav.is-stuck .site-nav__link:hover,
+	.site-nav.is-stuck .site-nav__link.is-active {
+		color: var(--header-green-ink);
+	}
+
+	.site-nav.is-stuck .site-nav__toggle {
+		color: var(--header-dark);
+	}
+
+	.site-menu {
+		position: fixed;
+		inset: 0;
+		z-index: 1200;
+		visibility: hidden;
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.24s ease, visibility 0.24s ease;
+	}
+
+	.site-menu.is-open {
+		visibility: visible;
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	.site-menu__overlay {
+		position: absolute;
+		inset: 0;
+		background: rgba(14, 14, 15, 0.5);
+	}
+
+	.site-menu__bar {
+		position: absolute;
+		inset: 0 auto 0 0;
+		display: flex;
+		width: 270px;
+		max-width: calc(100% - 48px);
+		flex-direction: column;
+		padding: 20px;
+		overflow-y: auto;
+		background: #fff;
+		color: #212529;
+		font-family: var(--font-body);
+		transform: translateX(-100%);
+		transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+
+	.site-menu.is-open .site-menu__bar {
+		transform: translateX(0);
+	}
+
+	.site-menu__head {
+		display: flex;
+		flex: 0 0 48px;
+		align-items: flex-start;
+		justify-content: space-between;
+		padding-bottom: 16px;
+	}
+
+	.site-menu__head > a {
+		display: flex;
+		height: 32px;
+		align-items: center;
+	}
+
+	.site-menu__head img {
+		width: auto;
+		height: 36px;
+	}
+
+	.site-menu__close {
+		display: grid;
+		width: 32px;
+		height: 32px;
+		margin: 1px 0 0;
+		padding: 0;
+		place-items: center;
+		border: 0;
+		border-radius: 4px;
+		background: transparent;
+		color: #212529;
+		cursor: pointer;
+		transition: color 0.15s ease, transform 0.15s ease;
+	}
+
+	.site-menu__close:hover {
+		color: var(--header-green-ink);
+		transform: rotate(90deg);
+	}
+
+	.site-menu__close svg {
+		width: 22px;
+		height: 22px;
+	}
+
+	.site-menu__panel {
+		display: flex;
+		flex: 1 0 auto;
+		flex-direction: column;
+		font-size: 16px;
+	}
+
+	.site-menu__search {
+		position: relative;
+		flex: 0 0 auto;
+		margin-bottom: 16px;
+	}
+
+	.site-menu__search input {
+		width: 100%;
+		height: 40px;
+		padding: 0 12px 0 36px;
+		border: 1px solid rgba(131, 131, 131, 0.25);
+		border-radius: 8px;
+		outline: 0;
+		background: #fff;
+		color: #212529;
+		font: inherit;
+		font-size: 14px;
+	}
+
+	.site-menu__search input:focus {
+		border-color: var(--header-green);
+	}
+
+	.site-menu__search i {
+		position: absolute;
+		top: 50%;
+		left: 12px;
+		color: #838383;
+		font-size: 13px;
+		transform: translateY(-50%);
+		pointer-events: none;
+	}
+
+	.site-menu__nav,
+	.site-menu__account,
+	.site-menu__social {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.site-menu__nav,
+	.site-menu__account {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.site-menu__nav a,
+	.site-menu__account a {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		padding: 5px 0;
+		color: #212529;
+		font-size: 16px;
+		font-weight: 500;
+		line-height: 24px;
+		transition: color 0.15s ease;
+	}
+
+	.site-menu__nav a:hover,
+	.site-menu__account a:hover {
+		color: var(--header-green-ink);
+	}
+
+	.site-menu__account {
+		margin-top: 16px;
+		padding-top: 24px;
+		border-top: 1px solid rgba(14, 14, 15, 0.09);
+	}
+
+	.site-menu__buy i {
+		font-size: 10px;
+	}
+
+	.site-menu__social {
+		display: flex;
+		align-items: center;
+		gap: 24px;
+		margin-top: 32px;
+	}
+
+	.site-menu__social a {
+		display: grid;
+		width: 20px;
+		height: 24px;
+		place-items: center;
+		color: #212529;
+		font-size: 17px;
+		transition: color 0.15s ease;
+	}
+
+	.site-menu__social a:hover {
+		color: var(--header-green-ink);
+	}
+
+	.site-menu__theme {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		margin-top: auto;
+		padding: 32px 0 4px;
+	}
+
+	.site-menu__theme > span {
+		color: rgba(33, 37, 41, 0.6);
+		font-size: 14px;
+		line-height: 1.4;
+	}
+
+	.site-menu__switch {
+		position: relative;
+		display: inline-block;
+		width: 44px;
+		height: 24px;
+	}
+
+	.site-menu__switch input {
+		width: 0;
+		height: 0;
+		opacity: 0;
+	}
+
+	.site-menu__switch > span {
+		position: absolute;
+		inset: 0;
+		border-radius: 999px;
+		background: #d9d9d9;
+		cursor: pointer;
+		transition: background 0.2s ease;
+	}
+
+	.site-menu__switch > span::before {
+		position: absolute;
+		top: 3px;
+		left: 3px;
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+		background: #fff;
+		content: '';
+		transition: transform 0.2s ease;
+	}
+
+	.site-menu__switch input:checked + span {
+		background: var(--header-green);
+	}
+
+	.site-menu__switch input:checked + span::before {
+		transform: translateX(20px);
+	}
+
+	:global(body.site-menu-open) {
+		overflow: hidden;
+	}
+
+	@media (max-width: 1080px) {
+		.site-nav {
+			padding-top: 0;
+		}
+
+		.site-nav__brand,
+		.site-nav__logo {
+			height: 46px;
+		}
+
+		.site-nav__bar {
+			height: 64px;
+		}
+
+		.site-nav__links,
+		.site-nav__actions {
+			display: none;
+		}
+
+		.site-nav__toggle {
+			display: block;
+		}
+
+		.site-nav.is-stuck {
+			padding-top: 12px;
+		}
+
+		.site-nav.is-stuck .site-nav__container {
+			max-width: calc(100% - 24px);
+			padding: 0;
+		}
+
+		.site-nav.is-stuck .site-nav__bar {
+			height: 52px;
+			padding: 0 16px;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.site-nav__container,
+		.site-nav__link,
+		.site-nav__cta,
+		.site-nav__toggle rect,
+		.site-menu,
+		.site-menu__bar,
+		.site-menu__close,
+		.site-menu__switch > span,
+		.site-menu__switch > span::before {
+			transition: none;
+		}
+	}
+</style>

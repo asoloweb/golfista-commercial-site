@@ -1,40 +1,17 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PageContent from '../components/PageContent.astro';
-import { directusItems } from '../lib/directus';
+import HomeLanding from '../components/HomeLanding.astro';
+import { getStaticPage } from '../data/site';
 
-type Page = {
-	title?: string;
-	Titolo?: string;
-	seo_title?: string;
-	seo_desc?: string;
-	hide_page_header?: boolean;
-	page_header?: string;
-	editor?: unknown[];
-};
+export const prerender = true;
 
-async function fetchHomePage() {
-	const pages = await directusItems<Page>('pages', {
-		fields:
-			'*,editor.sort,editor.collection,editor.item.*,editor.item.slider.*,editor.item.slider.slides.collection,editor.item.slider.slides.item.*,editor.item.card.single_card_id.*,editor.item.card.single_card_id.link.id,editor.item.card.single_card_id.link.slug,editor.item.card.single_card_id.link.title,editor.item.accordion.single_accordion_id.*',
-		'filter[status][_eq]': 'published',
-		'filter[slug][_eq]': 'home',
-		'sort[]': 'sort',
-	});
-	return pages[0] ?? null;
-}
-
-const page: Page | null = await fetchHomePage();
+const page = getStaticPage('home')!;
 ---
 
 <BaseLayout
-	title={page?.title || page?.Titolo || 'Home'}
-	seoTitle={page?.seo_title}
-	seoDescription={page?.seo_desc}
+	title={page.title}
+	seoTitle={page.seo_title}
+	seoDescription={page.seo_desc}
 >
-	<PageContent
-		page={page}
-		notFoundTitle="Home non trovata"
-		notFoundMessage="La pagina richiesta non esiste."
-	/>
+	<HomeLanding />
 </BaseLayout>

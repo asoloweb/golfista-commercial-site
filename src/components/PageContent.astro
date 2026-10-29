@@ -5,7 +5,7 @@ import SliderBlock from '../components/slider_block.astro';
 import CardsBlock from '../components/cards_block.astro';
 import AccordionBlock from '../components/accordion_block.astro';
 import GoogleReviewsBlock from '../components/google_reviews_block.astro';
-import { directusAssetUrl } from '../lib/directus';
+import PageHero from './PageHero.astro';
 
 type HeroBlockItem = {
 	id: number;
@@ -151,7 +151,8 @@ const pageSlug =
 		: '';
 const isContattiPage = pageSlug.trim().toLowerCase() === 'contatti';
 const isPrezziPage = pageSlug.trim().toLowerCase() === 'prezzi';
-const showPageHeader = page ? showHeader && !page.hide_page_header : false;
+const isInternalPage = ['gestionale', 'app', 'prezzi', 'contatti', 'chi-siamo'].includes(pageSlug);
+const showPageHeader = page ? isInternalPage || (showHeader && !page.hide_page_header) : false;
 
 const curatedHeroImages: Record<string, string> = {
 	'home:1': '/images/golf/golfer-swing.jpg',
@@ -161,14 +162,6 @@ const curatedHeroImages: Record<string, string> = {
 	'app:5': '/images/golf/golf-putting.jpg',
 	'app:6': '/images/golf/golfer-sunset.jpg',
 	'chi-siamo:7': '/images/golf/golf-players-together.jpg',
-};
-
-const curatedPageHeaderImages: Record<string, string> = {
-	gestionale: '/images/golf/golf-carts-sunset.jpg',
-	app: '/images/golf/golf-swing-course.jpg',
-	contatti: '/images/golf/golf-ball-tee.jpg',
-	'chi-siamo': '/images/golf/golf-course-twilight.jpg',
-	prezzi: '/images/golf/golf-sunset-pond.jpg',
 };
 
 const curatedSlideImages: Record<string, string> = {
@@ -182,13 +175,6 @@ const curatedSlideImages: Record<string, string> = {
 const curatedSlideTitles: Record<string, string> = {
 	'1:1': 'CONTROLLA IL TUO CIRCOLO CON <span>GOLFISTA</span>',
 };
-
-const pageHeaderImage = curatedPageHeaderImages[pageSlug] || (page?.featured_image ? resolveImageSrc(page.featured_image) : '');
-
-function resolveImageSrc(value: string) {
-	if (!value) return '';
-	return directusAssetUrl(value, { format: 'webp', quality: 78, width: 1600, height: 900, fit: 'cover' });
-}
 
 function getCuratedHeroImage(item: HeroBlockItem) {
 	const id = item.id != null ? String(item.id) : '';
@@ -307,15 +293,7 @@ function getBlockDomId(block: EditorEntry, collection: string, index: number) {
 {page ? (
 	<>
 		{showPageHeader ? (
-			<div
-				class="page_header"
-				style={pageHeaderImage ? `background-image: url('${pageHeaderImage}')` : undefined}
-			>
-				<div class="page_header_inner">
-					{pageTitle && <h1 data-aos="fade-up" data-aos-duration="1500">{pageTitle}</h1>}
-					{pageDescription && <p data-aos="fade-up" data-aos-duration="1800">{pageDescription}</p>}
-				</div>
-			</div>
+			<PageHero title={pageTitle} description={pageDescription} />
 		) : (
 			<>
 				{pageTitle && (
@@ -413,6 +391,8 @@ function getBlockDomId(block: EditorEntry, collection: string, index: number) {
 
 			return (
 				<section id={getBlockDomId(block, collection, index)} class={`editor_block editor_block_${collection}`}>
+					{pageSlug === 'gestionale' && collection === 'cards_block' && <span id="funzioni" />}
+					{pageSlug === 'app' && collection === 'hero_block' && index === 1 && <span id="app" />}
 					{blockContent}
 				</section>
 			);
@@ -460,3 +440,56 @@ function getBlockDomId(block: EditorEntry, collection: string, index: number) {
 		<p>{notFoundMessage}</p>
 	</>
 )}
+
+<style>
+	.editor_block {
+		width: 100%;
+		max-width: none;
+		scroll-margin-top: 120px;
+	}
+	.pricing_section {
+		width: 100%;
+		max-width: none;
+		margin: 0;
+		padding: 88px max(20px, calc((100% - 1240px) / 2));
+		border-radius: 0;
+		background: var(--lex-dark);
+		box-shadow: none;
+		color: var(--lex-cream, #ddd);
+	}
+	.pricing_intro { max-width: 760px; margin: 0 auto 44px; text-align: center; }
+	.pricing_eyebrow {
+		display: inline-flex;
+		padding: 8px 14px;
+		border: 1px solid rgba(255,255,255,.25);
+		border-radius: 999px;
+		font-size: 11px;
+		font-weight: 500;
+		color: #ddd;
+		letter-spacing: .1em;
+		text-transform: uppercase;
+	}
+	.pricing_intro h2 { margin: 8px 0 20px; color: inherit; font-size: clamp(34px, 4vw, 52px); line-height: 1.05; letter-spacing: -.05em; }
+	.pricing_intro > p:last-child { color: #bdbdc1; font-size: 15px; line-height: 1.7; }
+	.pricing_grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; max-width: 940px; margin-inline: auto; }
+	.pricing_card { display: flex; min-width: 0; flex-direction: column; align-items: flex-start; padding: 36px; border: 1px solid rgba(14,14,15,.1); border-radius: 30px; background: #fbf7f5; color: var(--lex-dark); }
+	.pricing_card_featured { background: #00ec10; color: #000; border-color: transparent; box-shadow: none; }
+	.pricing_badge { position: static; align-self: flex-end; margin-bottom: 16px; padding: 6px 12px; border-radius: 999px; background: #000; color: #fff; font-size: 11px; font-weight: 600; letter-spacing: .06em; }
+	.pricing_card h3 { margin: 0 0 20px; font-size: 22px; }
+	.pricing_price { font-size: clamp(42px, 5vw, 58px); font-weight: 600; line-height: 1.1; letter-spacing: -.05em; }
+	.pricing_price span { font-size: 14px; font-weight: 400; letter-spacing: 0; }
+	.pricing_card p { margin: 20px 0 0; color: #424247; font-size: 15px; line-height: 1.7; }
+	.pricing_card .pricing_annual { font-size: 13px; }
+	.pricing_card ul { display: grid; gap: 12px; width: 100%; margin: 26px 0 30px; padding: 24px 0 0; border-top: 1px solid rgba(14,14,15,.15); list-style: none; font-size: 14px; line-height: 1.7; }
+	.pricing_card li::before { content: '\2713'; width: auto; height: auto; margin-right: 10px; background: transparent; color: #11604d; }
+	.pricing_card_featured li::before { color: #000; }
+	.pricing_button { display: inline-flex; width: 100%; min-height: 52px; align-items: center; justify-content: center; margin-top: auto; padding: 14px 20px; border-radius: 999px; background: #000; color: #fff; font-size: 14px; font-weight: 600; text-align: center; text-transform: none; overflow-wrap: anywhere; }
+	.pricing_card_featured .pricing_button { background: #000; color: #fff; }
+	.pricing_button:hover { background: #252528; box-shadow: none; transform: none; }
+	.pricing_button:focus-visible { outline: 3px solid #fff; outline-offset: 4px; box-shadow: 0 0 0 7px #000; }
+	@media (max-width: 720px) {
+		.pricing_section { padding: 60px 14px; }
+		.pricing_grid { grid-template-columns: minmax(0, 1fr); }
+		.pricing_card { padding: 28px 24px; }
+	}
+</style>

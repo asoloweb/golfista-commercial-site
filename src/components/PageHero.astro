@@ -1,0 +1,96 @@
+---
+interface Props {
+	title: string;
+	highlight?: string;
+	eyebrow?: string;
+	description?: string;
+	id?: string;
+}
+
+const { title, highlight = '', eyebrow = 'Golfista', description = '', id = 'page-title' } = Astro.props;
+---
+
+<header class="page-intro" aria-labelledby={id}>
+	<div class="page-intro__inner">
+		<p class="page-intro__badge"><span aria-hidden="true"></span>{eyebrow}</p>
+		<h1 id={id}>{title}{highlight && <> <span class="page-intro__mark">{highlight}</span></>}</h1>
+		{description && <p class="page-intro__description">{description}</p>}
+		{Astro.slots.has('default') && <div class="page-intro__extra"><slot /></div>}
+	</div>
+</header>
+
+<style>
+	.page-intro {
+		padding: 76px 20px 68px;
+		background: var(--lex-cream);
+		color: var(--lex-dark);
+	}
+
+	.page-intro__inner {
+		width: min(100%, 1240px);
+		margin-inline: auto;
+		text-align: center;
+	}
+
+	.page-intro__badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		margin: 0 0 24px;
+		padding: 8px 14px;
+		border: 1px solid rgba(14, 14, 15, 0.14);
+		border-radius: 999px;
+		color: #505057;
+		font-size: 12px;
+		font-weight: 500;
+	}
+
+	.page-intro__badge > span {
+		width: 7px;
+		height: 7px;
+		border-radius: 50%;
+		background: var(--lex-green);
+		box-shadow: 0 0 0 4px rgba(20, 113, 91, 0.1);
+	}
+
+	.page-intro h1 {
+		max-width: 1000px;
+		margin: 0 auto;
+		font-size: clamp(42px, 6.2vw, 76px);
+		font-weight: 600;
+		line-height: 1.08;
+		letter-spacing: -0.055em;
+		overflow-wrap: anywhere;
+	}
+
+	.page-intro__mark {
+		padding-inline: 0.1em;
+		border-radius: 0.1em;
+		background: #00ec10;
+		color: #000;
+		box-decoration-break: clone;
+		-webkit-box-decoration-break: clone;
+	}
+
+	.page-intro__description {
+		max-width: 720px;
+		margin: 24px auto 0;
+		color: #5d5d63;
+		font-size: 15.5px;
+		line-height: 1.75;
+	}
+
+	.page-intro__extra {
+		margin-top: 30px;
+	}
+
+	@media (max-width: 640px) {
+		.page-intro {
+			padding: 48px 18px;
+		}
+
+		.page-intro__description {
+			font-size: 14px;
+		}
+	}
+</style>

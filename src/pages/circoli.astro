@@ -1,7 +1,11 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { circoloSlug, fetchCircoli } from '../lib/supabase';
+import PageHero from '../components/PageHero.astro';
+import { assertSupabasePublicConfig, circoloSlug, fetchCircoli } from '../lib/supabase';
 
+export const prerender = true;
+
+assertSupabasePublicConfig();
 const circoli = await fetchCircoli();
 
 function locationLabel(circolo: (typeof circoli)[number]) {
@@ -11,16 +15,14 @@ function locationLabel(circolo: (typeof circoli)[number]) {
 
 <BaseLayout
 	title="Circoli"
-	seoTitle="Circoli golf"
-	seoDescription="Consulta l'elenco dei circoli golf presenti su Golfista."
+	seoTitle="Circoli golf: elenco e schede"
+	seoDescription="Scopri i circoli golf presenti su Golfista e consulta le schede con località, descrizioni e recapiti disponibili per ciascun club."
 >
-	<section class="clubs_hero">
-		<div class="clubs_hero_inner">
-			<p class="eyebrow">Golfista</p>
-			<h1>Circoli golf</h1>
-			<p>Scopri i circoli presenti nel database Golfista e consulta le informazioni disponibili.</p>
-		</div>
-	</section>
+	<PageHero
+		title="Circoli golf"
+		highlight="da scoprire"
+		description="Scopri i circoli presenti nel database Golfista e consulta le informazioni disponibili."
+	/>
 
 	<section class="clubs_section">
 		<div class="clubs_section_inner">
@@ -57,7 +59,7 @@ function locationLabel(circolo: (typeof circoli)[number]) {
 										<h3>{circolo.nomecircolo || `Circolo ${circolo.idcircolo}`}</h3>
 										{location && <p>{location}</p>}
 										{circolo.indirizzo && <p class="club_address">{circolo.indirizzo}</p>}
-										<span>Vedi scheda</span>
+									<span>Vedi scheda <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
 									</div>
 								</a>
 							</article>
@@ -70,43 +72,23 @@ function locationLabel(circolo: (typeof circoli)[number]) {
 </BaseLayout>
 
 <style>
-	.clubs_hero {
-		padding: 70px 20px 34px;
-		background: var(--surface);
-	}
-
-	.clubs_hero_inner,
 	.clubs_section_inner {
-		max-width: var(--max-width);
+		max-width: 1240px;
 		margin: 0 auto;
 	}
 
-	.eyebrow {
-		margin: 0 0 8px;
-		font-weight: 700;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--primary);
-	}
-
-	.clubs_hero h1 {
-		margin: 0;
-		font-size: clamp(42px, 7vw, 92px);
-		line-height: 0.95;
-	}
-
-	.clubs_hero p:last-child {
-		max-width: 720px;
-		font-size: 20px;
-		line-height: 1.5;
-	}
-
 	.clubs_section {
-		padding: 34px 20px 80px;
+		padding: 12px 20px 88px;
+		background: var(--lex-cream, #ddd);
+		color: #0e0e0f;
 	}
 
 	.clubs_summary h2 {
-		margin: 0 0 24px;
+		margin: 0 0 28px;
+		padding-top: 28px;
+		border-top: 1px solid rgba(14, 14, 15, 0.1);
+		font-size: clamp(22px, 3vw, 30px);
+		letter-spacing: -0.04em;
 	}
 
 	.clubs_grid {
@@ -120,20 +102,26 @@ function locationLabel(circolo: (typeof circoli)[number]) {
 	}
 
 	.club_card_link {
-		display: block;
+		display: flex;
+		flex-direction: column;
 		height: 100%;
 		overflow: hidden;
-		border-radius: 24px;
-		background: #fff;
+		border: 1px solid rgba(14, 14, 15, 0.1);
+		border-radius: 30px;
+		background: #fbf7f5;
 		color: inherit;
 		text-decoration: none;
-		box-shadow: 0 12px 34px rgba(0, 0, 0, 0.08);
-		transition: transform 180ms ease, box-shadow 180ms ease;
+		transition: transform 180ms ease, border-color 180ms ease;
 	}
 
 	.club_card_link:hover {
-		transform: translateY(-4px);
-		box-shadow: 0 18px 46px rgba(0, 0, 0, 0.12);
+		transform: translateY(-3px);
+		border-color: rgba(14, 14, 15, 0.35);
+	}
+
+	.club_card_link:focus-visible {
+		outline: 3px solid #0e0e0f;
+		outline-offset: 5px;
 	}
 
 	.club_card img,
@@ -142,26 +130,36 @@ function locationLabel(circolo: (typeof circoli)[number]) {
 		align-items: center;
 		justify-content: center;
 		width: 100%;
-		height: 190px;
+		aspect-ratio: 16 / 10;
+		height: auto;
+		flex-shrink: 0;
 		object-fit: cover;
-		background: #101810;
-		color: var(--primary);
-		font-weight: 800;
-		letter-spacing: 0.06em;
+		background: #0e0e0f;
+		color: #00ec10;
+		font-weight: 600;
+		font-size: 26px;
+		letter-spacing: -0.05em;
 	}
 
 	.club_card_content {
-		padding: 22px;
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		align-items: flex-start;
+		padding: 26px;
+		overflow-wrap: anywhere;
 	}
 
 	.club_card_content h3 {
 		margin: 0 0 10px;
-		font-size: 24px;
-		line-height: 1.1;
+		font-size: 25px;
+		line-height: 1.18;
+		letter-spacing: -0.045em;
 	}
 
 	.club_card_content p {
 		margin: 0 0 8px;
+		font-size: 14px;
 		line-height: 1.45;
 	}
 
@@ -170,10 +168,23 @@ function locationLabel(circolo: (typeof circoli)[number]) {
 	}
 
 	.club_card_content span {
-		display: inline-block;
-		margin-top: 14px;
-		font-weight: 700;
-		color: var(--primary);
+		display: inline-flex;
+		align-items: center;
+		gap: 12px;
+		margin-top: auto;
+		padding-top: 24px;
+		font-size: 13px;
+		font-weight: 500;
+		color: #0e0e0f;
+	}
+
+	.club_card_content span i {
+		display: grid;
+		place-items: center;
+		width: 30px;
+		height: 30px;
+		border-radius: 50%;
+		background: #00ec10;
 	}
 
 	@media (max-width: 980px) {
@@ -187,8 +198,17 @@ function locationLabel(circolo: (typeof circoli)[number]) {
 			grid-template-columns: 1fr;
 		}
 
-		.clubs_hero {
-			padding-top: 46px;
+		.clubs_section {
+			padding: 8px 14px 56px;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.club_card_link {
+			transition: none;
+		}
+		.club_card_link:hover {
+			transform: none;
 		}
 	}
 </style>
