@@ -682,7 +682,7 @@ const isHome = Astro.url.pathname === '/';
 
 		.site-nav__brand,
 		.site-nav__logo {
-			height: 46px;
+			height: 56px;
 		}
 
 		.site-nav__bar {
@@ -710,6 +710,11 @@ const isHome = Astro.url.pathname === '/';
 		.site-nav.is-stuck .site-nav__bar {
 			height: 52px;
 			padding: 0 16px;
+		}
+
+		.site-nav.is-stuck .site-nav__brand,
+		.site-nav.is-stuck .site-nav__logo {
+			height: 40px;
 		}
 	}
 

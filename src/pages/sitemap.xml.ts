@@ -22,7 +22,12 @@ export const GET: APIRoute = async () => {
 			lastmod: circolo.updated_at || circolo.created_at || undefined,
 		})),
 	];
-	const urlset = entries.map(({ loc, lastmod }) => `<url><loc>${xmlEscape(loc)}</loc>${lastmod ? `<lastmod>${new Date(lastmod).toISOString().slice(0, 10)}</lastmod>` : ''}</url>`).join('');
+	const uniqueEntries = [...new Map(entries.map((entry) => [entry.loc, entry])).values()];
+	const urlset = uniqueEntries.map(({ loc, lastmod }) => {
+		const date = lastmod ? new Date(lastmod) : null;
+		const modified = date && !Number.isNaN(date.getTime()) ? `<lastmod>${date.toISOString().slice(0, 10)}</lastmod>` : '';
+		return `<url><loc>${xmlEscape(loc)}</loc>${modified}</url>`;
+	}).join('');
 	return new Response(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urlset}</urlset>`, {
 		headers: { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=3600' },
 	});

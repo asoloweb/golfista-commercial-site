@@ -4,6 +4,8 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { circoloSlug, fetchCircoli } from '../lib/supabase';
 
+const rotatingWords = ['i giocatori', 'le convenzioni', 'le foto delle gare', 'le recensioni', 'le news', 'le statistiche'];
+
 function pickRandom<T>(items: T[], count: number) {
 	const pool = [...items];
 	for (let index = pool.length - 1; index > 0; index -= 1) {
@@ -198,7 +200,7 @@ const allFaqs = faqs;
 		<div class="lp-container lp-hero-inner">
 			<div class="lp-hero-copy">
 
-				<h1 id="lp-hero-title">Gestisci<span class="lp-rotator" data-rotator-words="i giocatori|le convenzioni|le foto delle gare|le recensioni|le news|le statistiche" aria-hidden="true"><span class="lp-mark lp-rotator-word">i giocatori</span></span><span class="sr-only">i giocatori</span><br />del tuo circolo</h1>
+				<h1 id="lp-hero-title">Gestisci<span class="lp-rotator" data-rotator-words={rotatingWords.join('|')} aria-hidden="true"><span class="lp-mark lp-rotator-word">{rotatingWords[0]}</span>{rotatingWords.map((word) => <span class="lp-mark lp-rotator-sizer">{word}</span>)}</span><span class="sr-only">i giocatori</span><br />del tuo circolo</h1>
 				<p class="lp-hero-sub">La piattaforma semplice e completa per gestire giocatori, convenzioni e contenuti del circolo, ovunque ti trovi.</p>
 				<div class="lp-actions">
 					<a class="lp-btn lp-btn-cream" href="#pricing">Inizia ora <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
@@ -244,7 +246,7 @@ const allFaqs = faqs;
 	{brandCircoli.length > 0 && (
 		<section class="lp-brands" aria-label="Circoli presenti su Golfista">
 			<div class="lp-container">
-				<h2>Alcuni dei circoli su Golfista</h2>
+				<h2>Circoli presenti nell'app</h2>
 				<div class="lp-brand-marquee">
 					<div class="lp-brand-track" data-brand-track>
 						{[0, 1].map((copy) => (
@@ -295,6 +297,18 @@ const allFaqs = faqs;
 						</div>
 					</article>
 				))}
+				<article class="lp-beta-card lp-beta-cream lp-beta-app">
+					<div class="lp-beta-copy">
+						<h3>L’app gratuita che accompagna ogni giro di golf</h3>
+						<p>I giocatori scaricano gratuitamente l’app Golfista e la collegano alla piattaforma del circolo. Con la condivisione della posizione attiva, puoi seguire la posizione sul campo, la buca attuale e l’avanzamento durante tutto il giro di golf.</p>
+						<a class="lp-text-link" href="/app">Scopri l’app gratuita <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+					</div>
+					<ol class="lp-app-flow" aria-label="Come si collega l’app alla piattaforma">
+						<li><span class="lp-app-flow-icon"><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i></span><strong>App gratuita</strong><span>Il giocatore scarica Golfista</span></li>
+						<li><span class="lp-app-flow-icon"><i class="fa-solid fa-link" aria-hidden="true"></i></span><strong>Piattaforma connessa</strong><span>App e circolo, in un unico sistema</span></li>
+						<li><span class="lp-app-flow-icon"><i class="fa-solid fa-route" aria-hidden="true"></i></span><strong>Tutto il giro</strong><span>Posizione e avanzamento sul campo</span></li>
+					</ol>
+				</article>
 			</div>
 		</div>
 	</section>
@@ -378,7 +392,10 @@ const allFaqs = faqs;
 				<h2 id="lp-testimonials-title">Cosa dicono di noi <span class="lp-mark-dark">i golfisti</span></h2>
 			</header>
 
+			<div class="lp-quotes-viewport">
 			<div class="lp-quotes">
+				{[0, 1].map((copy) => (
+				<div class="lp-quotes-group" aria-hidden={copy === 1 ? 'true' : undefined}>
 				{testimonials.map(({ name, role, quote }) => (
 					<article class="lp-quote">
 						<div class="lp-stars" aria-label="5 stelle su 5">
@@ -391,6 +408,9 @@ const allFaqs = faqs;
 						</footer>
 					</article>
 				))}
+				</div>
+				))}
+			</div>
 			</div>
 		</div>
 	</section>
@@ -553,9 +573,23 @@ const allFaqs = faqs;
 	}
 
 	.lp-rotator {
-		display: inline-block;
+		display: inline-grid;
+		max-width: 100%;
 		margin-left: 0.1em;
-		vertical-align: baseline;
+		vertical-align: bottom;
+	}
+
+	.lp-rotator-word,
+	.lp-rotator-sizer {
+		grid-area: 1 / 1;
+		min-width: 0;
+		align-self: center;
+		justify-self: center;
+	}
+
+	.lp-rotator-sizer {
+		visibility: hidden;
+		pointer-events: none;
 	}
 
 	.lp-rotator-word {
@@ -1134,6 +1168,53 @@ const allFaqs = faqs;
 		color: var(--lex-dark);
 	}
 
+	.lp-beta-app {
+		grid-column: 1 / -1;
+		display: grid;
+		grid-template-columns: 1fr 1.15fr;
+		align-items: center;
+		gap: 40px;
+		min-height: 300px;
+		padding: 40px 34px;
+	}
+
+	.lp-app-flow {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 18px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		text-align: center;
+	}
+
+	.lp-app-flow li {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.lp-app-flow-icon {
+		display: grid;
+		width: 64px;
+		height: 64px;
+		place-items: center;
+		border-radius: 50%;
+		background: var(--header-green);
+		color: #000;
+		font-size: 24px;
+	}
+
+	.lp-app-flow strong { font-size: 13px; }
+	.lp-app-flow li > span:last-child { color: #5d5d63; font-size: 12px; line-height: 1.6; }
+
+	@media (max-width: 720px) {
+		.lp-beta-card.lp-beta-app { grid-template-columns: 1fr; min-height: auto; padding: 30px 24px; gap: 30px; }
+		.lp-app-flow { gap: 12px; }
+		.lp-app-flow-icon { width: 52px; height: 52px; font-size: 20px; }
+	}
+
 	.lp-beta-dark {
 		border: 1px solid rgba(241, 226, 222, 0.1);
 		background: var(--lex-dark);
@@ -1490,6 +1571,45 @@ const allFaqs = faqs;
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: 16px;
+	}
+
+	.lp-quotes-group { display: contents; }
+	.lp-quotes-group[aria-hidden='true'] { display: none; }
+
+	@keyframes quotes-marquee {
+		to { transform: translateX(-50%); }
+	}
+
+	@media (max-width: 720px) {
+		.lp-quotes-viewport { overflow: hidden; }
+		.lp-quotes {
+			display: flex;
+			width: max-content;
+			gap: 0;
+			animation: quotes-marquee 42s linear infinite;
+		}
+		.lp-quotes-group,
+		.lp-quotes-group[aria-hidden='true'] {
+			display: flex;
+			gap: 16px;
+			padding-right: 16px;
+		}
+		.lp-quotes .lp-quote {
+			flex: 0 0 min(82vw, 340px);
+			width: min(82vw, 340px);
+			padding: 24px;
+		}
+		.lp-quotes-viewport:focus-within .lp-quotes { animation-play-state: paused; }
+	}
+
+	@media (max-width: 720px) and (hover: hover) {
+		.lp-quotes-viewport:hover .lp-quotes { animation-play-state: paused; }
+	}
+
+	@media (max-width: 720px) and (prefers-reduced-motion: reduce) {
+		.lp-quotes-viewport { overflow-x: auto; }
+		.lp-quotes { animation: none; }
+		.lp-quotes-group[aria-hidden='true'] { display: none; }
 	}
 
 	.lp-quote {

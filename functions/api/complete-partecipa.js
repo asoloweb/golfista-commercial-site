@@ -1,3 +1,4 @@
+// Directus is retained only as the persistence backend for completed paid participation requests.
 const DIRECTUS_URL = (env) =>
 	(env.PUBLIC_DIRECTUS_URL || env.DIRECTUS_URL || 'https://admin.golfista.app').replace(
 		/\/+$/,
