@@ -11,9 +11,11 @@ export interface Props {
 	canonicalPath?: string;
 	noindex?: boolean;
 	appendSiteName?: boolean;
+	/** Colore della barra di Safari e dello sfondo di rimbalzo: deve coincidere con la parte alta della pagina. */
+	topColor?: string;
 }
 
-const { title, seoTitle, seoDescription, canonicalPath, noindex = false, appendSiteName = true } = Astro.props;
+const { title, seoTitle, seoDescription, canonicalPath, noindex = false, appendSiteName = true, topColor = '#ffffff' } = Astro.props;
 const siteUrl = (import.meta.env.PUBLIC_SITE_URL || 'https://www.golfista.app').replace(/\/+$/, '');
 const organizationSameAs = (import.meta.env.PUBLIC_ORGANIZATION_SAME_AS || '')
 	.split(',')
@@ -103,14 +105,14 @@ const organizationJsonLd = JSON.stringify(
 );
 ---
 
-<html lang="it">
+<html lang="it" style={`background-color: ${topColor}`}>
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" type={faviconMimeType} href={faviconSrc} sizes="any" />
 		<link rel="shortcut icon" type={faviconMimeType} href={faviconSrc} />
 		<link rel="apple-touch-icon" href={faviconSrc} />
 		<meta name="viewport" content="width=device-width" />
-		<meta name="theme-color" content="#0E0E0F" />
+		<meta name="theme-color" content={topColor} />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black" />
 		<meta name="generator" content={Astro.generator} />
 		<link rel="canonical" href={canonicalUrl} />
