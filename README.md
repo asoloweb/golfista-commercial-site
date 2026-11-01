@@ -1,52 +1,27 @@
-# Astro Starter Kit: 09_02_26
+# www.golfista.app
 
-```sh
-npm create astro@latest -- --template minimal
-```
+Sito pubblico commerciale di Golfista (Astro, output statico), pensato per presentare il gestionale ai circoli.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+L'ecosistema Golfista:
+- **App giocatori**: app iOS/Android per i golfisti
+- **Gestionale circoli**: https://manager.golfista.app (include i pagamenti)
+- **Sito pubblico**: questo repository
 
-## 🚀 Project Structure
+## Deploy
 
-Inside of your Astro project, you'll see the following folders and files:
+Cloudflare Pages pubblica automaticamente ogni push su `main` (GitHub).
+Le variabili d'ambiente di produzione si configurano nel progetto Cloudflare Pages.
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+## Comandi
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+| Comando           | Azione                                  |
+| :---------------- | :-------------------------------------- |
+| `npm install`     | Installa le dipendenze                  |
+| `npm run dev`     | Server locale su `localhost:4321`       |
+| `npm run build`   | Build di produzione in `./dist/`        |
+| `npm run preview` | Anteprima della build                   |
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## Blocco recensioni Google
 
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## Google Reviews Block
-
-Per usare il blocco slider recensioni Google, configura almeno:
-
-- `GOOGLE_MAPS_API_KEY` oppure `GOOGLE_PLACES_API_KEY`
-- opzionale: `GOOGLE_MYBUSINESS_PLACE_ID`
-
-Se `GOOGLE_MYBUSINESS_PLACE_ID` non e impostato, il blocco tenta la ricerca automatica dal campo `google_business_query`.
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Configura `GOOGLE_MAPS_API_KEY` (o `GOOGLE_PLACES_API_KEY`) e, opzionalmente, `GOOGLE_MYBUSINESS_PLACE_ID`.
+Senza Place ID il blocco prova a cercarlo da `google_business_query`.
