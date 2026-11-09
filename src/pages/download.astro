@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+
+export const prerender = true;
+
+const APP_STORE_URL = 'https://apps.apple.com/app/golfista/id6760565939';
+const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=it.golfista.app';
+---
+
+<BaseLayout
+	title="Scarica l'app"
+	seoTitle="Scarica l'app Golfista"
+	seoDescription="Scarica gratis l'app Golfista per iPhone e Android dall'App Store o da Google Play."
+>
+	<script is:inline define:vars={{ ios: APP_STORE_URL, android: PLAY_STORE_URL }}>
+		(function () {
+			var ua = navigator.userAgent || '';
+			var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+			var isAndroid = /Android/i.test(ua);
+			if (isIOS) window.location.replace(ios);
+			else if (isAndroid) window.location.replace(android);
+		})();
+	</script>
+
+	<PageHero
+		title="Scarica"
+		highlight="Golfista"
+		eyebrow="App"
+		description="Disponibile gratis per iPhone e Android. Scegli lo store del tuo dispositivo."
+	>
+		<div class="download_links">
+			<a class="download_link" href={APP_STORE_URL} rel="noopener">App Store</a>
+			<a class="download_link" href={PLAY_STORE_URL} rel="noopener">Google Play</a>
+		</div>
+	</PageHero>
+</BaseLayout>
+
+<style>
+	.download_links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px;
+		margin-top: 8px;
+	}
+	.download_link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 160px;
+		padding: 14px 24px;
+		border-radius: 999px;
+		background: #000;
+		color: #fff;
+		font-weight: 600;
+		text-decoration: none;
+	}
+	.download_link:hover {
+		opacity: 0.85;
+	}
+</style>
