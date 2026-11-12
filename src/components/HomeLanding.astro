@@ -190,6 +190,14 @@ const faqs = [
 
 const allFaqs = faqs;
 
+const appScreens = [
+	{ src: '/images/app/screen-1.jpg', alt: 'Clubhouse con meteo e gare di oggi', label: 'Clubhouse' },
+	{ src: '/images/app/screen-2.jpg', alt: 'Dettaglio gara con meteo e condizioni del campo', label: 'Dettaglio gara' },
+	{ src: '/images/app/screen-3.jpg', alt: 'Recensione della gara con stelle', label: 'Recensione gara' },
+	{ src: '/images/app/screen-4.jpg', alt: 'Scheda del circolo con mappa', label: 'Scheda circolo' },
+	{ src: '/images/app/screen-5.jpg', alt: 'Mappa dei circoli in Italia', label: 'Mappa circoli' },
+];
+
 ---
 
 <div class="lp">
@@ -201,7 +209,7 @@ const allFaqs = faqs;
 			<div class="lp-hero-copy">
 
 				<h1 id="lp-hero-title">Gestisci<span class="lp-rotator" data-rotator-words={rotatingWords.join('|')} aria-hidden="true"><span class="lp-mark lp-rotator-word">{rotatingWords[0]}</span>{rotatingWords.map((word) => <span class="lp-mark lp-rotator-sizer">{word}</span>)}</span><span class="sr-only">i giocatori</span><br />del tuo circolo</h1>
-				<p class="lp-hero-sub">La piattaforma semplice e completa per gestire giocatori, convenzioni e contenuti del circolo, ovunque ti trovi.</p>
+				<p class="lp-hero-sub">La piattaforma semplice e completa per gestire giocatori, convenzioni e contenuti del circolo, ovunque ti trovi, già da qua al costo di un green-fee al mese!</p>
 				<div class="lp-actions">
 					<a class="lp-btn lp-btn-cream" href="#pricing">Inizia ora <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
 				</div>
@@ -211,6 +219,19 @@ const allFaqs = faqs;
 			<div class="lp-course">
 				<div class="lp-map-panel">
 					<div id="lp-course-map" class="lp-map" role="application" aria-label="Mappa 3D dell'Asolo Golf Club con i giocatori in movimento"></div>
+				</div>
+
+				<div class="lp-phone lp-phone-hero" data-app-slider aria-hidden="true">
+					<span class="lp-phone-btn lp-phone-btn-l1"></span>
+					<span class="lp-phone-btn lp-phone-btn-l2"></span>
+					<span class="lp-phone-btn lp-phone-btn-r"></span>
+					<div class="lp-phone-screen">
+						<div class="lp-phone-track">
+							{appScreens.map(({ src }) => (
+								<img src={src} alt="" width="923" height="2000" decoding="async" />
+							))}
+						</div>
+					</div>
 				</div>
 
 				<div class="lp-course-stats" aria-label="Statistiche del campo">
@@ -415,6 +436,58 @@ const allFaqs = faqs;
 		</div>
 	</section>
 
+	<section class="lp-app" id="app" aria-labelledby="lp-app-title">
+		<div class="lp-container lp-app-grid">
+			<div class="lp-app-copy">
+				<p class="lp-badge lp-badge-dark"><span class="lp-dot lp-dot-green"></span> App gratuita per golfisti</p>
+				<h2 id="lp-app-title">Il golf italiano <span class="lp-mark-dark">in tasca</span></h2>
+				<p>Golfista è l’app pensata per chi gioca: scopri le gare di oggi e le prossime, esplora i circoli sulla mappa, controlla meteo e condizioni del campo e lascia la tua recensione su green, velocità di gioco, bouvette e premi.</p>
+				<ul class="lp-app-points">
+					<li><i class="fa-solid fa-check" aria-hidden="true"></i>Completamente gratuita</li>
+					<li><i class="fa-solid fa-check" aria-hidden="true"></i>Disponibile per iPhone e Android</li>
+					<li><i class="fa-solid fa-check" aria-hidden="true"></i>Gare, circoli, meteo e recensioni in un’unica app</li>
+				</ul>
+				<div class="lp-app-download">
+					<div class="lp-app-stores">
+						<a class="lp-store" href="https://apps.apple.com/app/golfista/id6760565939" rel="noopener" aria-label="Scarica su App Store">
+							<svg viewBox="0 0 384 512" aria-hidden="true"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+							<span><small>Scarica su</small>App Store</span>
+						</a>
+						<a class="lp-store" href="https://play.google.com/store/apps/details?id=it.golfista.app" rel="noopener" aria-label="Disponibile su Google Play">
+							<svg viewBox="0 0 512 512" aria-hidden="true"><path fill="#00d7fe" d="M48 59.5v393c0 9 4 15.5 10 19L272 256 58 40.5c-6 3.5-10 10-10 19z"/><path fill="#00f076" d="M346 182 99.5 40.6C83 31 67 31 58 40.5L272 256z"/><path fill="#ffc900" d="m346 330 84-48.3c26-15 26-36.4 0-51.4L346 182l-74 74z"/><path fill="#ff3a44" d="M58 471.5c9 9.5 25 9.5 41.5 0L346 330l-74-74z"/></svg>
+							<span><small>Disponibile su</small>Google Play</span>
+						</a>
+					</div>
+					<a class="lp-app-qr" href="/download" aria-label="Scansiona il QR code per scaricare l'app">
+						<img src="/images/app/qr-download.svg" alt="QR code per scaricare Golfista" width="104" height="104" loading="lazy" />
+						<span>Inquadra con<br />la fotocamera</span>
+					</a>
+				</div>
+				<a class="lp-btn lp-btn-dark" href="/download">Scarica l’app <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+			</div>
+
+			<div class="lp-app-visual">
+				<div class="lp-phone" data-app-slider>
+					<span class="lp-phone-btn lp-phone-btn-l1" aria-hidden="true"></span>
+					<span class="lp-phone-btn lp-phone-btn-l2" aria-hidden="true"></span>
+					<span class="lp-phone-btn lp-phone-btn-r" aria-hidden="true"></span>
+					<div class="lp-phone-screen">
+						<div class="lp-phone-track">
+							{appScreens.map(({ src, alt }, i) => (
+								<img src={src} alt={alt} width="923" height="2000" loading={i === 0 ? 'eager' : 'lazy'} decoding="async" />
+							))}
+						</div>
+					</div>
+				</div>
+				<div class="lp-app-dots" role="tablist" aria-label="Schermate dell'app">
+					{appScreens.map(({ label }, i) => (
+						<button type="button" role="tab" aria-selected={i === 0 ? 'true' : 'false'} aria-label={label} data-app-dot={i}></button>
+					))}
+				</div>
+			</div>
+		</div>
+	</section>
+
 	<section class="lp-faq" aria-labelledby="lp-faq-title">
 		<div class="lp-container lp-faq-grid">
 			<div class="lp-faq-copy">
@@ -480,7 +553,7 @@ const allFaqs = faqs;
 		position: relative;
 		overflow: hidden;
 		margin-top: -104px;
-		padding: 178px 0 92px;
+		padding: 178px 0 40px;
 		background: var(--lex-dark);
 		color: var(--lex-cream);
 	}
@@ -584,17 +657,16 @@ const allFaqs = faqs;
 		grid-area: 1 / 1;
 		min-width: 0;
 		align-self: center;
-		justify-self: center;
+		justify-self: start;
 	}
 
 	.lp-rotator-sizer {
-		visibility: hidden;
-		pointer-events: none;
+		display: none;
 	}
 
 	.lp-rotator-word {
-		transform-origin: center;
-		transition: opacity 0.22s ease, transform 0.22s ease;
+		transform-origin: left center;
+		transition: opacity 0.16s ease, transform 0.16s ease;
 	}
 
 	.lp-rotator.is-leaving .lp-rotator-word {
@@ -704,23 +776,44 @@ const allFaqs = faqs;
 	}
 
 	.lp-course {
+		--map-h: clamp(380px, 46vw, 590px);
+		--phone-w: clamp(250px, 25vw, 340px);
+		position: relative;
 		display: grid;
 		width: 100%;
 		gap: 14px;
+		padding-bottom: max(0px, calc(var(--phone-w) * 1.52 - 270px));
 	}
 
 	.lp-course-stats {
 		display: grid;
-		grid-template-columns: repeat(4, minmax(0, 1fr));
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: 12px;
+		max-width: calc(100% - var(--phone-w) - 48px);
+		align-self: start;
+	}
+
+	.lp-phone.lp-phone-hero {
+		position: absolute;
+		z-index: 5;
+		right: 20px;
+		top: calc(var(--map-h) - var(--phone-w) * 0.65);
+		width: var(--phone-w);
+		padding: 14px;
+		border-radius: 50px;
+		box-shadow: inset 0 0 0 2px #3a3a3e, 0 40px 90px -20px rgba(0, 0, 0, 0.6);
+	}
+
+	.lp-phone-hero .lp-phone-screen {
+		border-radius: 39px;
 	}
 
 	.lp-course-stat {
 		display: flex;
-		min-height: 154px;
+		min-height: 0;
 		flex-direction: column;
 		align-items: flex-start;
-		padding: 24px;
+		padding: 16px 20px;
 		border: 1px solid rgba(242, 242, 242, 0.18);
 		border-radius: 20px;
 		background: #000;
@@ -823,7 +916,7 @@ const allFaqs = faqs;
 
 	.lp-map {
 		width: 100%;
-		height: clamp(380px, 46vw, 590px);
+		height: var(--map-h, clamp(380px, 46vw, 590px));
 		background: #10251d;
 	}
 
@@ -1867,6 +1960,15 @@ const allFaqs = faqs;
 			height: 420px;
 		}
 
+		.lp-phone.lp-phone-hero {
+			display: none;
+		}
+
+		.lp-course-stats {
+			max-width: none;
+			min-height: 0;
+		}
+
 		.lp-course-stat {
 			min-height: 146px;
 			padding: 20px;
@@ -1954,6 +2056,45 @@ const allFaqs = faqs;
 			animation: none;
 		}
 	}
+	.lp-app { padding: 108px 0; background: #fff; overflow: hidden; }
+	.lp-app-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 64px; align-items: center; }
+	.lp-app-copy h2 { margin: 14px 0 0; font-size: clamp(36px, 4vw, 52px); font-weight: 600; line-height: 1.05; letter-spacing: -0.055em; }
+	.lp-app-copy > p:not(.lp-badge) { margin: 20px 0 0; max-width: 560px; color: #5d5d63; font-size: 15px; line-height: 1.7; }
+	.lp-app-points { margin: 24px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; font-size: 15px; font-weight: 500; }
+	.lp-app-points i { margin-right: 10px; color: #0a9c2a; }
+	.lp-app-download { display: flex; align-items: center; gap: 28px; margin: 32px 0 28px; flex-wrap: wrap; }
+	.lp-app-stores { display: grid; gap: 12px; }
+	.lp-store { display: inline-flex; align-items: center; gap: 12px; min-width: 190px; padding: 10px 18px; border-radius: 12px; background: #0e0e0f; color: #fff; text-decoration: none; transition: transform .2s ease, background .2s ease; }
+	.lp-store:hover { transform: translateY(-2px); background: #222; }
+	.lp-store svg { width: 26px; height: 26px; flex: none; }
+	.lp-store span { display: flex; flex-direction: column; font-size: 18px; font-weight: 600; line-height: 1.1; letter-spacing: -0.02em; }
+	.lp-store small { font-size: 11px; font-weight: 400; opacity: .8; letter-spacing: 0; }
+	.lp-app-qr { display: flex; align-items: center; gap: 14px; padding: 12px 18px 12px 12px; border: 1px solid #e6e6e8; border-radius: 18px; color: #5d5d63; font-size: 13px; line-height: 1.4; text-decoration: none; }
+	.lp-app-qr img { width: 104px; height: 104px; border-radius: 8px; }
+	.lp-app-visual { display: flex; flex-direction: column; align-items: center; gap: 22px; position: relative; }
+	.lp-app-visual::before { content: ''; position: absolute; inset: 8% -10% 14%; background: radial-gradient(closest-side, rgba(0, 236, 16, .22), transparent); z-index: 0; }
+	.lp-phone { position: relative; z-index: 1; width: min(310px, 78vw); aspect-ratio: 923 / 2000; padding: 12px; border-radius: 52px; background: #111; box-shadow: inset 0 0 0 2px #3a3a3e, 0 40px 80px -30px rgba(0, 0, 0, .45); }
+	.lp-phone-btn { position: absolute; width: 3px; background: #2a2a2e; border-radius: 2px; }
+	.lp-phone-btn-l1 { left: -3px; top: 22%; height: 9%; }
+	.lp-phone-btn-l2 { left: -3px; top: 33%; height: 9%; }
+	.lp-phone-btn-r { right: -3px; top: 27%; height: 14%; }
+	.lp-phone-screen { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: 40px; background: #000; }
+	.lp-phone-track { display: flex; height: 100%; transition: transform .6s cubic-bezier(.65, 0, .35, 1); }
+	.lp-phone-track img { flex: 0 0 100%; width: 100%; height: 100%; object-fit: cover; }
+	.lp-app-dots { display: flex; gap: 8px; position: relative; z-index: 1; }
+	.lp-app-dots button { width: 9px; height: 9px; padding: 0; border: 0; border-radius: 99px; background: #d4d4d8; cursor: pointer; transition: width .3s ease, background .3s ease; }
+	.lp-app-dots button[aria-selected='true'] { width: 26px; background: #0e0e0f; }
+	@media (max-width: 900px) {
+		.lp-app { padding: 80px 0; }
+		.lp-app-grid { grid-template-columns: 1fr; gap: 48px; }
+	}
+	@media (max-width: 520px) {
+		.lp-app-qr { display: none; }
+		.lp-app-stores { width: 100%; }
+		.lp-store { width: 100%; }
+	}
+	@media (prefers-reduced-motion: reduce) { .lp-phone-track { transition: none; } }
+
 </style>
 
 <script>
@@ -1989,8 +2130,8 @@ const allFaqs = faqs;
 				window.requestAnimationFrame(() => {
 					window.requestAnimationFrame(() => rotator.classList.remove('is-entering'));
 				});
-			}, 220);
-		}, 2600);
+			}, 160);
+		}, 1700);
 	}
 
 	const brandTrack = document.querySelector<HTMLElement>('[data-brand-track]');
@@ -2327,4 +2468,30 @@ const allFaqs = faqs;
 			{ once: true },
 		);
 	}
+
+	document.querySelectorAll('[data-app-slider]').forEach((phone) => {
+		const track = phone.querySelector('.lp-phone-track');
+		const dots = [...phone.parentElement.querySelectorAll('[data-app-dot]')];
+		const total = track.children.length;
+		let index = 0;
+		let timer;
+		const go = (n) => {
+			index = (n + total) % total;
+			track.style.transform = `translateX(-${index * 100}%)`;
+			dots.forEach((d, i) => d.setAttribute('aria-selected', String(i === index)));
+		};
+		const start = () => { clearInterval(timer); timer = setInterval(() => go(index + 1), 3500); };
+		dots.forEach((d, i) => d.addEventListener('click', () => { go(i); start(); }));
+		let x0 = null;
+		phone.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; }, { passive: true });
+		phone.addEventListener('touchend', (e) => {
+			if (x0 === null) return;
+			const dx = e.changedTouches[0].clientX - x0;
+			if (Math.abs(dx) > 40) { go(index + (dx < 0 ? 1 : -1)); start(); }
+			x0 = null;
+		});
+		phone.addEventListener('mouseenter', () => clearInterval(timer));
+		phone.addEventListener('mouseleave', start);
+		start();
+	});
 </script>

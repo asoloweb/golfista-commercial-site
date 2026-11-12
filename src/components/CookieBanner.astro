@@ -70,7 +70,7 @@ const { umamiScriptSrc = '', umamiWebsiteId = '', googleAdsId = '' } = Astro.pro
 			<label class="cookie-option">
 				<span class="cookie-option__copy">
 					<strong>Marketing</strong>
-					<span>Misurazione delle campagne e delle conversioni tramite Google Ads.</span>
+					<span>Misurazione delle campagne e delle conversioni tramite Google Ads e Meta Pixel (Facebook e Instagram).</span>
 				</span>
 				<input type="checkbox" data-cookie-category="marketing" />
 			</label>
@@ -213,6 +213,30 @@ const { umamiScriptSrc = '', umamiWebsiteId = '', googleAdsId = '' } = Astro.pro
 			window.gtag('config', googleAdsId);
 		};
 
+		const META_PIXEL_ID = '1073785302359806';
+		let metaPixelLoaded = false;
+
+		const loadMetaPixel = () => {
+			if (metaPixelLoaded || isLocalhost()) return;
+			metaPixelLoaded = true;
+			if (window.fbq) {
+				window.fbq('consent', 'grant');
+				return;
+			}
+			// Meta Pixel Code
+			!function(f,b,e,v,n,t,s)
+			{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+			n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+			if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+			n.queue=[];t=b.createElement(e);t.async=!0;
+			t.src=v;s=b.getElementsByTagName(e)[0];
+			s.parentNode.insertBefore(t,s)}(window, document,'script',
+			'https://connect.facebook.net/en_US/fbevents.js');
+			window.fbq('init', META_PIXEL_ID);
+			window.fbq('track', 'PageView');
+			// End Meta Pixel Code
+		};
+
 		const applyConsent = (consent) => {
 			if (consent.analytics) {
 				loadAnalytics();
@@ -222,8 +246,13 @@ const { umamiScriptSrc = '', umamiWebsiteId = '', googleAdsId = '' } = Astro.pro
 
 			if (consent.marketing) {
 				loadMarketing();
+				loadMetaPixel();
 			} else {
 				marketingLoaded = false;
+				if (metaPixelLoaded && window.fbq) window.fbq('consent', 'revoke');
+				metaPixelLoaded = false;
+				clearCookie('_fbp');
+				clearCookie('_fbc');
 				clearCookie('_gcl_au');
 				clearCookie('_gcl_aw');
 				try {

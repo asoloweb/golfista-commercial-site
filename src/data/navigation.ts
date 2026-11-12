@@ -4,6 +4,7 @@ export const primaryNavigation = [
 	{ label: 'Come funziona', href: '/#how_it_works' },
 	{ label: 'Prezzi', href: '/#pricing' },
 	{ label: 'Recensioni', href: '/#clients_feedback' },
+	{ label: "Scarica l'app", href: '/#app' },
 ];
 
 export const socialLinks = [
