@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PageHero from '../components/PageHero.astro';
 import QRCode from 'qrcode';
 
 export const prerender = true;
@@ -8,17 +7,36 @@ export const prerender = true;
 const APP_STORE_URL = 'https://apps.apple.com/app/golfista/id6760565939';
 const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=it.golfista.app';
 
-const qrOptions = { type: 'svg' as const, margin: 0, errorCorrectionLevel: 'M' as const, color: { dark: '#000000', light: '#ffffff' } };
+const qrOptions = { type: 'svg' as const, margin: 0, errorCorrectionLevel: 'M' as const, color: { dark: '#0E0E0F', light: '#FFFFFF' } };
 const stores = [
-	{ id: 'ios', name: 'App Store', label: 'iPhone', url: APP_STORE_URL, qr: await QRCode.toString(APP_STORE_URL, qrOptions) },
-	{ id: 'android', name: 'Google Play', label: 'Android', url: PLAY_STORE_URL, qr: await QRCode.toString(PLAY_STORE_URL, qrOptions) },
+	{
+		id: 'ios',
+		kicker: 'Scarica su',
+		name: 'App Store',
+		device: 'iPhone',
+		text: 'Apri la fotocamera dell’iPhone, inquadra il codice e tocca il link: si apre direttamente la pagina di Golfista sull’App Store.',
+		url: APP_STORE_URL,
+		qr: await QRCode.toString(APP_STORE_URL, qrOptions),
+	},
+	{
+		id: 'android',
+		kicker: 'Disponibile su',
+		name: 'Google Play',
+		device: 'Android',
+		text: 'Inquadra il codice con la fotocamera o con Google Lens: ti porta subito alla scheda di Golfista sul Play Store.',
+		url: PLAY_STORE_URL,
+		qr: await QRCode.toString(PLAY_STORE_URL, qrOptions),
+	},
 ];
+
+const screens = ['/images/app/screen-2.jpg', '/images/app/screen-1.jpg', '/images/app/screen-5.jpg'];
 ---
 
 <BaseLayout
 	title="Scarica l'app"
 	seoTitle="Scarica l'app Golfista"
 	seoDescription="Scarica gratis l'app Golfista per iPhone e Android dall'App Store o da Google Play."
+	topColor="#0E0E0F"
 >
 	<script is:inline define:vars={{ ios: APP_STORE_URL, android: PLAY_STORE_URL }}>
 		(function () {
@@ -30,124 +48,298 @@ const stores = [
 		})();
 	</script>
 
-	<PageHero
-		title="Scarica"
-		highlight="Golfista"
-		eyebrow="App"
-		description="Disponibile gratis per iPhone e Android. Scegli lo store del tuo dispositivo."
-	>
-		<div class="download_links">
-			<a class="download_link" href={APP_STORE_URL} rel="noopener">App Store</a>
-			<a class="download_link" href={PLAY_STORE_URL} rel="noopener">Google Play</a>
-		</div>
-		<div class="download_stores">
-			{stores.map((store) => (
-				<a class="store_card" href={store.url} rel="noopener">
-					<div class="store_head">
-						{store.id === 'ios' ? (
-							<svg class="store_icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.37 1.43c0 1.14-.42 2.2-1.25 3.02-.9.9-1.98 1.42-3.15 1.33a3.1 3.1 0 0 1-.02-.4c0-1.1.48-2.27 1.33-3.1.42-.43.96-.79 1.6-1.07.65-.28 1.26-.43 1.84-.46.02.23.03.46.03.68ZM20.9 17.2c-.4.92-.87 1.77-1.41 2.55-.74 1.06-1.35 1.8-1.82 2.2-.73.67-1.51 1.02-2.35 1.04-.6 0-1.33-.17-2.18-.52-.85-.35-1.63-.52-2.35-.52-.75 0-1.55.17-2.41.52-.86.35-1.56.53-2.08.55-.8.04-1.6-.32-2.4-1.07-.5-.44-1.14-1.2-1.9-2.28-.81-1.15-1.48-2.48-2-4-.56-1.64-.84-3.23-.84-4.77 0-1.76.38-3.28 1.14-4.56a6.7 6.7 0 0 1 2.39-2.42 6.43 6.43 0 0 1 3.23-.91c.63 0 1.46.2 2.5.58 1.03.39 1.7.58 1.99.58.22 0 .96-.23 2.21-.68 1.18-.43 2.18-.6 3-.53 2.21.18 3.88 1.05 4.98 2.62-1.98 1.2-2.96 2.88-2.94 5.04.02 1.68.63 3.08 1.82 4.19.54.51 1.15.91 1.82 1.19-.15.42-.3.82-.47 1.2Z"/></svg>
-						) : (
-							<svg class="store_icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="#00d7fe" d="M3.6 1.8 13.4 12l-9.8 10.2c-.36-.2-.6-.6-.6-1.1V2.9c0-.5.24-.9.6-1.1Z"/><path fill="#ffce00" d="M16.8 8.6 20 10.4c1 .57 1 2.03 0 2.6l-3.2 1.8L13.4 12l3.4-3.4Z"/><path fill="#00f076" d="M3.6 1.8c.33-.2.77-.22 1.17 0L16.8 8.6 13.4 12 3.6 1.8Z"/><path fill="#ff3a44" d="M13.4 12l3.4 2.8-12.03 6.8c-.4.23-.84.2-1.17 0L13.4 12Z"/></svg>
-						)}
-						<div>
-							<span class="store_label">{store.label}</span>
-							<strong class="store_name">{store.name}</strong>
+	<div class="dl">
+		<div class="dl-glow" aria-hidden="true"></div>
+		<div class="dl-grid-lines" aria-hidden="true"></div>
+
+		<div class="dl-container">
+			<div class="dl-preview">
+				<img class="dl-preview-bg" src="/images/golf/golf-course-sunset.jpg" alt="" width="2000" height="1125" />
+				<div class="dl-preview-shade" aria-hidden="true"></div>
+				<div class="dl-phones" aria-hidden="true">
+					{screens.map((src, index) => (
+						<div class={`dl-phone dl-phone-${index + 1}`}>
+							<img src={src} alt="" width="461" height="1000" />
 						</div>
-					</div>
-					<div class="store_qr" set:html={store.qr} />
-					<p class="store_hint">Inquadra il QR code con la fotocamera del telefono</p>
-				</a>
-			))}
+					))}
+				</div>
+			</div>
+
+			<header class="dl-intro">
+				<p class="dl-badge"><span class="dl-dot"></span> App gratuita per golfisti</p>
+				<h1>Scarica <span class="dl-mark">Golfista</span></h1>
+				<p class="dl-sub">Gare di oggi, mappa dei circoli, meteo e condizioni del campo, recensioni. Tutto gratis, su iPhone e Android.</p>
+			</header>
+
+			<div class="dl-stores">
+				{stores.map((store) => (
+					<article class="dl-card">
+						<a class="dl-store" href={store.url} rel="noopener" aria-label={`${store.kicker} ${store.name}`}>
+							{store.id === 'ios' ? (
+								<svg viewBox="0 0 384 512" aria-hidden="true"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+							) : (
+								<svg viewBox="0 0 512 512" aria-hidden="true"><path fill="#00d7fe" d="M48 59.5v393c0 9 4 15.5 10 19L272 256 58 40.5c-6 3.5-10 10-10 19z"/><path fill="#00f076" d="M346 182 99.5 40.6C83 31 67 31 58 40.5L272 256z"/><path fill="#ffc900" d="m346 330 84-48.3c26-15 26-36.4 0-51.4L346 182l-74 74z"/><path fill="#ff3a44" d="M58 471.5c9 9.5 25 9.5 41.5 0L346 330l-74-74z"/></svg>
+							)}
+							<span><small>{store.kicker}</small>{store.name}</span>
+						</a>
+						<div class="dl-qr" set:html={store.qr} />
+						<p class="dl-device">Per {store.device}</p>
+						<p class="dl-text">{store.text}</p>
+					</article>
+				))}
+			</div>
+
+			<p class="dl-note"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Nessun costo: scarichi l’app e inizi subito.</p>
 		</div>
-	</PageHero>
+	</div>
 </BaseLayout>
 
 <style>
-	.download_links {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 12px;
-		margin-top: 8px;
+	.dl {
+		position: relative;
+		overflow: hidden;
+		margin-top: -104px;
+		padding: 150px 0 110px;
+		background: var(--lex-dark);
+		color: var(--lex-cream);
 	}
-	.download_link {
+
+	.dl-glow {
+		position: absolute;
+		inset: -20% -15% auto auto;
+		width: 70vw;
+		height: 70vw;
+		border-radius: 50%;
+		background: radial-gradient(circle, rgba(20, 113, 91, 0.34) 0%, rgba(20, 113, 91, 0) 68%);
+		pointer-events: none;
+	}
+
+	.dl-grid-lines {
+		position: absolute;
+		inset: 0;
+		opacity: 0.18;
+		background-image:
+			linear-gradient(rgba(241, 226, 222, 0.08) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(241, 226, 222, 0.08) 1px, transparent 1px);
+		background-size: 64px 64px;
+		mask-image: linear-gradient(to bottom, #000 0%, transparent 70%);
+		-webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 70%);
+		pointer-events: none;
+	}
+
+	.dl-container {
+		position: relative;
+		z-index: 1;
+		width: min(1040px, calc(100% - 40px));
+		margin-inline: auto;
+	}
+
+	/* Preview */
+	.dl-preview {
+		position: relative;
+		height: 420px;
+		overflow: hidden;
+		border: 1px solid rgba(241, 226, 222, 0.12);
+		border-radius: 32px;
+		box-shadow: 0 40px 80px rgba(0, 0, 0, 0.45);
+	}
+
+	.dl-preview-bg {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.dl-preview-shade {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(to bottom, rgba(14, 14, 15, 0) 30%, rgba(14, 14, 15, 0.85) 100%);
+	}
+
+	.dl-phones {
+		position: absolute;
+		inset: auto 0 -120px;
+		display: flex;
+		justify-content: center;
+		align-items: flex-end;
+		gap: 28px;
+	}
+
+	.dl-phone {
+		width: 210px;
+		padding: 8px;
+		border-radius: 36px;
+		background: #111;
+		box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+	}
+
+	.dl-phone img {
+		display: block;
+		width: 100%;
+		height: auto;
+		border-radius: 28px;
+	}
+
+	.dl-phone-1 { transform: translateY(40px) rotate(-6deg); }
+	.dl-phone-2 { width: 240px; z-index: 1; }
+	.dl-phone-3 { transform: translateY(40px) rotate(6deg); }
+
+	/* Intro */
+	.dl-intro {
+		margin-top: 64px;
+		text-align: center;
+	}
+
+	.dl-badge {
 		display: inline-flex;
 		align-items: center;
-		justify-content: center;
-		min-width: 160px;
-		padding: 14px 24px;
+		gap: 9px;
+		margin: 0 0 24px;
+		padding: 8px 14px;
+		border: 1px solid rgba(241, 226, 222, 0.2);
 		border-radius: 999px;
-		background: #000;
-		color: #fff;
+		color: rgba(241, 226, 222, 0.78);
+		font-size: 11px;
+		font-weight: 500;
+		letter-spacing: 0.1em;
+		line-height: 1;
+		text-transform: uppercase;
+	}
+
+	.dl-dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--header-green, #00ec10);
+		box-shadow: 0 0 0 4px rgba(0, 236, 16, 0.15);
+	}
+
+	.dl-intro h1 {
+		margin: 0;
+		color: var(--lex-cream);
+		font-size: clamp(46px, 6vw, 82px);
 		font-weight: 600;
-		text-decoration: none;
+		line-height: 1.03;
+		letter-spacing: -0.06em;
 	}
-	.download_link:hover {
-		opacity: 0.85;
+
+	.dl-mark {
+		display: inline-block;
+		padding: 0 0.14em;
+		border-radius: 10px;
+		background: var(--header-green, #00ec10);
+		color: #000;
+		transform: rotate(-1.5deg);
 	}
-	.download_stores {
-		display: none;
+
+	.dl-sub {
+		max-width: 640px;
+		margin: 24px auto 0;
+		color: rgba(241, 226, 222, 0.72);
+		font-size: 17px;
+		line-height: 1.7;
 	}
-	@media (hover: hover) and (pointer: fine) {
-		.download_links {
-			display: none;
-		}
-		.download_stores {
-			display: grid;
-			grid-template-columns: repeat(2, minmax(0, 260px));
-			gap: 24px;
-			margin-top: 16px;
-		}
+
+	/* Stores */
+	.dl-stores {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 24px;
+		max-width: 820px;
+		margin: 56px auto 0;
 	}
-	.store_card {
+
+	.dl-card {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 20px;
-		padding: 28px 24px;
-		border-radius: 24px;
-		background: #fff;
-		color: #000;
-		text-decoration: none;
-		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-		transition: transform 0.2s ease;
+		padding: 36px 32px 32px;
+		border: 1px solid rgba(241, 226, 222, 0.12);
+		border-radius: 28px;
+		background: var(--lex-dark-raised, #1c1c1e);
+		text-align: center;
+		transition: transform 0.25s ease, border-color 0.25s ease;
 	}
-	.store_card:hover {
+
+	.dl-card:hover {
 		transform: translateY(-4px);
+		border-color: rgba(0, 236, 16, 0.4);
 	}
-	.store_head {
-		display: flex;
+
+	.dl-store {
+		display: inline-flex;
 		align-items: center;
-		gap: 12px;
-		align-self: stretch;
+		gap: 16px;
+		padding: 14px 28px;
+		border-radius: 16px;
+		background: #000;
+		border: 1px solid rgba(255, 255, 255, 0.18);
+		color: #fff;
+		text-decoration: none;
+		transition: background 0.2s ease;
 	}
-	.store_icon {
-		width: 36px;
-		height: 36px;
-		flex: none;
+
+	.dl-store:hover { background: #222; }
+	.dl-store svg { width: 40px; height: 40px; flex: none; }
+	.dl-store span { display: flex; flex-direction: column; align-items: flex-start; font-size: 26px; font-weight: 600; line-height: 1.1; letter-spacing: -0.02em; }
+	.dl-store small { font-size: 13px; font-weight: 400; opacity: 0.8; letter-spacing: 0; }
+
+	.dl-qr {
+		width: 220px;
+		height: 220px;
+		margin-top: 28px;
+		padding: 18px;
+		border-radius: 22px;
+		background: #fff;
+		box-sizing: content-box;
 	}
-	.store_label {
-		display: block;
-		font-size: 13px;
-		opacity: 0.6;
-	}
-	.store_name {
-		display: block;
-		font-size: 20px;
-		line-height: 1.2;
-	}
-	.store_qr {
-		width: 180px;
-		height: 180px;
-	}
-	.store_qr :global(svg) {
+
+	.dl-qr :global(svg) {
 		display: block;
 		width: 100%;
 		height: 100%;
 	}
-	.store_hint {
-		margin: 0;
-		font-size: 13px;
+
+	.dl-device {
+		margin: 24px 0 0;
+		color: var(--lex-cream);
+		font-size: 18px;
+		font-weight: 600;
+		letter-spacing: -0.02em;
+	}
+
+	.dl-text {
+		max-width: 320px;
+		margin: 8px 0 0;
+		color: rgba(241, 226, 222, 0.6);
+		font-size: 14px;
+		line-height: 1.65;
+	}
+
+	.dl-note {
+		margin: 40px 0 0;
+		color: rgba(241, 226, 222, 0.6);
+		font-size: 14px;
 		text-align: center;
-		opacity: 0.6;
+	}
+
+	.dl-note i { color: var(--header-green, #00ec10); margin-right: 6px; }
+
+	/* Touch / mobile: niente QR, solo pulsanti */
+	@media (hover: none), (max-width: 760px) {
+		.dl-qr, .dl-text { display: none; }
+		.dl-device { margin-top: 16px; }
+	}
+
+	@media (max-width: 760px) {
+		.dl { padding: 130px 0 72px; }
+		.dl-preview { height: 300px; border-radius: 24px; }
+		.dl-phones { gap: 12px; bottom: -90px; }
+		.dl-phone { width: 120px; padding: 5px; border-radius: 22px; }
+		.dl-phone img { border-radius: 18px; }
+		.dl-phone-2 { width: 140px; }
+		.dl-stores { grid-template-columns: 1fr; }
 	}
 </style>
