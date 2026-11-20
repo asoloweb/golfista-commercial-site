@@ -1,11 +1,18 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
+import QRCode from 'qrcode';
 
 export const prerender = true;
 
 const APP_STORE_URL = 'https://apps.apple.com/app/golfista/id6760565939';
 const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=it.golfista.app';
+
+const qrOptions = { type: 'svg' as const, margin: 0, errorCorrectionLevel: 'M' as const, color: { dark: '#000000', light: '#ffffff' } };
+const stores = [
+	{ id: 'ios', name: 'App Store', label: 'iPhone', url: APP_STORE_URL, qr: await QRCode.toString(APP_STORE_URL, qrOptions) },
+	{ id: 'android', name: 'Google Play', label: 'Android', url: PLAY_STORE_URL, qr: await QRCode.toString(PLAY_STORE_URL, qrOptions) },
+];
 ---
 
 <BaseLayout
@@ -33,6 +40,25 @@ const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=it.golfist
 			<a class="download_link" href={APP_STORE_URL} rel="noopener">App Store</a>
 			<a class="download_link" href={PLAY_STORE_URL} rel="noopener">Google Play</a>
 		</div>
+		<div class="download_stores">
+			{stores.map((store) => (
+				<a class="store_card" href={store.url} rel="noopener">
+					<div class="store_head">
+						{store.id === 'ios' ? (
+							<svg class="store_icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.37 1.43c0 1.14-.42 2.2-1.25 3.02-.9.9-1.98 1.42-3.15 1.33a3.1 3.1 0 0 1-.02-.4c0-1.1.48-2.27 1.33-3.1.42-.43.96-.79 1.6-1.07.65-.28 1.26-.43 1.84-.46.02.23.03.46.03.68ZM20.9 17.2c-.4.92-.87 1.77-1.41 2.55-.74 1.06-1.35 1.8-1.82 2.2-.73.67-1.51 1.02-2.35 1.04-.6 0-1.33-.17-2.18-.52-.85-.35-1.63-.52-2.35-.52-.75 0-1.55.17-2.41.52-.86.35-1.56.53-2.08.55-.8.04-1.6-.32-2.4-1.07-.5-.44-1.14-1.2-1.9-2.28-.81-1.15-1.48-2.48-2-4-.56-1.64-.84-3.23-.84-4.77 0-1.76.38-3.28 1.14-4.56a6.7 6.7 0 0 1 2.39-2.42 6.43 6.43 0 0 1 3.23-.91c.63 0 1.46.2 2.5.58 1.03.39 1.7.58 1.99.58.22 0 .96-.23 2.21-.68 1.18-.43 2.18-.6 3-.53 2.21.18 3.88 1.05 4.98 2.62-1.98 1.2-2.96 2.88-2.94 5.04.02 1.68.63 3.08 1.82 4.19.54.51 1.15.91 1.82 1.19-.15.42-.3.82-.47 1.2Z"/></svg>
+						) : (
+							<svg class="store_icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="#00d7fe" d="M3.6 1.8 13.4 12l-9.8 10.2c-.36-.2-.6-.6-.6-1.1V2.9c0-.5.24-.9.6-1.1Z"/><path fill="#ffce00" d="M16.8 8.6 20 10.4c1 .57 1 2.03 0 2.6l-3.2 1.8L13.4 12l3.4-3.4Z"/><path fill="#00f076" d="M3.6 1.8c.33-.2.77-.22 1.17 0L16.8 8.6 13.4 12 3.6 1.8Z"/><path fill="#ff3a44" d="M13.4 12l3.4 2.8-12.03 6.8c-.4.23-.84.2-1.17 0L13.4 12Z"/></svg>
+						)}
+						<div>
+							<span class="store_label">{store.label}</span>
+							<strong class="store_name">{store.name}</strong>
+						</div>
+					</div>
+					<div class="store_qr" set:html={store.qr} />
+					<p class="store_hint">Inquadra il QR code con la fotocamera del telefono</p>
+				</a>
+			))}
+		</div>
 	</PageHero>
 </BaseLayout>
 
@@ -57,5 +83,71 @@ const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=it.golfist
 	}
 	.download_link:hover {
 		opacity: 0.85;
+	}
+	.download_stores {
+		display: none;
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.download_links {
+			display: none;
+		}
+		.download_stores {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 260px));
+			gap: 24px;
+			margin-top: 16px;
+		}
+	}
+	.store_card {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 20px;
+		padding: 28px 24px;
+		border-radius: 24px;
+		background: #fff;
+		color: #000;
+		text-decoration: none;
+		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+		transition: transform 0.2s ease;
+	}
+	.store_card:hover {
+		transform: translateY(-4px);
+	}
+	.store_head {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		align-self: stretch;
+	}
+	.store_icon {
+		width: 36px;
+		height: 36px;
+		flex: none;
+	}
+	.store_label {
+		display: block;
+		font-size: 13px;
+		opacity: 0.6;
+	}
+	.store_name {
+		display: block;
+		font-size: 20px;
+		line-height: 1.2;
+	}
+	.store_qr {
+		width: 180px;
+		height: 180px;
+	}
+	.store_qr :global(svg) {
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+	.store_hint {
+		margin: 0;
+		font-size: 13px;
+		text-align: center;
+		opacity: 0.6;
 	}
 </style>
