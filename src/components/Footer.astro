@@ -9,7 +9,7 @@ const currentYear = new Date().getFullYear();
 		<div class="gfoot_top">
 			<div class="gfoot_brandcol">
 				<a class="gfoot_brand" href="/" aria-label="Golfista, vai alla homepage">
-					<img class="gfoot_logo" src="/golfista/logo-dark.svg" alt="Golfista" width="888" height="262" />
+					<img class="gfoot_logo" src="/golfista/logo-white.svg" alt="Golfista" width="888" height="262" />
 				</a>
 				<p class="gfoot_tagline">La piattaforma digitale per giocatori di golf e circoli.</p>
 				<div class="gfoot_social" aria-label="Profili social Golfista">
@@ -45,8 +45,8 @@ const currentYear = new Date().getFullYear();
 <style>
 	.gfoot {
 		padding: 78px 20px 28px;
-		background: var(--lex-cream-soft);
-		color: var(--lex-dark);
+		background: #0e0e0f;
+		color: var(--lex-cream);
 	}
 
 	.gfoot_inner {
@@ -59,7 +59,7 @@ const currentYear = new Date().getFullYear();
 		grid-template-columns: minmax(280px, 1.15fr) minmax(0, 1.85fr);
 		gap: 70px;
 		padding-bottom: 58px;
-		border-bottom: 1px solid rgba(14, 14, 15, 0.1);
+		border-bottom: 1px solid rgba(241, 226, 222, 0.12);
 	}
 
 	.gfoot_brand {
@@ -96,7 +96,7 @@ const currentYear = new Date().getFullYear();
 	.gfoot_tagline {
 		max-width: 360px;
 		margin: 22px 0 0;
-		color: #58585e;
+		color: rgba(241, 226, 222, 0.6);
 		font-size: 14px;
 		line-height: 1.7;
 	}
@@ -112,17 +112,17 @@ const currentYear = new Date().getFullYear();
 		width: 44px;
 		height: 44px;
 		place-items: center;
-		border: 1px solid rgba(14, 14, 15, 0.14);
+		border: 1px solid rgba(241, 226, 222, 0.2);
 		border-radius: 50%;
-		color: var(--lex-dark);
+		color: var(--lex-cream);
 		font-size: 15px;
 		transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 	}
 
 	.gfoot_social a:hover {
-		border-color: var(--lex-green);
-		background: var(--lex-green);
-		color: #fff;
+		border-color: #00ec10;
+		background: #00ec10;
+		color: #000;
 	}
 
 	.gfoot_nav {
@@ -141,7 +141,7 @@ const currentYear = new Date().getFullYear();
 
 	.gfoot_title {
 		margin: 0 0 17px;
-		color: var(--lex-dark);
+		color: var(--lex-cream);
 		font-size: 12px;
 		font-weight: 600;
 		letter-spacing: 0.09em;
@@ -149,14 +149,14 @@ const currentYear = new Date().getFullYear();
 	}
 
 	.gfoot_links a {
-		color: #5f5f66;
+		color: rgba(241, 226, 222, 0.65);
 		font-size: 13.5px;
 		line-height: 1.4;
 		transition: color 0.2s ease;
 	}
 
 	.gfoot_links a:hover {
-		color: var(--lex-green);
+		color: #00ec10;
 	}
 
 	.gfoot_bottom {
@@ -165,7 +165,7 @@ const currentYear = new Date().getFullYear();
 		justify-content: space-between;
 		gap: 20px;
 		padding-top: 24px;
-		color: #717177;
+		color: rgba(241, 226, 222, 0.45);
 		font-size: 11.5px;
 	}
 
@@ -178,14 +178,14 @@ const currentYear = new Date().getFullYear();
 		padding: 0;
 		border: 0;
 		background: transparent;
-		color: #4b4b51;
+		color: rgba(241, 226, 222, 0.7);
 		font: inherit;
 		cursor: pointer;
 	}
 
 	.gfoot_bottom a:hover,
 	.gfoot_bottom button:hover {
-		color: var(--lex-green);
+		color: #00ec10;
 	}
 
 	.gfoot_legal {

@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import QRCode from 'qrcode';
 import { assertSupabasePublicConfig, circoloIdFromSlug, circoloSlug, fetchCircoloById, fetchCircoli } from '../../lib/supabase';
 
 export const prerender = true;
@@ -31,6 +32,16 @@ const mapHref =
 		: '';
 const coverImage = circolo?.local_cover_url || circolo?.cover_image_url || circolo?.cover_url || circolo?.logo_url || '';
 const logoImage = circolo?.local_logo_url || circolo?.logo_url || '/loghi/fallback.jpg';
+
+const latNum = Number(circolo?.lat);
+const lonNum = Number(circolo?.lon);
+const hasCoords = Number.isFinite(latNum) && Number.isFinite(lonNum) && !(latNum === 0 && lonNum === 0);
+const downloadQr = await QRCode.toString('https://golfista.app/download', {
+	type: 'svg',
+	margin: 0,
+	errorCorrectionLevel: 'M',
+	color: { dark: '#0E0E0F', light: '#FFFFFF' },
+});
 
 const details = circolo
 	? [
@@ -90,6 +101,7 @@ const details = circolo
 
 			<section class="club_detail_body">
 				<div class="club_detail_grid">
+					<div class="club_main">
 					<article class="club_description">
 						<h2>Informazioni</h2>
 						{circolo.desc_ai ? (
@@ -100,6 +112,45 @@ const details = circolo
 							<p>Non è ancora disponibile una descrizione per questo circolo.</p>
 						)}
 					</article>
+
+						{hasCoords && (
+						<div class="club_weather" data-weather data-lat={latNum} data-lon={lonNum}>
+						<div class="weather_head">
+							<div>
+								<p class="eyebrow eyebrow_inline"><span class="live_dot"></span> Meteo in tempo reale</p>
+								<h2>Com’è il tempo al circolo</h2>
+							</div>
+							<p class="weather_updated" data-w="updated"></p>
+						</div>
+
+						<div class="weather_loading" data-w="loading">Caricamento del meteo…</div>
+
+						<div class="weather_body" data-w="body" hidden>
+							<div class="weather_now">
+								<i class="fa-solid fa-sun weather_icon" data-w="icon" aria-hidden="true"></i>
+								<div>
+									<p class="weather_temp"><span data-w="temp"></span>°</p>
+									<p class="weather_desc" data-w="desc"></p>
+									<p class="weather_golf" data-w="golf"></p>
+								</div>
+							</div>
+
+							<dl class="weather_stats">
+								<div><dt><i class="fa-solid fa-temperature-half" aria-hidden="true"></i> Percepita</dt><dd><span data-w="feels"></span>°</dd></div>
+								<div><dt><i class="fa-solid fa-wind" aria-hidden="true"></i> Vento</dt><dd><span data-w="wind"></span> km/h <span data-w="windDir"></span></dd></div>
+								<div><dt><i class="fa-solid fa-droplet" aria-hidden="true"></i> Umidità</dt><dd><span data-w="humidity"></span>%</dd></div>
+								<div><dt><i class="fa-solid fa-umbrella" aria-hidden="true"></i> Pioggia oggi</dt><dd><span data-w="rainProb"></span>%</dd></div>
+								<div><dt><i class="fa-solid fa-sun" aria-hidden="true"></i> Alba</dt><dd data-w="sunrise"></dd></div>
+								<div><dt><i class="fa-solid fa-moon" aria-hidden="true"></i> Tramonto</dt><dd data-w="sunset"></dd></div>
+							</dl>
+
+							<div class="weather_days" data-w="days"></div>
+						</div>
+
+						<p class="weather_error" data-w="error" hidden>Meteo al momento non disponibile.</p>
+					</div>
+						)}
+					</div>
 
 					<aside class="club_sidebar">
 						<h2>Dettagli</h2>
@@ -125,6 +176,21 @@ const details = circolo
 					</aside>
 				</div>
 			</section>
+
+			<section class="club_app_section">
+				<div class="club_app">
+					<div class="club_app_copy">
+						<p class="eyebrow eyebrow_dark"><span class="live_dot"></span> App gratuita</p>
+						<h2>Vuoi vedere tutte le gare di <span class="club_app_mark">{title}</span>?</h2>
+						<p>Nell’app Golfista trovi le gare di oggi e le prossime, le condizioni del campo, le foto, le recensioni dei golfisti e le news di questo circolo. Scaricala gratis per iPhone e Android.</p>
+						<a href="/download" class="primary_button club_app_button">Scarica l’app <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+					</div>
+					<a class="club_app_qr" href="/download" aria-label="QR code per scaricare l'app Golfista">
+						<span class="club_app_qr_code" set:html={downloadQr}></span>
+						<span>Inquadra con la fotocamera<br />per scaricare l’app</span>
+					</a>
+				</div>
+			</section>
 		</>
 	) : (
 		<section class="club_not_found">
@@ -134,6 +200,90 @@ const details = circolo
 		</section>
 	)}
 </BaseLayout>
+
+<script>
+	const WEATHER: Record<number, [string, string, string]> = {
+		0: ['fa-sun', 'Cielo sereno', 'Giornata perfetta per il golf!'],
+		1: ['fa-sun', 'Prevalentemente sereno', 'Ottime condizioni per giocare'],
+		2: ['fa-cloud-sun', 'Parzialmente nuvoloso', 'Buone condizioni generali'],
+		3: ['fa-cloud', 'Coperto', 'Condizioni accettabili, cielo grigio'],
+		45: ['fa-smog', 'Nebbia', 'Attenzione alla visibilità ridotta'],
+		48: ['fa-smog', 'Nebbia con brina', 'Campo scivoloso, attenzione'],
+		51: ['fa-cloud-rain', 'Pioggerella leggera', 'Portati l’ombrello'],
+		53: ['fa-cloud-rain', 'Pioggerella moderata', 'Pioggia fastidiosa ma giocabile'],
+		55: ['fa-cloud-showers-heavy', 'Pioggerella intensa', 'Meglio restare al coperto'],
+		56: ['fa-cloud-rain', 'Pioggerella gelata leggera', 'Attenzione al ghiaccio'],
+		57: ['fa-cloud-rain', 'Pioggerella gelata intensa', 'Campo scivoloso, attenzione'],
+		61: ['fa-cloud-rain', 'Pioggia leggera', 'Un po’ d’acqua, ma si può giocare'],
+		63: ['fa-cloud-rain', 'Pioggia moderata', 'Campo bagnato, difficile giocare'],
+		65: ['fa-cloud-showers-heavy', 'Pioggia forte', 'Meglio restare al coperto'],
+		66: ['fa-cloud-rain', 'Pioggia gelata leggera', 'Attenzione al ghiaccio'],
+		67: ['fa-cloud-showers-heavy', 'Pioggia gelata intensa', 'Meglio restare al coperto'],
+		71: ['fa-snowflake', 'Neve leggera', 'Oggi meglio lo sci'],
+		73: ['fa-snowflake', 'Neve moderata', 'Campo innevato, impossibile giocare'],
+		75: ['fa-snowflake', 'Neve intensa', 'Bufera di neve, rimandiamo!'],
+		77: ['fa-snowflake', 'Nevischio', 'Campo scivoloso, attenzione'],
+		80: ['fa-cloud-sun-rain', 'Rovesci leggeri', 'Qualche scroscio, ma si può fare'],
+		81: ['fa-cloud-showers-heavy', 'Rovesci moderati', 'Difficile con questi rovesci'],
+		82: ['fa-cloud-bolt', 'Rovesci violenti', 'Impossibile giocare'],
+		85: ['fa-snowflake', 'Rovesci di neve leggeri', 'Attenzione al campo innevato'],
+		86: ['fa-snowflake', 'Rovesci di neve intensi', 'Meglio restare al coperto'],
+		95: ['fa-cloud-bolt', 'Temporale', 'Pericoloso, meglio restare al sicuro'],
+		96: ['fa-cloud-bolt', 'Temporale con grandine leggera', 'Troppo pericoloso oggi'],
+		99: ['fa-cloud-bolt', 'Temporale con grandine forte', 'Assolutamente no, è troppo pericoloso'],
+	};
+	const info = (code: number) => WEATHER[code] || ['fa-cloud', 'Meteo non disponibile', ''];
+	const DIRS = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
+	const time = (iso: string) => iso.slice(11, 16);
+
+	async function loadWeather(box: HTMLElement) {
+		const el = (key: string) => box.querySelector<HTMLElement>(`[data-w="${key}"]`)!;
+		const set = (key: string, value: string | number) => (el(key).textContent = String(value));
+		try {
+			const url = new URL('https://api.open-meteo.com/v1/forecast');
+			url.search = new URLSearchParams({
+				latitude: box.dataset.lat!,
+				longitude: box.dataset.lon!,
+				current: 'temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m',
+				daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset',
+				timezone: 'auto',
+				forecast_days: '4',
+			}).toString();
+			const response = await fetch(url);
+			if (!response.ok) throw new Error(String(response.status));
+			const data = await response.json();
+			const c = data.current;
+			const d = data.daily;
+			const [icon, desc, golf] = info(c.weather_code);
+			el('icon').className = `fa-solid ${icon} weather_icon`;
+			set('temp', Math.round(c.temperature_2m));
+			set('desc', desc);
+			set('golf', golf);
+			set('feels', Math.round(c.apparent_temperature));
+			set('wind', Math.round(c.wind_speed_10m));
+			set('windDir', DIRS[Math.round(c.wind_direction_10m / 45) % 8]);
+			set('humidity', Math.round(c.relative_humidity_2m));
+			set('rainProb', d.precipitation_probability_max?.[0] ?? 0);
+			set('sunrise', time(d.sunrise[0]));
+			set('sunset', time(d.sunset[0]));
+			set('updated', `Aggiornato alle ${time(c.time)}`);
+			el('days').innerHTML = d.time
+				.map((day: string, i: number) => {
+					const [dIcon, dDesc] = info(d.weather_code[i]);
+					const label = i === 0 ? 'Oggi' : new Date(`${day}T12:00:00`).toLocaleDateString('it-IT', { weekday: 'long' });
+					return `<div class="weather_day"><p>${label}</p><i class="fa-solid ${dIcon}" title="${dDesc}" aria-hidden="true"></i><span class="sr-only">${dDesc}</span><p><strong>${Math.round(d.temperature_2m_max[i])}°</strong> ${Math.round(d.temperature_2m_min[i])}°</p></div>`;
+				})
+				.join('');
+			el('loading').hidden = true;
+			el('body').hidden = false;
+		} catch {
+			el('loading').hidden = true;
+			el('error').hidden = false;
+		}
+	}
+
+	document.querySelectorAll<HTMLElement>('[data-weather]').forEach(loadWeather);
+</script>
 
 <style>
 	.club_detail_hero {
@@ -226,7 +376,7 @@ const details = circolo
 
 	.club_detail_body,
 	.club_not_found {
-		padding: 40px 20px 88px;
+		padding: 40px 20px 24px;
 		background: var(--lex-cream, #ddd);
 		color: #0e0e0f;
 	}
@@ -363,4 +513,329 @@ const details = circolo
 			height: 88px;
 		}
 	}
+	.club_weather_section,
+	.club_app_section {
+		padding: 0 20px 24px;
+		background: var(--lex-cream, #ddd);
+	}
+
+	.club_app_section {
+		padding-bottom: 88px;
+	}
+
+	.club_weather,
+	.club_app {
+		max-width: 1240px;
+		margin: 0 auto;
+		border-radius: 30px;
+		padding: 36px;
+	}
+
+	.club_weather {
+		border: 1px solid rgba(14, 14, 15, 0.1);
+		background: #fbf7f5;
+		color: #0e0e0f;
+	}
+
+	.club_app {
+		background: #0e0e0f;
+		color: #f1e2de;
+	}
+
+	.eyebrow_inline {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.eyebrow_dark {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		border-color: rgba(241, 226, 222, 0.2);
+		color: rgba(241, 226, 222, 0.8);
+	}
+
+	.live_dot {
+		width: 7px;
+		height: 7px;
+		border-radius: 50%;
+		background: #00ec10;
+		box-shadow: 0 0 0 4px rgba(0, 236, 16, 0.18);
+	}
+
+	.weather_head {
+		display: flex;
+		align-items: flex-end;
+		justify-content: space-between;
+		gap: 16px;
+		flex-wrap: wrap;
+	}
+
+	.club_weather h2,
+	.club_app h2 {
+		margin: 0;
+		font-size: clamp(28px, 3.4vw, 40px);
+		line-height: 1.1;
+		letter-spacing: -0.045em;
+	}
+
+	.weather_updated,
+	.weather_loading,
+	.weather_error {
+		margin: 0;
+		color: #66666c;
+		font-size: 13px;
+	}
+
+	.weather_loading,
+	.weather_error {
+		margin-top: 28px;
+	}
+
+	.weather_body {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+		gap: 24px 40px;
+		margin-top: 32px;
+	}
+
+	.weather_body[hidden] {
+		display: none;
+	}
+
+	.weather_now {
+		display: flex;
+		align-items: center;
+		gap: 24px;
+	}
+
+	.weather_icon {
+		display: grid;
+		place-items: center;
+		width: 112px;
+		height: 112px;
+		flex-shrink: 0;
+		border-radius: 28px;
+		background: #0e0e0f;
+		font-size: 52px;
+		color: #00ec10;
+	}
+
+	.weather_temp {
+		margin: 0;
+		font-size: 76px;
+		font-weight: 600;
+		line-height: 1;
+		letter-spacing: -0.06em;
+	}
+
+	.weather_desc {
+		margin: 8px 0 0;
+		font-size: 18px;
+		font-weight: 600;
+	}
+
+	.weather_golf {
+		margin: 4px 0 0;
+		color: #55555b;
+		font-size: 14px;
+	}
+
+	.weather_stats {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 10px;
+	}
+
+	.weather_stats div {
+		padding: 14px 16px;
+		border: 1px solid rgba(14, 14, 15, 0.1);
+		border-radius: 18px;
+		background: #fff;
+	}
+
+	.weather_stats dt {
+		color: #66666c;
+		font-size: 12px;
+	}
+
+	.weather_stats dt i {
+		width: 14px;
+		margin-right: 4px;
+		color: #14715b;
+	}
+
+	.weather_stats dd {
+		margin: 6px 0 0;
+		color: #0e0e0f;
+		font-size: 18px;
+		font-weight: 600;
+	}
+
+	.weather_days {
+		grid-column: 1 / -1;
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 10px;
+		padding-top: 24px;
+		border-top: 1px solid rgba(14, 14, 15, 0.1);
+	}
+
+	.weather_days :global(.weather_day) {
+		text-align: center;
+	}
+
+	.weather_days :global(.weather_day p) {
+		margin: 0;
+		font-size: 13px;
+		color: #55555b;
+		text-transform: capitalize;
+	}
+
+	.weather_days :global(.weather_day i) {
+		display: block;
+		margin: 10px 0;
+		font-size: 26px;
+		color: #0e0e0f;
+	}
+
+	.weather_days :global(.weather_day strong) {
+		color: #0e0e0f;
+		font-size: 15px;
+	}
+
+	.club_app {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 40px;
+	}
+
+	.club_app_copy {
+		max-width: 680px;
+	}
+
+	.club_app_copy > p:not(.eyebrow) {
+		margin: 20px 0 0;
+		color: rgba(241, 226, 222, 0.7);
+		font-size: 15.5px;
+		line-height: 1.75;
+	}
+
+	.club_app_mark {
+		padding: 0 0.12em;
+		border-radius: 8px;
+		background: #00ec10;
+		color: #000;
+		box-decoration-break: clone;
+		-webkit-box-decoration-break: clone;
+	}
+
+	.club_app_button {
+		gap: 10px;
+		margin-top: 28px;
+		padding-inline: 28px;
+	}
+
+	.club_app_button:hover {
+		background: #f1e2de;
+		color: #0e0e0f;
+	}
+
+	.club_app_qr {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 14px;
+		flex-shrink: 0;
+		color: rgba(241, 226, 222, 0.6);
+		font-size: 13px;
+		line-height: 1.4;
+		text-align: center;
+		text-decoration: none;
+	}
+
+	.club_app_qr_code {
+		display: block;
+		width: 180px;
+		height: 180px;
+		padding: 16px;
+		border-radius: 22px;
+		background: #fff;
+	}
+
+	.club_app_qr_code :global(svg) {
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	@media (max-width: 860px) {
+		.weather_body {
+			grid-template-columns: 1fr;
+		}
+		.club_app {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.club_weather_section,
+		.club_app_section {
+			padding-inline: 14px;
+		}
+		.club_weather,
+		.club_app {
+			padding: 24px;
+		}
+		.weather_stats {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+		.weather_days {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			row-gap: 20px;
+		}
+		.club_app_qr {
+			display: none;
+		}
+	}
+	.club_main {
+		display: grid;
+		gap: 24px;
+		min-width: 0;
+	}
+
+	.club_weather {
+		padding: 32px !important;
+		max-width: none !important;
+		margin: 0 !important;
+	}
+
+	.club_weather h2 {
+		font-size: 28px !important;
+	}
+
+	.weather_body {
+		grid-template-columns: 1fr !important;
+		gap: 24px !important;
+		margin-top: 24px !important;
+	}
+
+	.weather_icon {
+		width: 84px !important;
+		height: 84px !important;
+		border-radius: 22px !important;
+		font-size: 38px !important;
+	}
+
+	.weather_temp {
+		font-size: 60px !important;
+	}
+
+	.weather_stats dd {
+		font-size: 16px !important;
+	}
+
 </style>
