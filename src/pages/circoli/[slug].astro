@@ -75,7 +75,7 @@ const details = circolo
 						fetchpriority="high"
 						data-fallback-one={`/circoli/${circolo.idcircolo}.1.jpg`}
 						data-fallback-two={`/circoli/${circolo.idcircolo}.2.jpg`}
-						onerror="if(!this.dataset.triedOne){this.dataset.triedOne='1';this.src=this.dataset.fallbackOne;}else if(!this.dataset.triedTwo){this.dataset.triedTwo='1';this.src=this.dataset.fallbackTwo;}else{this.style.display='none';}"
+						onerror="if(!this.dataset.triedOne){this.dataset.triedOne='1';this.src=this.dataset.fallbackOne;}else if(!this.dataset.triedTwo){this.dataset.triedTwo='1';this.src=this.dataset.fallbackTwo;}else if(!this.dataset.triedGeneric){this.dataset.triedGeneric='1';this.src='/circoli/cover-generica.jpg';}else{this.style.display='none';}"
 					/>
 				)}
 				</div>
