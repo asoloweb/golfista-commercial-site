@@ -90,6 +90,13 @@ const keyFeatures = [
 	{ icon: 'fa-id-card', title: 'Anagrafica del giocatore', text: 'Gestisci i dati dei giocatori in un profilo completo e aggiornato.', href: '/gestionale' },
 ];
 
+const pushNotifications = [
+	{ icon: 'fa-clock', title: 'Orari di partenza', text: 'Appena il circolo pubblica gli orari, ogni giocatore iscritto riceve il giorno prima l’orario e il tee di partenza.' },
+	{ icon: 'fa-ranking-star', title: 'Classifiche', text: 'Avviso quando la classifica è provvisoria, quando cambia e quando diventa definitiva, ai giocatori del circolo e a chi segue la gara.' },
+	{ icon: 'fa-cloud-sun-rain', title: 'Aggiornamenti del campo', text: 'Campo chiuso per maltempo, buche temporanee, cambi di programma: lo comunichi in un attimo a tutti i giocatori.' },
+	{ icon: 'fa-paper-plane', title: 'Messaggi dal manager', text: 'Scrivi titolo e testo dal pannello del circolo e invia la notifica a tutti i giocatori o a un singolo giocatore.' },
+];
+
 const plans = [
 	{
 		name: 'Gratuito per sempre',
@@ -115,6 +122,7 @@ const plans = [
 			'Inserimento delle gare',
 			'Anagrafica dei giocatori',
 			'Confronto tra circoli e statistiche',
+			'Notifiche push ai giocatori',
 		],
 		cta: 'Acquista ora',
 		featured: true,
@@ -177,6 +185,10 @@ const faqs = [
 	{
 		q: 'Quali funzionalità include il piano Pro?',
 		a: 'Il piano Pro include tutte le funzionalità della piattaforma: controllo dei giocatori, convenzioni tra circoli, percorsi e punti di interesse, gare, foto, recensioni, anagrafica e statistiche.',
+	},
+	{
+		q: 'Come funzionano le notifiche push?',
+		a: 'I giocatori con l’app Golfista ricevono sul telefono gli orari di partenza, le classifiche delle gare e i messaggi inviati dal manager, come gli aggiornamenti sul campo. Le notifiche sono incluse: niente costi per SMS o WhatsApp.',
 	},
 	{
 		q: 'I dati del circolo e dei giocatori sono al sicuro?',
@@ -377,6 +389,38 @@ const appScreens = [
 			</div>
 
 
+		</div>
+	</section>
+
+	<section class="lp-push" id="notifiche" aria-labelledby="lp-push-title">
+		<div class="lp-container">
+			<header class="lp-section-head">
+				<p class="lp-badge lp-badge-dark"><span class="lp-dot lp-dot-green"></span> Notifiche push</p>
+				<h2 id="lp-push-title">Avvisa i tuoi giocatori, <span class="lp-mark-dark">senza costi di SMS</span></h2>
+				<p>Orari, classifiche e comunicazioni del circolo arrivano direttamente sul telefono dei giocatori con l’app Golfista, nel momento giusto.</p>
+			</header>
+
+			<div class="lp-push-grid">
+				{pushNotifications.map((item) => (
+					<article class="lp-push-card">
+						<span class="lp-key-icon"><i class={`fa-solid ${item.icon}`} aria-hidden="true"></i></span>
+						<h3>{item.title}</h3>
+						<p>{item.text}</p>
+					</article>
+				))}
+			</div>
+
+			<div class="lp-push-save">
+				<div>
+					<h3>Risparmi rispetto a SMS e WhatsApp</h3>
+					<p>Gli SMS si pagano a messaggio e WhatsApp Business a conversazione: con tanti soci e gare ogni settimana il conto cresce in fretta. Le notifiche push di Golfista sono incluse e non hanno costi per invio.</p>
+				</div>
+				<ul>
+					<li><i class="fa-solid fa-check" aria-hidden="true"></i> Nessun costo per messaggio</li>
+					<li><i class="fa-solid fa-check" aria-hidden="true"></i> Orari e classifiche inviati in automatico</li>
+					<li><i class="fa-solid fa-check" aria-hidden="true"></i> Il giocatore sceglie quali avvisi ricevere</li>
+				</ul>
+			</div>
 		</div>
 	</section>
 
@@ -1388,6 +1432,101 @@ const appScreens = [
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
+	}
+
+	.lp-push {
+		padding: 108px 0;
+		background: #fbf7f5;
+	}
+
+	.lp-push-grid {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 12px;
+	}
+
+	.lp-push-card {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		padding: 30px;
+		border: 1px solid rgba(14, 14, 15, 0.1);
+		border-radius: 30px;
+		background: #fff;
+		color: var(--lex-dark);
+	}
+
+	.lp-push-card h3 {
+		margin: 0;
+		font-size: 18px;
+		font-weight: 600;
+		line-height: 1.3;
+		letter-spacing: -0.03em;
+	}
+
+	.lp-push-card p,
+	.lp-push-save p {
+		margin: 0;
+		color: #5d5d63;
+		font-size: 14px;
+		line-height: 1.6;
+	}
+
+	.lp-push-save {
+		display: grid;
+		grid-template-columns: 1.4fr 1fr;
+		gap: 32px;
+		align-items: center;
+		margin-top: 12px;
+		padding: 36px;
+		border-radius: 30px;
+		background: var(--lex-dark);
+		color: #fff;
+	}
+
+	.lp-push-save h3 {
+		margin: 0 0 10px;
+		font-size: 24px;
+		font-weight: 600;
+		letter-spacing: -0.03em;
+	}
+
+	.lp-push-save p {
+		color: rgba(255, 255, 255, 0.75);
+	}
+
+	.lp-push-save ul {
+		display: grid;
+		gap: 12px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		font-size: 15px;
+	}
+
+	.lp-push-save li i {
+		margin-right: 8px;
+		color: #5fd3a8;
+	}
+
+	@media (max-width: 900px) {
+		.lp-push {
+			padding: 80px 0;
+		}
+
+		.lp-push-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.lp-push-save {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	@media (max-width: 560px) {
+		.lp-push-grid {
+			grid-template-columns: 1fr;
+		}
 	}
 
 	.lp-key-section {
